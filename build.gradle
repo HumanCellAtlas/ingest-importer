@@ -27,6 +27,7 @@ repositories {
 dependencies {
 	compile('org.springframework.boot:spring-boot-starter')
     compile('org.apache.poi:poi-ooxml:3.17')
+    compile('com.google.guava:guava:24.0-jre')
 
     def jacksonModules = ['annotations', 'core', 'databind']
     jacksonModules.forEach { module ->

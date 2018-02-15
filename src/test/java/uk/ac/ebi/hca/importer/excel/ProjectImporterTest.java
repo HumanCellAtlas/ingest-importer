@@ -3,7 +3,6 @@ package uk.ac.ebi.hca.importer.excel;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonassert.JsonAssert;
-import com.jayway.jsonpath.JsonPath;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -59,7 +58,10 @@ public class ProjectImporterTest {
 
         //and:
         String json = objectMapper.writeValueAsString(projectJson);
-        JsonAssert.with(json).assertEquals("project_shortname", "DEMO-ProjectShortname");
+        JsonAssert.with(json)
+                .assertEquals("project_shortname", "DEMO-ProjectShortname")
+                .assertEquals("project_title", "DEMO-Single cell RNA-seq of primary human " +
+                        "glioblastomas");
     }
 
 }
