@@ -7,6 +7,8 @@ import java.util.Arrays;
 
 class CellMapping {
 
+    static final String ARRAY_SEPARATOR = "\\|\\|";
+
     final String jsonProperty;
     final CellDataType dataType;
 
@@ -22,7 +24,7 @@ class CellMapping {
     void importTo(final ObjectNode node, final String data) {
         if (CellDataType.STRING_ARRAY.equals(dataType)) {
             ArrayNode array = node.putArray(jsonProperty);
-            Arrays.stream(data.split("\\|\\|")).forEach(array::add);
+            Arrays.stream(data.split(ARRAY_SEPARATOR)).forEach(array::add);
         } else {
             node.put(jsonProperty, data);
         }

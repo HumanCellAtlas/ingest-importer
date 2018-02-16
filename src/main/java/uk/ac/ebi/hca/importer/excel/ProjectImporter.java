@@ -18,8 +18,6 @@ import static uk.ac.ebi.hca.importer.excel.CellMapping.map;
 
 public class ProjectImporter {
 
-    private static final String ARRAY_SEPARATOR = "\\|\\|";
-
     private static final Map<String, CellMapping> HEADER_MAP;
 
     static {
