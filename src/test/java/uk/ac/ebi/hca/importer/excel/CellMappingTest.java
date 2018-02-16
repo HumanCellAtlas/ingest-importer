@@ -17,15 +17,25 @@ public class CellMappingTest {
 
         //and:
         String firstName = "first_name";
-        CellMapping mapping = new CellMapping(firstName, CellDataType.STRING);
+        CellMapping firstNameMapping = new CellMapping(firstName, CellDataType.STRING);
+        String lastName = "last_name";
+        CellMapping lastNameMapping = new CellMapping(lastName, CellDataType.STRING);
 
         //when:
         String juan = "Juan";
-        mapping.importTo(node, juan);
+        firstNameMapping.importTo(node, juan);
+
+        //and:
+        String delaCruz = "dela Cruz";
+        lastNameMapping.importTo(node, delaCruz);
 
         //then:
         assertThat(node.has(firstName)).as("first_name field expected").isTrue();
         assertThat(node.get(firstName).asText()).isEqualTo(juan);
+
+        //and:
+        assertThat(node.has(lastName)).as("last_name field expected").isTrue();
+        assertThat(node.get(lastName).asText()).isEqualTo(delaCruz);
     }
 
 }

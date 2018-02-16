@@ -17,7 +17,7 @@ class CellMapping {
     }
 
     void importTo(ObjectNode node, String data) {
-        node.put("first_name", "Juan");
+        node.put(jsonProperty, data);
     }
 
 }
