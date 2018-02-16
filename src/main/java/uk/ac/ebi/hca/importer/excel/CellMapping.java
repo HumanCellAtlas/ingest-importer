@@ -1,5 +1,6 @@
 package uk.ac.ebi.hca.importer.excel;
 
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 class CellMapping {
@@ -17,7 +18,13 @@ class CellMapping {
     }
 
     void importTo(ObjectNode node, String data) {
-        node.put(jsonProperty, data);
+        if (CellDataType.STRING_ARRAY.equals(dataType)) {
+            ArrayNode array = node.putArray(jsonProperty);
+            array.add("milk");
+        } else {
+            node.put(jsonProperty, data);
+        }
+
     }
 
 }
