@@ -58,7 +58,7 @@ public class CellMappingTest {
         //then:
         assertThat(node.has(shoppingList)).as("shopping_list field expected").isTrue();
         JsonAssert.with(objectMapper.writeValueAsString(node))
-                .assertThat(shoppingList, contains("milk"));
+                .assertThat(shoppingList, contains("milk", "egg", "cereals"));
     }
 
 }
