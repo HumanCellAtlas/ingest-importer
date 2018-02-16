@@ -2,7 +2,6 @@ package uk.ac.ebi.hca.importer.excel;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.collect.ImmutableMap;
 import org.apache.poi.ss.usermodel.Cell;
@@ -11,9 +10,10 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.Arrays;
 import java.util.Map;
 
+import static uk.ac.ebi.hca.importer.excel.CellDataType.STRING;
+import static uk.ac.ebi.hca.importer.excel.CellDataType.STRING_ARRAY;
 import static uk.ac.ebi.hca.importer.excel.CellMapping.map;
 
 public class ProjectImporter {
@@ -24,16 +24,16 @@ public class ProjectImporter {
 
     static {
         HEADER_MAP = new ImmutableMap.Builder<String, CellMapping>()
-                .put("Project shortname", map("project_shortname", CellDataType.STRING))
-                .put("Project title", map("project_title", CellDataType.STRING))
-                .put("Project description", map("project_description", CellDataType.STRING))
-                .put("Supplementary files", map("supplementary_files", CellDataType.STRING_ARRAY))
-                .put("INSDC project accession", map("insdc_project", CellDataType.STRING))
-                .put("GEO series accession", map("geo_series", CellDataType.STRING))
+                .put("Project shortname", map("project_shortname", STRING))
+                .put("Project title", map("project_title", STRING))
+                .put("Project description", map("project_description", STRING))
+                .put("Supplementary files", map("supplementary_files", STRING_ARRAY))
+                .put("INSDC project accession", map("insdc_project", STRING))
+                .put("GEO series accession", map("geo_series", STRING))
                 .put("ArrayExpress accession", map("array_express_investigation",
-                        CellDataType.STRING))
-                .put("INSDC study accession", map("insdc_study", CellDataType.STRING))
-                .put("Related projects", map("related_projects", CellDataType.STRING_ARRAY))
+                        STRING))
+                .put("INSDC study accession", map("insdc_study", STRING))
+                .put("Related projects", map("related_projects", STRING_ARRAY))
                 .build();
     }
 
@@ -47,16 +47,14 @@ public class ProjectImporter {
         ObjectNode objectNode = objectMapper.createObjectNode();
         dataRow.iterator().forEachRemaining(dataCell -> {
             Cell headerCell = headerRow.getCell(dataCell.getColumnIndex());
-            CellMapping cellMapping = HEADER_MAP.get(headerCell.getStringCellValue());
-            if (cellMapping != null) {
-                String data = dataCell.getStringCellValue();
-                if (CellDataType.STRING.equals(cellMapping.dataType)) {
-                    objectNode.put(cellMapping.jsonProperty, data);
-                } else if (CellDataType.STRING_ARRAY.equals(cellMapping.dataType)) {
-                    ArrayNode array = objectNode.putArray(cellMapping.jsonProperty);
-                    Arrays.stream(data.split(ARRAY_SEPARATOR)).forEach(array::add);
-                }
+            String header = headerCell.getStringCellValue();
+            CellMapping cellMapping = HEADER_MAP.get(header);
+            if (cellMapping == null) {
+                String customField = header.toLowerCase().replaceAll(" ", "_");
+                cellMapping = new CellMapping(customField, STRING);
             }
+            String data = dataCell.getStringCellValue();
+            cellMapping.importTo(objectNode, data);
         });
         return objectNode;
     }

@@ -73,7 +73,8 @@ public class ProjectImporterTest {
                 .assertEquals("geo_series", "GEO456")
                 .assertEquals("array_express_investigation", "AR789")
                 .assertEquals("insdc_study", "INSDC001")
-                .assertThat("related_projects", contains("UUID321", "UUID654"));
+                .assertThat("related_projects", contains("UUID321", "UUID654"))
+                .assertEquals("extra_field", "this is a custom field");
     }
 
 }

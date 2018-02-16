@@ -19,7 +19,7 @@ class CellMapping {
         return new CellMapping(jsonProperty, dataType);
     }
 
-    void importTo(ObjectNode node, String data) {
+    void importTo(final ObjectNode node, final String data) {
         if (CellDataType.STRING_ARRAY.equals(dataType)) {
             ArrayNode array = node.putArray(jsonProperty);
             Arrays.stream(data.split("\\|\\|")).forEach(array::add);
