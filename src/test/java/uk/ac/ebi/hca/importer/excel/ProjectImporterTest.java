@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonassert.JsonAssert;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.hamcrest.Matchers;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +18,7 @@ import java.net.URI;
 import java.nio.file.Paths;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.contains;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -61,7 +63,17 @@ public class ProjectImporterTest {
         JsonAssert.with(json)
                 .assertEquals("project_shortname", "DEMO-ProjectShortname")
                 .assertEquals("project_title", "DEMO-Single cell RNA-seq of primary human " +
-                        "glioblastomas");
+                        "glioblastomas")
+                .assertThat("project_description", Matchers.containsString("Single cell cDNA " +
+                        "libraries for MGH30 were resequenced using 100 bp paired end reads to " +
+                        "allow for isoform and splice junction reconstruction (96 samples, " +
+                        "annotated MGH30L)."))
+                .assertThat("supplementary_files", contains("supplementary.jpg"))
+                .assertEquals("insdc_project", "ACS123")
+                .assertEquals("geo_series", "GEO456")
+                .assertEquals("array_express_investigation", "AR789")
+                .assertEquals("insdc_study", "INSDC001")
+                .assertThat("related_projects", contains("UUID321", "UUID654"));
     }
 
 }
