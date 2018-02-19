@@ -5,8 +5,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonassert.JsonAssert;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.hamcrest.Matchers;
-import org.junit.Test;
+import org.junit.runner.RunWith;
+import uk.ac.ebi.hca.test.IngestTestRunner;
+import uk.ac.ebi.hca.test.IntegrationTest;
 
 import java.io.File;
 import java.net.URI;
@@ -14,15 +15,14 @@ import java.nio.file.Paths;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.contains;
-import static uk.ac.ebi.hca.importer.excel.CellDataType.NUMERIC;
-import static uk.ac.ebi.hca.importer.excel.CellDataType.STRING;
-import static uk.ac.ebi.hca.importer.excel.CellDataType.STRING_ARRAY;
+import static uk.ac.ebi.hca.importer.excel.CellDataType.*;
 
+@RunWith(IngestTestRunner.class)
 public class WorksheetImporterTest {
 
     private ObjectMapper objectMapper = new ObjectMapper();
 
-    @Test //This is effectively an integration test
+    @IntegrationTest
     public void testImportFrom() throws Exception {
         //given:
         URI spreadsheetUri = ClassLoader.getSystemResource("spreadsheets/generic.xlsx").toURI();
@@ -61,6 +61,5 @@ public class WorksheetImporterTest {
     TODO add handling for wrongly formatted excel spreadsheet
     For example, when there < 4 rows in the spreadsheet
     */
-
 
 }
