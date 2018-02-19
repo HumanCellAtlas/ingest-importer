@@ -29,11 +29,6 @@ public class WorksheetImporter {
             Cell headerCell = headerRow.getCell(dataCell.getColumnIndex());
             String header = headerCell.getStringCellValue();
             CellMapping cellMapping = worksheetMapping.getMappingFor(header);
-            if (cellMapping == null) {
-                String customField = header.toLowerCase().replaceAll(" ", "_");
-                dataCell.setCellType(CellType.STRING);
-                cellMapping = new CellMapping(customField, STRING);
-            }
             cellMapping.importTo(objectNode, dataCell);
         });
         return objectNode;

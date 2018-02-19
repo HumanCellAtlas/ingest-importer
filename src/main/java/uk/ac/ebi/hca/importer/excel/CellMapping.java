@@ -3,6 +3,7 @@ package uk.ac.ebi.hca.importer.excel;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
 
 import java.util.Arrays;
 
@@ -27,8 +28,10 @@ class CellMapping {
 
     void importTo(final ObjectNode node, final Cell dataCell) {
         if (NUMERIC.equals(dataType)) {
+            dataCell.setCellType(CellType.NUMERIC);
             node.put(jsonProperty, dataCell.getNumericCellValue());
         } else {
+            dataCell.setCellType(CellType.STRING);
             importTo(node, dataCell.getStringCellValue());
         }
     }

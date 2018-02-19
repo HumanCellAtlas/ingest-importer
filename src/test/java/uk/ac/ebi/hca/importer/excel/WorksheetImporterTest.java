@@ -22,7 +22,7 @@ public class WorksheetImporterTest {
 
     private ObjectMapper objectMapper = new ObjectMapper();
 
-    @Test
+    @Test //This is effectively an integration test
     public void testImportFrom() throws Exception {
         //given:
         URI spreadsheetUri = ClassLoader.getSystemResource("spreadsheets/generic.xlsx").toURI();
@@ -56,5 +56,11 @@ public class WorksheetImporterTest {
                 .assertEquals("miscellaneous", "looks||like||a||list")
                 .assertEquals("extra_number", "123");
     }
+
+    /*
+    TODO add handling for wrongly formatted excel spreadsheet
+    For example, when there < 4 rows in the spreadsheet
+    */
+
 
 }
