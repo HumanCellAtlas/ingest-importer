@@ -6,6 +6,9 @@ import org.apache.poi.ss.usermodel.Cell;
 
 import java.util.Arrays;
 
+import static uk.ac.ebi.hca.importer.excel.CellDataType.NUMERIC;
+import static uk.ac.ebi.hca.importer.excel.CellDataType.STRING_ARRAY;
+
 class CellMapping {
 
     static final String ARRAY_SEPARATOR = "\\|\\|";
@@ -22,19 +25,20 @@ class CellMapping {
         return new CellMapping(jsonProperty, dataType);
     }
 
+    void importTo(final ObjectNode node, final Cell dataCell) {
+        if (NUMERIC.equals(dataType)) {
+            node.put(jsonProperty, dataCell.getNumericCellValue());
+        } else {
+            importTo(node, dataCell.getStringCellValue());
+        }
+    }
+
     void importTo(final ObjectNode node, final String data) {
-        if (CellDataType.STRING_ARRAY.equals(dataType)) {
+        if (STRING_ARRAY.equals(dataType)) {
             ArrayNode array = node.putArray(jsonProperty);
             Arrays.stream(data.split(ARRAY_SEPARATOR)).forEach(array::add);
         } else {
             node.put(jsonProperty, data);
-        }
-    }
-
-    void importTo(final ObjectNode node, final Cell dataCell) {
-        Object value = null;
-        if (CellDataType.NUMERIC.equals(dataType)) {
-            node.put(jsonProperty, dataCell.getNumericCellValue());
         }
     }
 

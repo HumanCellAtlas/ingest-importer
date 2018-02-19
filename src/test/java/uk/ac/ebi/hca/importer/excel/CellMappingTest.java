@@ -5,18 +5,13 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.jayway.jsonassert.JsonAssert;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
-import org.apache.poi.xssf.usermodel.XSSFCell;
-import org.hamcrest.Matchers;
 import org.junit.Test;
-import org.mockito.Mockito;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
-import static uk.ac.ebi.hca.importer.excel.CellDataType.NUMERIC;
-import static uk.ac.ebi.hca.importer.excel.CellDataType.STRING;
-import static uk.ac.ebi.hca.importer.excel.CellDataType.STRING_ARRAY;
+import static uk.ac.ebi.hca.importer.excel.CellDataType.*;
 
 public class CellMappingTest {
 
@@ -34,12 +29,18 @@ public class CellMappingTest {
         CellMapping lastNameMapping = new CellMapping(lastName, STRING);
 
         //when:
+        Cell juanCell = mock(Cell.class);
+        doReturn(CellType.STRING).when(juanCell).getCellTypeEnum();
         String juan = "Juan";
-        firstNameMapping.importTo(node, juan);
+        doReturn(juan).when(juanCell).getStringCellValue();
+        firstNameMapping.importTo(node, juanCell);
 
         //and:
+        Cell delaCruzCell = mock(Cell.class);
+        doReturn(CellType.STRING).when(delaCruzCell).getCellTypeEnum();
         String delaCruz = "dela Cruz";
-        lastNameMapping.importTo(node, delaCruz);
+        doReturn(delaCruz).when(delaCruzCell).getStringCellValue();
+        lastNameMapping.importTo(node, delaCruzCell);
 
         //then:
         assertThat(node.has(firstName)).as("first_name field expected").isTrue();
@@ -56,11 +57,15 @@ public class CellMappingTest {
         ObjectNode node = objectMapper.createObjectNode();
 
         //and:
+        Cell shoppingListCell = mock(Cell.class);
+        doReturn(CellType.STRING).when(shoppingListCell).getCellTypeEnum();
+        String items = "milk||egg||cereals";
+        doReturn(items).when(shoppingListCell).getStringCellValue();
         String shoppingList = "shopping_list";
         CellMapping shoppingListMapping = new CellMapping(shoppingList, STRING_ARRAY);
 
         //when:
-        shoppingListMapping.importTo(node, "milk||egg||cereals");
+        shoppingListMapping.importTo(node, shoppingListCell);
 
         //then:
         assertThat(node.has(shoppingList)).as("shopping_list field expected").isTrue();
