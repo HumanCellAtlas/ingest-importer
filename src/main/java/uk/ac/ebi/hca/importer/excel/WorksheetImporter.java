@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 
@@ -30,6 +31,7 @@ public class WorksheetImporter {
             CellMapping cellMapping = worksheetMapping.getMappingFor(header);
             if (cellMapping == null) {
                 String customField = header.toLowerCase().replaceAll(" ", "_");
+                dataCell.setCellType(CellType.STRING);
                 cellMapping = new CellMapping(customField, STRING);
             }
             cellMapping.importTo(objectNode, dataCell);

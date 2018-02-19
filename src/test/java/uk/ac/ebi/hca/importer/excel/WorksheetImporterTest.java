@@ -53,7 +53,8 @@ public class WorksheetImporterTest {
                 .assertEquals("age", 41.0)
                 .assertThat("friends", contains("Pedro", "Santiago"))
                 .assertEquals("remarks", "This is an extra field")
-                .assertEquals("miscellaneous", "looks||like||a||list");
+                .assertEquals("miscellaneous", "looks||like||a||list")
+                .assertEquals("extra_number", "123");
     }
 
 }
