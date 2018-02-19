@@ -12,4 +12,9 @@ public class WorksheetMapping {
         return this;
     }
 
+    public CellMapping getMappingFor(String header) {
+        //TODO make this return a default CellMapping when none is specified?
+        return mapping.get(header);
+    }
+
 }
