@@ -2,20 +2,14 @@ package uk.ac.ebi.hca.importer.excel;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.google.common.collect.ImmutableMap;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.PostConstruct;
-import java.util.Map;
 
 import static uk.ac.ebi.hca.importer.excel.CellDataType.STRING;
 import static uk.ac.ebi.hca.importer.excel.CellDataType.STRING_ARRAY;
-import static uk.ac.ebi.hca.importer.excel.CellMapping.map;
 
 public class ProjectImporter {
 

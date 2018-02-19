@@ -85,7 +85,7 @@ public class CellMappingTest {
         //and:
         Cell cell = mock(Cell.class);
         doReturn(CellType.NUMERIC).when(cell).getCellTypeEnum();
-        double cellValue = 12;
+        double cellValue = 12D;
         doReturn(cellValue).when(cell).getNumericCellValue();
 
         //when:
@@ -94,6 +94,29 @@ public class CellMappingTest {
         //then:
         assertThat(node.has(quantity)).as("quantity field expected").isTrue();
         assertThat(node.get(quantity).asDouble()).isEqualTo(cellValue);
+    }
+
+    @Test
+    public void testModularFieldImportTo() throws Exception {
+        //given:
+        ObjectNode node = objectMapper.createObjectNode();
+
+        //and:
+        String warrantyLength = "warranty.warranty_length";
+        CellMapping cellMapping = new CellMapping(warrantyLength, NUMERIC);
+
+        //and:
+        Cell cell = mock(Cell.class);
+        doReturn(CellType.NUMERIC).when(cell).getCellTypeEnum();
+        double cellValue = 1D;
+        doReturn(cellValue).when(cell).getNumericCellValue();
+
+        //when:
+        cellMapping.importTo(node, cell);
+
+        //then:
+        JsonAssert.with(objectMapper.writeValueAsString(node))
+                .assertEquals("$.warranty.warranty_length", cellValue);
     }
 
 }
