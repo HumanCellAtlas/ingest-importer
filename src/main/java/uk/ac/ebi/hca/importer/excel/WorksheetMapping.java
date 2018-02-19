@@ -3,6 +3,8 @@ package uk.ac.ebi.hca.importer.excel;
 import java.util.HashMap;
 import java.util.Map;
 
+import static uk.ac.ebi.hca.importer.excel.CellDataType.STRING;
+
 public class WorksheetMapping {
 
     private Map<String, CellMapping> mapping = new HashMap<>();
@@ -13,8 +15,12 @@ public class WorksheetMapping {
     }
 
     public CellMapping getMappingFor(String header) {
-        //TODO make this return a default CellMapping when none is specified?
-        return mapping.get(header);
+        CellMapping cellMapping = mapping.get(header);
+        if (cellMapping == null) {
+            String jsonProperty = header.toLowerCase().replaceAll(" ", "_");
+            cellMapping = new CellMapping(jsonProperty, STRING);
+        }
+        return cellMapping;
     }
 
 }
