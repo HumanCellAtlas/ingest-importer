@@ -5,6 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonassert.JsonAssert;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.hamcrest.Matchers;
+import org.junit.ClassRule;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +14,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit4.rules.SpringClassRule;
+import org.springframework.test.context.junit4.rules.SpringMethodRule;
+import uk.ac.ebi.hca.test.IngestTestRunner;
+import uk.ac.ebi.hca.test.IntegrationTest;
 
 import java.io.File;
 import java.net.URI;
@@ -20,9 +26,15 @@ import java.nio.file.Paths;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.contains;
 
-@RunWith(SpringRunner.class)
+@RunWith(IngestTestRunner.class)
 @SpringBootTest
 public class ProjectImporterTest {
+
+    @ClassRule
+    public static final SpringClassRule CLASS_RULE = new SpringClassRule();
+
+    @Rule
+    public SpringMethodRule springMethodRule = new SpringMethodRule();
 
     @Configuration
     static class TestConfiguration {
@@ -45,7 +57,7 @@ public class ProjectImporterTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @Test
+    @IntegrationTest
     public void testImportFrom() throws Exception {
         //given:
         URI spreadsheetUri = ClassLoader.getSystemResource("spreadsheets/v5.xlsx").toURI();

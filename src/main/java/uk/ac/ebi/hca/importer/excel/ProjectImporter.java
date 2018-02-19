@@ -10,6 +10,7 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.annotation.PostConstruct;
 import java.util.Map;
 
 import static uk.ac.ebi.hca.importer.excel.CellDataType.STRING;
@@ -18,43 +19,30 @@ import static uk.ac.ebi.hca.importer.excel.CellMapping.map;
 
 public class ProjectImporter {
 
-    private static final Map<String, CellMapping> HEADER_MAP;
-
-    static {
-        HEADER_MAP = new ImmutableMap.Builder<String, CellMapping>()
-                .put("Project shortname", map("project_shortname", STRING))
-                .put("Project title", map("project_title", STRING))
-                .put("Project description", map("project_description", STRING))
-                .put("Supplementary files", map("supplementary_files", STRING_ARRAY))
-                .put("INSDC project accession", map("insdc_project", STRING))
-                .put("GEO series accession", map("geo_series", STRING))
-                .put("ArrayExpress accession", map("array_express_investigation",
-                        STRING))
-                .put("INSDC study accession", map("insdc_study", STRING))
-                .put("Related projects", map("related_projects", STRING_ARRAY))
-                .build();
-    }
+    private static final WorksheetMapping WORKSHEET_MAPPING = new WorksheetMapping()
+            .map("Project shortname", "project_shortname", STRING)
+            .map("Project title", "project_title", STRING)
+            .map("Project description", "project_description", STRING)
+            .map("Supplementary files", "supplementary_files", STRING_ARRAY)
+            .map("INSDC project accession", "insdc_project", STRING)
+            .map("GEO series accession", "geo_series", STRING)
+            .map("ArrayExpress accession", "array_express_investigation", STRING)
+            .map("INSDC study accession", "insdc_study", STRING)
+            .map("Related projects", "related_projects", STRING_ARRAY);
 
     @Autowired
     private ObjectMapper objectMapper;
 
+    private WorksheetImporter worksheetImporter;
+
+    @PostConstruct
+    public void setUp() {
+        worksheetImporter = new WorksheetImporter(objectMapper, WORKSHEET_MAPPING);
+    }
+
     public JsonNode importFrom(Workbook workbook) {
         Sheet projectSheet = workbook.getSheet("project");
-        Row headerRow = projectSheet.getRow(2);
-        Row dataRow = projectSheet.getRow(3);
-        ObjectNode objectNode = objectMapper.createObjectNode();
-        dataRow.iterator().forEachRemaining(dataCell -> {
-            Cell headerCell = headerRow.getCell(dataCell.getColumnIndex());
-            String header = headerCell.getStringCellValue();
-            CellMapping cellMapping = HEADER_MAP.get(header);
-            if (cellMapping == null) {
-                String customField = header.toLowerCase().replaceAll(" ", "_");
-                cellMapping = new CellMapping(customField, STRING);
-            }
-            String data = dataCell.getStringCellValue();
-            cellMapping.importTo(objectNode, data);
-        });
-        return objectNode;
+        return worksheetImporter.importFrom(projectSheet);
     }
 
 }

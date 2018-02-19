@@ -4,11 +4,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
-
-import static uk.ac.ebi.hca.importer.excel.CellDataType.STRING;
+import org.apache.poi.ss.usermodel.Sheet;
 
 public class WorksheetImporter {
 
@@ -21,7 +18,7 @@ public class WorksheetImporter {
         this.worksheetMapping = worksheetMapping;
     }
 
-    public JsonNode importFrom(XSSFSheet worksheet) {
+    public JsonNode importFrom(Sheet worksheet) {
         Row headerRow = worksheet.getRow(2);
         Row dataRow = worksheet.getRow(3);
         ObjectNode objectNode = objectMapper.createObjectNode();
