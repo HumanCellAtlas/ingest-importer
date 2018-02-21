@@ -30,11 +30,10 @@ class CellMapping {
 
     void importTo(final ObjectNode node, final Cell dataCell) {
         NodeNavigator nodeNavigator = new NodeNavigator(node);
-        nodeNavigator.navigateTo(jsonProperty);
-
         if (NUMERIC.equals(dataType)) {
             dataCell.setCellType(CellType.NUMERIC);
-            nodeNavigator.put(dataCell.getNumericCellValue());
+            nodeNavigator.navigateTo(jsonProperty)
+                    .put(dataCell.getNumericCellValue());
         } else {
             dataCell.setCellType(CellType.STRING);
             String data = dataCell.getStringCellValue();
@@ -42,7 +41,8 @@ class CellMapping {
                 ArrayNode array = node.putArray(jsonProperty);
                 Arrays.stream(data.split(ARRAY_SEPARATOR)).forEach(array::add);
             } else {
-                nodeNavigator.put(data);
+                nodeNavigator.navigateTo(jsonProperty)
+                        .put(data);
             }
         }
     }
@@ -58,7 +58,7 @@ class CellMapping {
             this.currentProperty = "";
         }
 
-        void navigateTo(String jsonProperty) {
+        NodeNavigator navigateTo(String jsonProperty) {
             String[] propertyChain = jsonProperty.split(PROPERTY_NESTING_DELIMETER);
             int terminalPropertyIndex = propertyChain.length - 1;
 
@@ -81,6 +81,7 @@ class CellMapping {
             }
 
             currentProperty = propertyChain[terminalPropertyIndex];
+            return this;
         }
 
         void put(double value) {
