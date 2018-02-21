@@ -121,14 +121,25 @@ public class CellMappingTest {
         String unitValue = "year";
         doReturn(unitValue).when(stringCell).getStringCellValue();
 
+        //and:
+        String warrantyExclusions = "warranty.exclusions";
+        CellMapping arrayCellMapping = new CellMapping(warrantyExclusions, STRING_ARRAY);
+
+        //and:
+        Cell arrayCell = mock(Cell.class);
+        doReturn(CellType.STRING).when(arrayCell).getCellTypeEnum();
+        doReturn("cosmetic damages||dead pixels").when(arrayCell).getStringCellValue();
+
         //when:
         numericCellMapping.importTo(node, numericCell);
         stringCellMapping.importTo(node, stringCell);
+        arrayCellMapping.importTo(node, arrayCell);
 
         //then:
         JsonAssert.with(objectMapper.writeValueAsString(node))
                 .assertEquals("$.warranty.warranty_length", lengthValue)
-                .assertEquals("$.warranty.warranty_length_unit", unitValue);
+                .assertEquals("$.warranty.warranty_length_unit", unitValue)
+                .assertThat("$.warranty.exclusions", contains("cosmetic damages", "dead pixels"));
     }
 
 }

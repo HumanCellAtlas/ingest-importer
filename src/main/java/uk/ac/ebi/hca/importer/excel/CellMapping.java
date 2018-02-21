@@ -29,20 +29,17 @@ class CellMapping {
     }
 
     void importTo(final ObjectNode node, final Cell dataCell) {
-        NodeNavigator nodeNavigator = new NodeNavigator(node);
+        NodeNavigator nodeNavigator = new NodeNavigator(node).navigateTo(jsonProperty);
         if (NUMERIC.equals(dataType)) {
             dataCell.setCellType(CellType.NUMERIC);
-            nodeNavigator.navigateTo(jsonProperty)
-                    .put(dataCell.getNumericCellValue());
+            nodeNavigator.put(dataCell.getNumericCellValue());
         } else {
             dataCell.setCellType(CellType.STRING);
             String data = dataCell.getStringCellValue();
             if (STRING_ARRAY.equals(dataType)) {
-                ArrayNode array = node.putArray(jsonProperty);
-                Arrays.stream(data.split(ARRAY_SEPARATOR)).forEach(array::add);
+                nodeNavigator.put(data.split(ARRAY_SEPARATOR));
             } else {
-                nodeNavigator.navigateTo(jsonProperty)
-                        .put(data);
+                nodeNavigator.put(data);
             }
         }
     }
@@ -94,6 +91,11 @@ class CellMapping {
 
         void put(String value) {
             currentNode.put(currentProperty, value);
+        }
+
+        void put(String[] value) {
+            ArrayNode array = currentNode.putArray(currentProperty);
+            Arrays.stream(value).forEach(array::add);
         }
 
     }
