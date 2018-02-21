@@ -16,7 +16,6 @@ class CellMapping {
     static final String PROPERTY_NESTING_DELIMETER = "\\.";
     static final String ARRAY_SEPARATOR = "\\|\\|";
 
-
     final String jsonProperty;
     final CellDataType dataType;
 
@@ -30,32 +29,12 @@ class CellMapping {
     }
 
     void importTo(final ObjectNode node, final Cell dataCell) {
-        String[] propertyChain = jsonProperty.split(PROPERTY_NESTING_DELIMETER);
-        int terminalPropertyIndex = propertyChain.length - 1;
-
-        int index = 0;
-        JsonNode navigator = node;
-        while (index < terminalPropertyIndex && navigator.has(propertyChain[index])) {
-            navigator = navigator.get(propertyChain[index]);
-            index++;
-        }
-
-        ObjectNode moduleNode = (ObjectNode) navigator;
-        if (index < terminalPropertyIndex) {
-            String property = propertyChain[index];
-            moduleNode = moduleNode.putObject(property);
-            for (int propertyIndex = index + 1; propertyIndex < terminalPropertyIndex;
-                 propertyIndex++) {
-                property = propertyChain[propertyIndex];
-                moduleNode = moduleNode.putObject(property);
-            }
-        }
-
-        String moduleProperty = propertyChain[terminalPropertyIndex];
+        NodeNavigator nodeNavigator = new NodeNavigator(node);
+        nodeNavigator.navigateTo(jsonProperty);
 
         if (NUMERIC.equals(dataType)) {
             dataCell.setCellType(CellType.NUMERIC);
-            moduleNode.put(moduleProperty, dataCell.getNumericCellValue());
+            nodeNavigator.put(dataCell.getNumericCellValue());
         } else {
             dataCell.setCellType(CellType.STRING);
             String data = dataCell.getStringCellValue();
@@ -63,9 +42,55 @@ class CellMapping {
                 ArrayNode array = node.putArray(jsonProperty);
                 Arrays.stream(data.split(ARRAY_SEPARATOR)).forEach(array::add);
             } else {
-                moduleNode.put(moduleProperty, data);
+                nodeNavigator.put(data);
             }
         }
+    }
+
+    private static class NodeNavigator {
+
+        ObjectNode currentNode;
+
+        String currentProperty;
+
+        NodeNavigator(ObjectNode currentNode) {
+            this.currentNode = currentNode;
+            this.currentProperty = "";
+        }
+
+        void navigateTo(String jsonProperty) {
+            String[] propertyChain = jsonProperty.split(PROPERTY_NESTING_DELIMETER);
+            int terminalPropertyIndex = propertyChain.length - 1;
+
+            int index = 0;
+            JsonNode navigator = currentNode;
+            while (index < terminalPropertyIndex && navigator.has(propertyChain[index])) {
+                navigator = navigator.get(propertyChain[index]);
+                index++;
+            }
+
+            currentNode = (ObjectNode) navigator;
+            if (index < terminalPropertyIndex) {
+                String property = propertyChain[index];
+                currentNode = currentNode.putObject(property);
+                for (int propertyIndex = index + 1; propertyIndex < terminalPropertyIndex;
+                     propertyIndex++) {
+                    property = propertyChain[propertyIndex];
+                    currentNode = currentNode.putObject(property);
+                }
+            }
+
+            currentProperty = propertyChain[terminalPropertyIndex];
+        }
+
+        void put(double value) {
+            currentNode.put(currentProperty, value);
+        }
+
+        void put(String value) {
+            currentNode.put(currentProperty, value);
+        }
+
     }
 
 }
