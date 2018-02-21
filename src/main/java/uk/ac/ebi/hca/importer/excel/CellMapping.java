@@ -1,5 +1,6 @@
 package uk.ac.ebi.hca.importer.excel;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.apache.poi.ss.usermodel.Cell;
@@ -30,29 +31,40 @@ class CellMapping {
 
     void importTo(final ObjectNode node, final Cell dataCell) {
         String[] propertyChain = jsonProperty.split(PROPERTY_NESTING_DELIMETER);
+        int terminalPropertyIndex = propertyChain.length - 1;
 
-        ObjectNode moduleNode = node.putObject(propertyChain[0]);
-        for (int propertyIndex = 1; propertyIndex < propertyChain.length - 1; propertyIndex++) {
-            moduleNode = moduleNode.putObject(propertyChain[propertyIndex]);
+        int index = 0;
+        JsonNode navigator = node;
+        while (index < terminalPropertyIndex && navigator.has(propertyChain[index])) {
+            navigator = navigator.get(propertyChain[index]);
+            index++;
         }
 
-        String moduleProperty = propertyChain[propertyChain.length - 1];
+        ObjectNode moduleNode = (ObjectNode) navigator;
+        if (index < terminalPropertyIndex) {
+            String property = propertyChain[index];
+            moduleNode = moduleNode.putObject(property);
+            for (int propertyIndex = index + 1; propertyIndex < terminalPropertyIndex;
+                 propertyIndex++) {
+                property = propertyChain[propertyIndex];
+                moduleNode = moduleNode.putObject(property);
+            }
+        }
+
+        String moduleProperty = propertyChain[terminalPropertyIndex];
 
         if (NUMERIC.equals(dataType)) {
             dataCell.setCellType(CellType.NUMERIC);
             moduleNode.put(moduleProperty, dataCell.getNumericCellValue());
         } else {
             dataCell.setCellType(CellType.STRING);
-            importTo(node, dataCell.getStringCellValue());
-        }
-    }
-
-    void importTo(final ObjectNode node, final String data) {
-        if (STRING_ARRAY.equals(dataType)) {
-            ArrayNode array = node.putArray(jsonProperty);
-            Arrays.stream(data.split(ARRAY_SEPARATOR)).forEach(array::add);
-        } else {
-            node.put(jsonProperty, data);
+            String data = dataCell.getStringCellValue();
+            if (STRING_ARRAY.equals(dataType)) {
+                ArrayNode array = node.putArray(jsonProperty);
+                Arrays.stream(data.split(ARRAY_SEPARATOR)).forEach(array::add);
+            } else {
+                moduleNode.put(moduleProperty, data);
+            }
         }
     }
 

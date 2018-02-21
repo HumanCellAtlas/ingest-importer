@@ -103,20 +103,32 @@ public class CellMappingTest {
 
         //and:
         String warrantyLength = "warranty.warranty_length";
-        CellMapping cellMapping = new CellMapping(warrantyLength, NUMERIC);
+        CellMapping numericCellMapping = new CellMapping(warrantyLength, NUMERIC);
 
         //and:
-        Cell cell = mock(Cell.class);
-        doReturn(CellType.NUMERIC).when(cell).getCellTypeEnum();
-        double cellValue = 1D;
-        doReturn(cellValue).when(cell).getNumericCellValue();
+        Cell numericCell = mock(Cell.class);
+        doReturn(CellType.NUMERIC).when(numericCell).getCellTypeEnum();
+        double lengthValue = 1D;
+        doReturn(lengthValue).when(numericCell).getNumericCellValue();
+
+        //and:
+        String warrantyLengthUnit = "warranty.warranty_length_unit";
+        CellMapping stringCellMapping = new CellMapping(warrantyLengthUnit, STRING);
+
+        //and:
+        Cell stringCell = mock(Cell.class);
+        doReturn(CellType.STRING).when(stringCell).getCellTypeEnum();
+        String unitValue = "year";
+        doReturn(unitValue).when(stringCell).getStringCellValue();
 
         //when:
-        cellMapping.importTo(node, cell);
+        numericCellMapping.importTo(node, numericCell);
+        stringCellMapping.importTo(node, stringCell);
 
         //then:
         JsonAssert.with(objectMapper.writeValueAsString(node))
-                .assertEquals("$.warranty.warranty_length", cellValue);
+                .assertEquals("$.warranty.warranty_length", lengthValue)
+                .assertEquals("$.warranty.warranty_length_unit", unitValue);
     }
 
 }
