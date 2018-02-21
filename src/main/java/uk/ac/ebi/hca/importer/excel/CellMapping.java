@@ -60,28 +60,32 @@ class CellMapping {
 
         NodeNavigator navigateTo(String jsonProperty) {
             String[] propertyChain = jsonProperty.split(PROPERTY_NESTING_DELIMETER);
-            int terminalPropertyIndex = propertyChain.length - 1;
 
+            int indexOfLastKnownNode = moveToLastExistentNode(propertyChain);
+            int terminalPropertyIndex = propertyChain.length - 1;
+            if (indexOfLastKnownNode < terminalPropertyIndex) {
+                int propertyIndex = indexOfLastKnownNode;
+                do {
+                    String property = propertyChain[indexOfLastKnownNode];
+                    currentNode = currentNode.putObject(property);
+                    propertyIndex++;
+                } while (propertyIndex < terminalPropertyIndex);
+            }
+
+            currentProperty = propertyChain[terminalPropertyIndex];
+            return this;
+        }
+
+        private int moveToLastExistentNode(String[] propertyChain) {
+            int terminalPropertyIndex = propertyChain.length - 1;
             int index = 0;
             JsonNode navigator = currentNode;
             while (index < terminalPropertyIndex && navigator.has(propertyChain[index])) {
                 navigator = navigator.get(propertyChain[index]);
                 index++;
             }
-
             currentNode = (ObjectNode) navigator;
-            if (index < terminalPropertyIndex) {
-                String property = propertyChain[index];
-                currentNode = currentNode.putObject(property);
-                for (int propertyIndex = index + 1; propertyIndex < terminalPropertyIndex;
-                     propertyIndex++) {
-                    property = propertyChain[propertyIndex];
-                    currentNode = currentNode.putObject(property);
-                }
-            }
-
-            currentProperty = propertyChain[terminalPropertyIndex];
-            return this;
+            return index;
         }
 
         void put(double value) {
