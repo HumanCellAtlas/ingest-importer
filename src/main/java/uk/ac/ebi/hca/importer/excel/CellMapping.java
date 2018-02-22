@@ -65,7 +65,8 @@ class CellMapping {
             if (currentNode.isObject()) {
                 pointerNode = (ObjectNode) currentNode;
             } else {
-                throw new NotAnObjectNode();
+                throw new NotAnObjectNode(Arrays.copyOfRange(propertyChain, 0,
+                        indexOfLastKnownNode));
             }
 
             int terminalPropertyIndex = propertyChain.length - 1;

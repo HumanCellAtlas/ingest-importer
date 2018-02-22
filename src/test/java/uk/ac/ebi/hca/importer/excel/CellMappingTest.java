@@ -9,6 +9,7 @@ import org.junit.Test;
 import uk.ac.ebi.hca.importer.excel.exception.NotAnObjectNode;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.hamcrest.Matchers.contains;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -160,19 +161,17 @@ public class CellMappingTest {
         doReturn(14D).when(cell).getNumericCellValue();
 
         //when:
-        boolean exceptionThrown = false;
+        NotAnObjectNode notAnObjectNode = null;
         try {
             cellMapping.importTo(node, cell);
-        } catch (NotAnObjectNode e) {
-            exceptionThrown = true;
+        } catch (NotAnObjectNode exception) {
+            notAnObjectNode = exception;
         } catch (Exception e) {
-            //pass
+            fail("Expected to throw NotAnObjectNode exception");
         }
 
         //then:
-        assertThat(exceptionThrown)
-                .as("Expected to throw NotAnObjectNode exception")
-                .isTrue();
+        assertThat(notAnObjectNode.getMessage()).contains("[friends] field");
     }
 
 }
