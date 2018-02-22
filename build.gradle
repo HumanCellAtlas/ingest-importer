@@ -16,14 +16,25 @@ apply plugin: 'org.springframework.boot'
 
 group = 'uk.ac.ebi.hca'
 version = '0.0.1-SNAPSHOT'
+
 sourceCompatibility = 1.9
+targetCompatibility = 1.9
 
 repositories {
 	mavenCentral()
 }
 
-
 dependencies {
 	compile('org.springframework.boot:spring-boot-starter')
+    compile('org.apache.poi:poi-ooxml:3.17')
+    compile('com.google.guava:guava:24.0-jre')
+    compile('javax.annotation:javax.annotation-api:1.3.1')
+
+    def jacksonModules = ['annotations', 'core', 'databind']
+    jacksonModules.forEach { module ->
+        compile("com.fasterxml.jackson.core:jackson-$module:2.9.4")
+    }
+
 	testCompile('org.springframework.boot:spring-boot-starter-test')
+    testCompile('com.jayway.jsonpath:json-path-assert:2.4.0')
 }
