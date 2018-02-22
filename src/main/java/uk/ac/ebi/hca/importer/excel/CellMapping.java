@@ -30,7 +30,7 @@ class CellMapping {
     }
 
     void importTo(final ObjectNode node, final Cell dataCell) {
-        NodeNavigator nodeNavigator = new NodeNavigator(node).setUpObjectNode(jsonProperty);
+        NodeNavigator nodeNavigator = new NodeNavigator(node).prepareObjectNode(jsonProperty);
         if (NUMERIC.equals(dataType)) {
             dataCell.setCellType(CellType.NUMERIC);
             nodeNavigator.put(dataCell.getNumericCellValue());
@@ -56,7 +56,7 @@ class CellMapping {
             this.currentProperty = "";
         }
 
-        NodeNavigator setUpObjectNode(String jsonProperty) {
+        NodeNavigator prepareObjectNode(String jsonProperty) {
             String[] propertyChain = jsonProperty.split(PROPERTY_NESTING_DELIMETER);
 
             int indexOfLastKnownNode = moveToLastExistentObjectNode(propertyChain);
