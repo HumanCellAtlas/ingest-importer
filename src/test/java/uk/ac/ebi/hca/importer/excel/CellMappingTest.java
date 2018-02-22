@@ -6,6 +6,7 @@ import com.jayway.jsonassert.JsonAssert;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
 import org.junit.Test;
+import uk.ac.ebi.hca.importer.excel.exception.NotAnObjectNode;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.contains;
@@ -140,6 +141,38 @@ public class CellMappingTest {
                 .assertEquals("$.warranty.warranty_length", lengthValue)
                 .assertEquals("$.warranty.warranty_length_unit", unitValue)
                 .assertThat("$.warranty.exclusions", contains("cosmetic damages", "dead pixels"));
+    }
+
+    @Test
+    public void testAttemptImportToModularFieldOfArrayType() {
+        //given: a node with friends array
+        ObjectNode node = objectMapper.createObjectNode();
+        node.putArray("friends")
+                .add("Juan")
+                .add("Pedro");
+
+        //and: a cell mapping that attempts to put a field under friends property
+        CellMapping cellMapping = new CellMapping("friends.count", NUMERIC);
+
+        //and:
+        Cell cell = mock(Cell.class);
+        doReturn(CellType.NUMERIC).when(cell).getCellTypeEnum();
+        doReturn(14D).when(cell).getNumericCellValue();
+
+        //when:
+        boolean exceptionThrown = false;
+        try {
+            cellMapping.importTo(node, cell);
+        } catch (NotAnObjectNode e) {
+            exceptionThrown = true;
+        } catch (Exception e) {
+            //pass
+        }
+
+        //then:
+        assertThat(exceptionThrown)
+                .as("Expected to throw NotAnObjectNode exception")
+                .isTrue();
     }
 
 }

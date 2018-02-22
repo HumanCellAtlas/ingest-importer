@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
+import uk.ac.ebi.hca.importer.excel.exception.NotAnObjectNode;
 
 import java.util.Arrays;
 
@@ -29,7 +30,7 @@ class CellMapping {
     }
 
     void importTo(final ObjectNode node, final Cell dataCell) {
-        NodeNavigator nodeNavigator = new NodeNavigator(node).navigateTo(jsonProperty);
+        NodeNavigator nodeNavigator = new NodeNavigator(node).setUpObjectNode(jsonProperty);
         if (NUMERIC.equals(dataType)) {
             dataCell.setCellType(CellType.NUMERIC);
             nodeNavigator.put(dataCell.getNumericCellValue());
@@ -46,7 +47,7 @@ class CellMapping {
 
     private static class NodeNavigator {
 
-        ObjectNode currentNode;
+        JsonNode currentNode;
 
         String currentProperty;
 
@@ -55,25 +56,33 @@ class CellMapping {
             this.currentProperty = "";
         }
 
-        NodeNavigator navigateTo(String jsonProperty) {
+        NodeNavigator setUpObjectNode(String jsonProperty) {
             String[] propertyChain = jsonProperty.split(PROPERTY_NESTING_DELIMETER);
 
-            int indexOfLastKnownNode = moveToLastExistentNode(propertyChain);
+            int indexOfLastKnownNode = moveToLastExistentObjectNode(propertyChain);
+
+            ObjectNode pointerNode = null;
+            if (currentNode.isObject()) {
+                pointerNode = (ObjectNode) currentNode;
+            } else {
+                throw new NotAnObjectNode();
+            }
+
             int terminalPropertyIndex = propertyChain.length - 1;
             if (indexOfLastKnownNode < terminalPropertyIndex) {
                 int propertyIndex = indexOfLastKnownNode;
                 do {
                     String property = propertyChain[indexOfLastKnownNode];
-                    currentNode = currentNode.putObject(property);
+                    pointerNode = pointerNode.putObject(property);
                     propertyIndex++;
                 } while (propertyIndex < terminalPropertyIndex);
             }
-
+            currentNode = pointerNode;
             currentProperty = propertyChain[terminalPropertyIndex];
             return this;
         }
 
-        private int moveToLastExistentNode(String[] propertyChain) {
+        private int moveToLastExistentObjectNode(String[] propertyChain) {
             int terminalPropertyIndex = propertyChain.length - 1;
             int index = 0;
             JsonNode navigator = currentNode;
@@ -81,20 +90,21 @@ class CellMapping {
                 navigator = navigator.get(propertyChain[index]);
                 index++;
             }
-            currentNode = (ObjectNode) navigator;
+
+            currentNode = navigator;
             return index;
         }
 
         void put(double value) {
-            currentNode.put(currentProperty, value);
+            ((ObjectNode) currentNode).put(currentProperty, value);
         }
 
         void put(String value) {
-            currentNode.put(currentProperty, value);
+            ((ObjectNode) currentNode).put(currentProperty, value);
         }
 
         void put(String[] value) {
-            ArrayNode array = currentNode.putArray(currentProperty);
+            ArrayNode array = ((ObjectNode) currentNode).putArray(currentProperty);
             Arrays.stream(value).forEach(array::add);
         }
 
