@@ -2,7 +2,9 @@ package uk.ac.ebi.hca.importer.excel;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.jayway.jsonassert.JsonAssert;
+import com.jayway.jsonpath.JsonPath;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.junit.runner.RunWith;
@@ -12,9 +14,12 @@ import uk.ac.ebi.hca.test.IntegrationTest;
 import java.io.File;
 import java.net.URI;
 import java.nio.file.Paths;
+import java.util.Optional;
+import java.util.stream.StreamSupport;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.hasSize;
 import static uk.ac.ebi.hca.importer.excel.CellDataType.*;
 
 @RunWith(IngestTestRunner.class)
@@ -22,6 +27,7 @@ public class WorksheetImporterTest {
 
     private ObjectMapper objectMapper = new ObjectMapper();
 
+    //TODO add container array name in the worksheet mapping (e.g. new WorksheetMapping("profiles")
     private WorksheetMapping profileMapping = new WorksheetMapping()
             .map("First Name", "first_name", STRING)
             .map("Last Name", "last_name", STRING)
@@ -42,11 +48,26 @@ public class WorksheetImporterTest {
         WorksheetImporter projectImporter = new WorksheetImporter(objectMapper, profileMapping);
 
         //when:
-        JsonNode profile = projectImporter.importFrom(profileWorksheet);
+        JsonNode profileJson = projectImporter.importFrom(profileWorksheet);
 
         //then:
-        assertThat(profile).isNotNull();
-        JsonAssert.with(objectMapper.writeValueAsString(profile))
+        assertThat(profileJson).isNotNull();
+        assertThat(profileJson.has("Profile")).as("Expected field [Profile].").isTrue();
+        assertThat(profileJson.get("Profile").isArray()).isTrue();
+        JsonAssert.with(objectMapper.writeValueAsString(profileJson))
+                .assertThat("Profile", hasSize(3));
+
+        //and:
+        ArrayNode profileArray = (ArrayNode) profileJson.get("Profile");
+        JsonNode juanNode = StreamSupport
+                .stream(profileArray.spliterator(), false)
+                .filter(node -> {
+                    return node.has("first_name") && node.get("first_name").asText().equals("Juan");
+                })
+                .findFirst().get();
+
+        //and:
+        JsonAssert.with(objectMapper.writeValueAsString(juanNode))
                 .assertEquals("first_name", "Juan")
                 .assertEquals("last_name", "dela Cruz")
                 .assertEquals("age", 41.0)
