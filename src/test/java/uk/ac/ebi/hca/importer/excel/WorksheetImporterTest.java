@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.jayway.jsonassert.JsonAssert;
-import com.jayway.jsonpath.JsonPath;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.junit.runner.RunWith;
@@ -14,7 +13,7 @@ import uk.ac.ebi.hca.test.IntegrationTest;
 import java.io.File;
 import java.net.URI;
 import java.nio.file.Paths;
-import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.StreamSupport;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -59,24 +58,64 @@ public class WorksheetImporterTest {
 
         //and:
         ArrayNode profileArray = (ArrayNode) profileJson.get("Profile");
-        JsonNode juanNode = StreamSupport
-                .stream(profileArray.spliterator(), false)
-                .filter(node -> {
-                    return node.has("first_name") && node.get("first_name").asText().equals("Juan");
-                })
-                .findFirst().get();
 
         //and:
-        JsonAssert.with(objectMapper.writeValueAsString(juanNode))
+        JsonNode juan = firstNameFinder(profileArray).apply("Juan");
+        JsonAssert.with(objectMapper.writeValueAsString(juan))
                 .assertEquals("first_name", "Juan")
                 .assertEquals("last_name", "dela Cruz")
-                .assertEquals("age", 41.0)
+                .assertEquals("age", 41D)
                 .assertThat("friends", contains("Pedro", "Santiago"))
                 .assertEquals("remarks", "This is an extra field")
                 .assertEquals("miscellaneous", "looks||like||a||list")
                 .assertEquals("extra_number", "123")
+                .assertEquals("developer_grade", "Senior")
                 .assertEquals("favorite_languages", "Java||Python")
                 .assertEquals("years_of_experience", "20");
+
+        //and:
+        JsonNode john = firstNameFinder(profileArray).apply("John");
+        JsonAssert.with(objectMapper.writeValueAsString(john))
+                .assertEquals("first_name", "John")
+                .assertEquals("last_name", "Doe")
+                .assertEquals("age", 23D)
+                .assertThat("friends", contains("Jessica", "Kaz", "David"))
+                .assertNotDefined("remarks")
+                .assertNotDefined("miscellaneous")
+                .assertNotDefined("extra_number")
+                .assertEquals("developer_grade", "Junior")
+                .assertEquals("favorite_languages", "Python")
+                .assertEquals("years_of_experience", "2");
+
+        //and:
+        JsonNode mary = firstNameFinder(profileArray).apply("Mary");
+        JsonAssert.with(objectMapper.writeValueAsString(mary))
+                .assertEquals("first_name", "Mary")
+                .assertEquals("last_name", "Moon")
+                .assertEquals("age", 25D)
+                .assertThat("friends", contains("Vegetables"))
+                .assertEquals("remarks", "She's a vegetarian")
+                .assertNotDefined("miscellaneous")
+                .assertNotDefined("extra_number")
+                .assertEquals("developer_grade", "Mid")
+                .assertEquals("favorite_languages", "Haskell||Perl||Erlang")
+                .assertEquals("years_of_experience", "5");
+    }
+
+    //aren't we overdoing encapsulation here?
+    private Function<String, JsonNode> firstNameFinder(ArrayNode profileArray) {
+        return new Function<String, JsonNode>() {
+                @Override
+                public JsonNode apply(String firstName) {
+                    return StreamSupport
+                            .stream(profileArray.spliterator(), false)
+                            .filter(node -> {
+                                return node.has("first_name") &&
+                                        node.get("first_name").asText().equals(firstName);
+                            })
+                            .findFirst().orElse(null);
+                }
+            };
     }
 
     @IntegrationTest
