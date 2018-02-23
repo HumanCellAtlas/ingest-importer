@@ -65,22 +65,6 @@ public class WorksheetImporterTest {
         assertCorrectMaryProfile(firstNameFinder.apply("Mary"));
     }
 
-    //aren't we overdoing encapsulation here?
-    private Function<String, JsonNode> firstNameFinder(ArrayNode profileArray) {
-        return new Function<String, JsonNode>() {
-            @Override
-            public JsonNode apply(String firstName) {
-                return StreamSupport
-                        .stream(profileArray.spliterator(), false)
-                        .filter(node -> {
-                            return node.has("first_name") &&
-                                    node.get("first_name").asText().equals(firstName);
-                        })
-                        .findFirst().orElse(null);
-            }
-        };
-    }
-
     private void assertCorrectJuanProfile(JsonNode juan) throws JsonProcessingException {
         JsonAssert.with(objectMapper.writeValueAsString(juan))
                 .assertEquals("first_name", "Juan")
@@ -148,10 +132,36 @@ public class WorksheetImporterTest {
 
         //then:
         assertThat(profileJson).isNotNull();
-        JsonAssert.with(objectMapper.writeValueAsString(profileJson))
+        assertThat(profileJson.has("Profile")).as("Expected [Profile] field.");
+
+        //and:
+        assertThat(profileJson.get("Profile").isArray())
+                .as("[Profile] should be an array.")
+                .isTrue();
+        ArrayNode profileArray = (ArrayNode) profileJson.get("Profile");
+
+        //and:
+        Function<String, JsonNode> firstNameFinder = firstNameFinder(profileArray);
+        JsonAssert.with(objectMapper.writeValueAsString(firstNameFinder.apply("Juan")))
                 .assertEquals("$.developer.grade", "Senior")
                 .assertThat("$.developer.fav_langs", contains("Java", "Python"))
                 .assertEquals("$.developer.years", 20D);
+    }
+
+    //aren't we overdoing encapsulation here?
+    private Function<String, JsonNode> firstNameFinder(ArrayNode profileArray) {
+        return new Function<String, JsonNode>() {
+            @Override
+            public JsonNode apply(String firstName) {
+                return StreamSupport
+                        .stream(profileArray.spliterator(), false)
+                        .filter(node -> {
+                            return node.has("first_name") &&
+                                    node.get("first_name").asText().equals(firstName);
+                        })
+                        .findFirst().orElse(null);
+            }
+        };
     }
 
     /*
