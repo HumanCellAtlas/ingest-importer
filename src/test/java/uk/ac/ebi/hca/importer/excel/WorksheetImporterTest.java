@@ -1,5 +1,6 @@
 package uk.ac.ebi.hca.importer.excel;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -58,9 +59,29 @@ public class WorksheetImporterTest {
 
         //and:
         ArrayNode profileArray = (ArrayNode) profileJson.get("Profile");
+        Function<String, JsonNode> firstNameFinder = firstNameFinder(profileArray);
+        assertCorrectJuanProfile(firstNameFinder.apply("Juan"));
+        assertCorrectJohnProfile(firstNameFinder.apply("John"));
+        assertCorrectMaryProfile(firstNameFinder.apply("Mary"));
+    }
 
-        //and:
-        JsonNode juan = firstNameFinder(profileArray).apply("Juan");
+    //aren't we overdoing encapsulation here?
+    private Function<String, JsonNode> firstNameFinder(ArrayNode profileArray) {
+        return new Function<String, JsonNode>() {
+            @Override
+            public JsonNode apply(String firstName) {
+                return StreamSupport
+                        .stream(profileArray.spliterator(), false)
+                        .filter(node -> {
+                            return node.has("first_name") &&
+                                    node.get("first_name").asText().equals(firstName);
+                        })
+                        .findFirst().orElse(null);
+            }
+        };
+    }
+
+    private void assertCorrectJuanProfile(JsonNode juan) throws JsonProcessingException {
         JsonAssert.with(objectMapper.writeValueAsString(juan))
                 .assertEquals("first_name", "Juan")
                 .assertEquals("last_name", "dela Cruz")
@@ -72,9 +93,9 @@ public class WorksheetImporterTest {
                 .assertEquals("developer_grade", "Senior")
                 .assertEquals("favorite_languages", "Java||Python")
                 .assertEquals("years_of_experience", "20");
+    }
 
-        //and:
-        JsonNode john = firstNameFinder(profileArray).apply("John");
+    private void assertCorrectJohnProfile(JsonNode john) throws JsonProcessingException {
         JsonAssert.with(objectMapper.writeValueAsString(john))
                 .assertEquals("first_name", "John")
                 .assertEquals("last_name", "Doe")
@@ -86,9 +107,9 @@ public class WorksheetImporterTest {
                 .assertEquals("developer_grade", "Junior")
                 .assertEquals("favorite_languages", "Python")
                 .assertEquals("years_of_experience", "2");
+    }
 
-        //and:
-        JsonNode mary = firstNameFinder(profileArray).apply("Mary");
+    private void assertCorrectMaryProfile(JsonNode mary) throws JsonProcessingException {
         JsonAssert.with(objectMapper.writeValueAsString(mary))
                 .assertEquals("first_name", "Mary")
                 .assertEquals("last_name", "Moon")
@@ -100,22 +121,6 @@ public class WorksheetImporterTest {
                 .assertEquals("developer_grade", "Mid")
                 .assertEquals("favorite_languages", "Haskell||Perl||Erlang")
                 .assertEquals("years_of_experience", "5");
-    }
-
-    //aren't we overdoing encapsulation here?
-    private Function<String, JsonNode> firstNameFinder(ArrayNode profileArray) {
-        return new Function<String, JsonNode>() {
-                @Override
-                public JsonNode apply(String firstName) {
-                    return StreamSupport
-                            .stream(profileArray.spliterator(), false)
-                            .filter(node -> {
-                                return node.has("first_name") &&
-                                        node.get("first_name").asText().equals(firstName);
-                            })
-                            .findFirst().orElse(null);
-                }
-            };
     }
 
     @IntegrationTest
