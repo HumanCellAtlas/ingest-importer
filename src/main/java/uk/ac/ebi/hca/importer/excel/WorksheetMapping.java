@@ -9,6 +9,13 @@ public class WorksheetMapping {
 
     private Map<String, CellMapping> mapping = new HashMap<>();
 
+    public WorksheetMapping() {}
+
+    private WorksheetMapping(Map<String, CellMapping> mapping) {
+        this();
+        this.mapping.putAll(mapping);
+    }
+
     public WorksheetMapping map(String header, String jsonProperty, CellDataType type) {
         mapping.put(header, new CellMapping(jsonProperty, type));
         return this;
@@ -21,6 +28,10 @@ public class WorksheetMapping {
             cellMapping = new CellMapping(jsonProperty, STRING);
         }
         return cellMapping;
+    }
+
+    public WorksheetMapping copy() {
+        return new WorksheetMapping(mapping);
     }
 
 }
