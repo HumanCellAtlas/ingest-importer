@@ -27,6 +27,10 @@ public class WorksheetImporter {
         this.worksheetMapping = worksheetMapping;
     }
 
+    public String getFieldName() {
+        return fieldName;
+    }
+
     public JsonNode importFrom(Sheet worksheet) {
         ObjectNode objectNode = objectMapper.createObjectNode();
         String arrayName = fieldName.isEmpty() ? worksheet.getSheetName() : fieldName;
