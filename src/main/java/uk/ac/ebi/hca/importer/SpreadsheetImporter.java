@@ -26,7 +26,7 @@ public class SpreadsheetImporter {
 
     public SpreadsheetImporter() {
         //Cell to JSON field mapping
-        WorksheetImporter projectImporter = new WorksheetImporter(objectMapper,
+        WorksheetImporter projectImporter = new WorksheetImporter(objectMapper, "projects",
                 new WorksheetMapping()
                         .map("Project shortname", "project_shortname", STRING)
                         .map("Related projects", "related_projects", STRING_ARRAY)
@@ -69,7 +69,9 @@ public class SpreadsheetImporter {
                     XSSFSheet worksheet = workbook.getSheetAt(index);
                     WorksheetImporter importer = registry.get(worksheet
                             .getSheetName());
-                    json.set(worksheet.getSheetName(), importer.importFrom(worksheet));
+                    String fieldName = importer.getFieldName();
+                    JsonNode importedNode = importer.importFrom(worksheet);
+                    json.set(fieldName, importedNode.get(fieldName));
                 });
         return json;
     }
