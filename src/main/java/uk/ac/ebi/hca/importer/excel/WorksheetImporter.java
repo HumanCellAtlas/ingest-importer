@@ -8,23 +8,28 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 
-import java.util.stream.IntStream;
-
 public class WorksheetImporter {
 
     private final ObjectMapper objectMapper;
 
     private final WorksheetMapping worksheetMapping;
 
+    private final String fieldName;
+
     public WorksheetImporter(ObjectMapper objectMapper, WorksheetMapping worksheetMapping) {
+        this(objectMapper, "", worksheetMapping);
+    }
+
+    public WorksheetImporter(ObjectMapper objectMapper, String fieldName,
+            WorksheetMapping worksheetMapping) {
         this.objectMapper = objectMapper;
+        this.fieldName = fieldName;
         this.worksheetMapping = worksheetMapping;
     }
 
     public JsonNode importFrom(Sheet worksheet) {
         ObjectNode objectNode = objectMapper.createObjectNode();
-        String arrayName = worksheetMapping.hasName() ? worksheetMapping.getName() :
-                worksheet.getSheetName();
+        String arrayName = fieldName.isEmpty() ? worksheet.getSheetName() : fieldName;
         ArrayNode arrayNode = objectNode.putArray(arrayName);
 
         Row headerRow = worksheet.getRow(2);
