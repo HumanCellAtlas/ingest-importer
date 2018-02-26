@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.jayway.jsonassert.JsonAssert;
-import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.junit.runner.RunWith;
@@ -13,9 +12,7 @@ import uk.ac.ebi.hca.test.IngestTestRunner;
 import uk.ac.ebi.hca.test.IntegrationTest;
 
 import java.io.File;
-import java.io.IOException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.nio.file.Paths;
 import java.util.function.Function;
 import java.util.stream.StreamSupport;
@@ -180,12 +177,41 @@ public class WorksheetImporterTest {
                 .assertEquals("$.products[2].quantity", 37D);
     }
 
-    private XSSFWorkbook loadGenericWorkbook() throws URISyntaxException, IOException,
-            InvalidFormatException {
-        URI spreadsheetUri = ClassLoader.getSystemResource("spreadsheets/generic.xlsx").toURI();
-        File spreadsheet = Paths
-                .get(spreadsheetUri).toFile();
-        return new XSSFWorkbook(spreadsheet);
+    @IntegrationTest
+    public void testImportWithDeepNesting() throws Exception {
+        //given:
+        XSSFSheet profileWorksheet = loadGenericWorkbook().getSheet("Profile");
+
+        //and:
+        WorksheetMapping deepMapping = profileMapping.copy()
+                .map("Developer Grade", "developer.info.grade", STRING)
+                .map("Favorite Languages", "developer.preferences.languages", STRING_ARRAY)
+                .map("Years of Experience", "developer.info.years", NUMERIC);
+
+        //and:
+        WorksheetImporter worksheetImporter = new WorksheetImporter(objectMapper, "profiles",
+                deepMapping);
+
+        //when:
+        JsonNode profileJson = worksheetImporter.importFrom(profileWorksheet);
+
+        //then:
+        JsonAssert.with(objectMapper.writeValueAsString(profileJson))
+                .assertEquals("$.profiles[0].developer.info.grade", "Senior")
+                .assertEquals("$.profiles[1].developer.info.years", 2D)
+                .assertThat("$.profiles[2].developer.preferences.languages",
+                        contains("Haskell", "Perl", "Erlang"));
+    }
+
+    private XSSFWorkbook loadGenericWorkbook() {
+        try {
+            URI spreadsheetUri = ClassLoader.getSystemResource("spreadsheets/generic.xlsx").toURI();
+            File spreadsheet = Paths
+                    .get(spreadsheetUri).toFile();
+            return new XSSFWorkbook(spreadsheet);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /*
