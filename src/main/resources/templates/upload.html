@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Demo</title>
+</head>
+<body>
+<h1>Ingest Importer</h1>
+
+<form th:action="@{/upload}" enctype="multipart/form-data" method="post">
+    <input type="file" name="spreadsheet"
+           accept="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>
+    <input type="submit" name="upload" value="upload" />
+</form>
+</body>
+</html>

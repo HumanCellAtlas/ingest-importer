@@ -14,7 +14,7 @@ public class IngestTestRunner extends BlockJUnit4ClassRunner {
      * Creates a BlockJUnit4ClassRunner to run {@code klass}
      *
      * @param klass
-     * @throws InitializationError if the test class is malformed.
+     * @throws InitializationError if the upload class is malformed.
      */
     public IngestTestRunner(Class<?> klass) throws InitializationError {
         super(klass);
