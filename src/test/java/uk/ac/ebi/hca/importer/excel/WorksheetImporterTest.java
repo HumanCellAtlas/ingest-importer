@@ -1,8 +1,11 @@
 package uk.ac.ebi.hca.importer.excel;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.jayway.jsonassert.JsonAssert;
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.junit.runner.RunWith;
@@ -10,11 +13,16 @@ import uk.ac.ebi.hca.test.IngestTestRunner;
 import uk.ac.ebi.hca.test.IntegrationTest;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.file.Paths;
+import java.util.function.Function;
+import java.util.stream.StreamSupport;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.hasSize;
 import static uk.ac.ebi.hca.importer.excel.CellDataType.*;
 
 @RunWith(IngestTestRunner.class)
@@ -31,42 +39,75 @@ public class WorksheetImporterTest {
     @IntegrationTest
     public void testImportFrom() throws Exception {
         //given:
-        URI spreadsheetUri = ClassLoader.getSystemResource("spreadsheets/generic.xlsx").toURI();
-        File spreadsheet = Paths.get(spreadsheetUri).toFile();
-        XSSFWorkbook workbook = new XSSFWorkbook(spreadsheet);
-
-        //and:
-        XSSFSheet profileWorksheet = workbook.getSheet("Profile");
+        XSSFSheet profileWorksheet = loadGenericWorkbook().getSheet("Profile");
 
         //and:
         WorksheetImporter projectImporter = new WorksheetImporter(objectMapper, profileMapping);
 
         //when:
-        JsonNode profile = projectImporter.importFrom(profileWorksheet);
+        JsonNode profileJson = projectImporter.importFrom(profileWorksheet);
 
         //then:
-        assertThat(profile).isNotNull();
-        JsonAssert.with(objectMapper.writeValueAsString(profile))
+        assertThat(profileJson).isNotNull();
+        assertThat(profileJson.has("Profile")).as("Expected field [Profile].").isTrue();
+        assertThat(profileJson.get("Profile").isArray()).isTrue();
+        JsonAssert.with(objectMapper.writeValueAsString(profileJson))
+                .assertThat("Profile", hasSize(3));
+
+        //and:
+        ArrayNode profileArray = (ArrayNode) profileJson.get("Profile");
+        Function<String, JsonNode> firstNameFinder = firstNameFinder(profileArray);
+        assertCorrectJuanProfile(firstNameFinder.apply("Juan"));
+        assertCorrectJohnProfile(firstNameFinder.apply("John"));
+        assertCorrectMaryProfile(firstNameFinder.apply("Mary"));
+    }
+
+    private void assertCorrectJuanProfile(JsonNode juan) throws JsonProcessingException {
+        JsonAssert.with(objectMapper.writeValueAsString(juan))
                 .assertEquals("first_name", "Juan")
                 .assertEquals("last_name", "dela Cruz")
-                .assertEquals("age", 41.0)
+                .assertEquals("age", 41D)
                 .assertThat("friends", contains("Pedro", "Santiago"))
                 .assertEquals("remarks", "This is an extra field")
                 .assertEquals("miscellaneous", "looks||like||a||list")
                 .assertEquals("extra_number", "123")
+                .assertEquals("developer_grade", "Senior")
                 .assertEquals("favorite_languages", "Java||Python")
                 .assertEquals("years_of_experience", "20");
+    }
+
+    private void assertCorrectJohnProfile(JsonNode john) throws JsonProcessingException {
+        JsonAssert.with(objectMapper.writeValueAsString(john))
+                .assertEquals("first_name", "John")
+                .assertEquals("last_name", "Doe")
+                .assertEquals("age", 23D)
+                .assertThat("friends", contains("Jessica", "Kaz", "David"))
+                .assertNotDefined("remarks")
+                .assertNotDefined("miscellaneous")
+                .assertNotDefined("extra_number")
+                .assertEquals("developer_grade", "Junior")
+                .assertEquals("favorite_languages", "Python")
+                .assertEquals("years_of_experience", "2");
+    }
+
+    private void assertCorrectMaryProfile(JsonNode mary) throws JsonProcessingException {
+        JsonAssert.with(objectMapper.writeValueAsString(mary))
+                .assertEquals("first_name", "Mary")
+                .assertEquals("last_name", "Moon")
+                .assertEquals("age", 25D)
+                .assertThat("friends", contains("Vegetables"))
+                .assertEquals("remarks", "She's a vegetarian")
+                .assertNotDefined("miscellaneous")
+                .assertNotDefined("extra_number")
+                .assertEquals("developer_grade", "Mid")
+                .assertEquals("favorite_languages", "Haskell||Perl||Erlang")
+                .assertEquals("years_of_experience", "5");
     }
 
     @IntegrationTest
     public void testImportFromModularWorksheet() throws Exception {
         //given:
-        URI spreadsheetUri = ClassLoader.getSystemResource("spreadsheets/generic.xlsx").toURI();
-        File spreadsheet = Paths.get(spreadsheetUri).toFile();
-        XSSFWorkbook workbook = new XSSFWorkbook(spreadsheet);
-
-        //and:
-        XSSFSheet profileWorksheet = workbook.getSheet("Profile");
+        XSSFSheet profileWorksheet = loadGenericWorkbook().getSheet("Profile");
 
         //and:
         WorksheetMapping modularProfileMapping = profileMapping.copy()
@@ -83,10 +124,68 @@ public class WorksheetImporterTest {
 
         //then:
         assertThat(profileJson).isNotNull();
-        JsonAssert.with(objectMapper.writeValueAsString(profileJson))
+        assertThat(profileJson.has("Profile")).as("Expected [Profile] field.");
+
+        //and:
+        assertThat(profileJson.get("Profile").isArray())
+                .as("[Profile] should be an array.")
+                .isTrue();
+        ArrayNode profileArray = (ArrayNode) profileJson.get("Profile");
+
+        //and:
+        Function<String, JsonNode> firstNameFinder = firstNameFinder(profileArray);
+        JsonAssert.with(objectMapper.writeValueAsString(firstNameFinder.apply("Juan")))
                 .assertEquals("$.developer.grade", "Senior")
                 .assertThat("$.developer.fav_langs", contains("Java", "Python"))
                 .assertEquals("$.developer.years", 20D);
+    }
+
+    //aren't we overdoing encapsulation here?
+    private Function<String, JsonNode> firstNameFinder(ArrayNode profileArray) {
+        return new Function<String, JsonNode>() {
+            @Override
+            public JsonNode apply(String firstName) {
+                return StreamSupport
+                        .stream(profileArray.spliterator(), false)
+                        .filter(node -> {
+                            return node.has("first_name") &&
+                                    node.get("first_name").asText().equals(firstName);
+                        })
+                        .findFirst().orElse(null);
+            }
+        };
+    }
+
+    @IntegrationTest
+    public void testImportFromWorksheetUsePreferredArrayName() throws Exception {
+        //given:
+        XSSFSheet productWorksheet = loadGenericWorkbook().getSheet("Product");
+
+        //and:
+        String products = "products";
+        WorksheetImporter worksheetImporter = new WorksheetImporter(objectMapper,
+                new WorksheetMapping(products)
+                        .map("ID", "id", STRING)
+                        .map("NAME", "name", STRING)
+                        .map("QUANTITY", "quantity", NUMERIC));
+
+        //when:
+        JsonNode productJson = worksheetImporter.importFrom(productWorksheet);
+
+        //then:
+        JsonAssert.with(objectMapper.writeValueAsString(productJson))
+                .assertThat("$.products", hasSize(3))
+                .assertEquals("$.products[0].id", "A001")
+                .assertEquals("$.products[1].name", "Butter")
+                .assertEquals("$.products[2].quantity", 37D);
+    }
+
+    private XSSFWorkbook loadGenericWorkbook() throws URISyntaxException, IOException,
+            InvalidFormatException {
+        URI spreadsheetUri = ClassLoader.getSystemResource("spreadsheets/generic.xlsx").toURI();
+        File spreadsheet = Paths
+                .get(spreadsheetUri).toFile();
+        return new XSSFWorkbook(spreadsheet);
     }
 
     /*
