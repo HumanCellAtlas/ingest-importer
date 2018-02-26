@@ -31,7 +31,7 @@ public class ProjectImporter {
 
     @PostConstruct
     public void setUp() {
-        worksheetImporter = new WorksheetImporter(objectMapper, WORKSHEET_MAPPING);
+        worksheetImporter = new WorksheetImporter(objectMapper, "projects", WORKSHEET_MAPPING);
     }
 
     public JsonNode importFrom(Workbook workbook) {

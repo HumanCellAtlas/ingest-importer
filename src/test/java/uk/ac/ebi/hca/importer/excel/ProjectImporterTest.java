@@ -71,7 +71,7 @@ public class ProjectImporterTest {
         assertThat(projectJson).isNotNull();
 
         //and:
-        String json = objectMapper.writeValueAsString(projectJson);
+        String json = objectMapper.writeValueAsString(projectJson.get("projects").get(0));
         JsonAssert.with(json)
                 .assertEquals("project_shortname", "DEMO-ProjectShortname")
                 .assertEquals("project_title", "DEMO-Single cell RNA-seq of primary human " +
