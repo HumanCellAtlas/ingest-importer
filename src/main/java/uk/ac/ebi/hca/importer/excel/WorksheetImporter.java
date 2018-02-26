@@ -23,7 +23,9 @@ public class WorksheetImporter {
 
     public JsonNode importFrom(Sheet worksheet) {
         ObjectNode objectNode = objectMapper.createObjectNode();
-        ArrayNode arrayNode = objectNode.putArray("Profile");
+        String arrayName = worksheetMapping.hasName() ? worksheetMapping.getName() :
+                worksheet.getSheetName();
+        ArrayNode arrayNode = objectNode.putArray(arrayName);
 
         Row headerRow = worksheet.getRow(2);
         for (int row = 3; row <= worksheet.getLastRowNum(); row++) {

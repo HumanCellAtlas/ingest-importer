@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.jayway.jsonassert.JsonAssert;
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.junit.runner.RunWith;
@@ -12,7 +13,9 @@ import uk.ac.ebi.hca.test.IngestTestRunner;
 import uk.ac.ebi.hca.test.IntegrationTest;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.file.Paths;
 import java.util.function.Function;
 import java.util.stream.StreamSupport;
@@ -27,7 +30,6 @@ public class WorksheetImporterTest {
 
     private ObjectMapper objectMapper = new ObjectMapper();
 
-    //TODO add container array name in the worksheet mapping (e.g. new WorksheetMapping("profiles")
     private WorksheetMapping profileMapping = new WorksheetMapping()
             .map("First Name", "first_name", STRING)
             .map("Last Name", "last_name", STRING)
@@ -37,12 +39,7 @@ public class WorksheetImporterTest {
     @IntegrationTest
     public void testImportFrom() throws Exception {
         //given:
-        URI spreadsheetUri = ClassLoader.getSystemResource("spreadsheets/generic.xlsx").toURI();
-        File spreadsheet = Paths.get(spreadsheetUri).toFile();
-        XSSFWorkbook workbook = new XSSFWorkbook(spreadsheet);
-
-        //and:
-        XSSFSheet profileWorksheet = workbook.getSheet("Profile");
+        XSSFSheet profileWorksheet = loadGenericWorkbook().getSheet("Profile");
 
         //and:
         WorksheetImporter projectImporter = new WorksheetImporter(objectMapper, profileMapping);
@@ -110,12 +107,7 @@ public class WorksheetImporterTest {
     @IntegrationTest
     public void testImportFromModularWorksheet() throws Exception {
         //given:
-        URI spreadsheetUri = ClassLoader.getSystemResource("spreadsheets/generic.xlsx").toURI();
-        File spreadsheet = Paths.get(spreadsheetUri).toFile();
-        XSSFWorkbook workbook = new XSSFWorkbook(spreadsheet);
-
-        //and:
-        XSSFSheet profileWorksheet = workbook.getSheet("Profile");
+        XSSFSheet profileWorksheet = loadGenericWorkbook().getSheet("Profile");
 
         //and:
         WorksheetMapping modularProfileMapping = profileMapping.copy()
@@ -162,6 +154,38 @@ public class WorksheetImporterTest {
                         .findFirst().orElse(null);
             }
         };
+    }
+
+    @IntegrationTest
+    public void testImportFromWorksheetUsePreferredArrayName() throws Exception {
+        //given:
+        XSSFSheet productWorksheet = loadGenericWorkbook().getSheet("Product");
+
+        //and:
+        String products = "products";
+        WorksheetImporter worksheetImporter = new WorksheetImporter(objectMapper,
+                new WorksheetMapping(products)
+                        .map("ID", "id", STRING)
+                        .map("NAME", "name", STRING)
+                        .map("QUANTITY", "quantity", NUMERIC));
+
+        //when:
+        JsonNode productJson = worksheetImporter.importFrom(productWorksheet);
+
+        //then:
+        JsonAssert.with(objectMapper.writeValueAsString(productJson))
+                .assertThat("$.products", hasSize(3))
+                .assertEquals("$.products[0].id", "A001")
+                .assertEquals("$.products[1].name", "Butter")
+                .assertEquals("$.products[2].quantity", 37D);
+    }
+
+    private XSSFWorkbook loadGenericWorkbook() throws URISyntaxException, IOException,
+            InvalidFormatException {
+        URI spreadsheetUri = ClassLoader.getSystemResource("spreadsheets/generic.xlsx").toURI();
+        File spreadsheet = Paths
+                .get(spreadsheetUri).toFile();
+        return new XSSFWorkbook(spreadsheet);
     }
 
     /*

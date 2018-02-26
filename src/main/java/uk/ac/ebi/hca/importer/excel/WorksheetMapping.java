@@ -7,12 +7,25 @@ import static uk.ac.ebi.hca.importer.excel.CellDataType.STRING;
 
 public class WorksheetMapping {
 
+    private final String name;
+
     private Map<String, CellMapping> mapping = new HashMap<>();
 
-    public WorksheetMapping() {}
+    public WorksheetMapping() {
+        name = "";
+    }
+
+    public WorksheetMapping(String name) {
+        this.name = name;
+    }
 
     private WorksheetMapping(Map<String, CellMapping> mapping) {
+        this();
         this.mapping.putAll(mapping);
+    }
+
+    public String getName() {
+        return name;
     }
 
     public WorksheetMapping map(String header, String jsonProperty, CellDataType type) {
@@ -31,6 +44,10 @@ public class WorksheetMapping {
 
     public WorksheetMapping copy() {
         return new WorksheetMapping(mapping);
+    }
+
+    public boolean hasName() {
+        return !"".equals(name);
     }
 
 }
