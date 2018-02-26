@@ -157,14 +157,14 @@ public class WorksheetImporterTest {
     }
 
     @IntegrationTest
-    public void testImportFromWorksheetUsePreferredArrayName() throws Exception {
+    public void testImportFromWorksheetUseSetFieldName() throws Exception {
         //given:
         XSSFSheet productWorksheet = loadGenericWorkbook().getSheet("Product");
 
         //and:
         String products = "products";
-        WorksheetImporter worksheetImporter = new WorksheetImporter(objectMapper,
-                new WorksheetMapping(products)
+        WorksheetImporter worksheetImporter = new WorksheetImporter(objectMapper, products,
+                new WorksheetMapping()
                         .map("ID", "id", STRING)
                         .map("NAME", "name", STRING)
                         .map("QUANTITY", "quantity", NUMERIC));
