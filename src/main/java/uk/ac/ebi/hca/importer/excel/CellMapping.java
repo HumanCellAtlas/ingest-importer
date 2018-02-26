@@ -59,25 +59,25 @@ class CellMapping {
         NodeNavigator prepareObjectNode(String jsonProperty) {
             String[] propertyChain = jsonProperty.split(PROPERTY_NESTING_DELIMETER);
 
-            int indexOfLastKnownNode = moveToLastExistentObjectNode(propertyChain);
+            int lastKnownNodeIndex = moveToLastExistentObjectNode(propertyChain);
 
             ObjectNode pointerNode = null;
             if (currentNode.isObject()) {
                 pointerNode = (ObjectNode) currentNode;
             } else {
                 throw new NotAnObjectNode(Arrays.copyOfRange(propertyChain, 0,
-                        indexOfLastKnownNode));
+                        lastKnownNodeIndex));
             }
 
             int terminalPropertyIndex = propertyChain.length - 1;
-            if (indexOfLastKnownNode < terminalPropertyIndex) {
-                int propertyIndex = indexOfLastKnownNode;
+            if (lastKnownNodeIndex < terminalPropertyIndex) {
                 do {
-                    String property = propertyChain[indexOfLastKnownNode];
+                    String property = propertyChain[lastKnownNodeIndex];
                     pointerNode = pointerNode.putObject(property);
-                    propertyIndex++;
-                } while (propertyIndex < terminalPropertyIndex);
+                    lastKnownNodeIndex++;
+                } while (lastKnownNodeIndex < terminalPropertyIndex);
             }
+
             currentNode = pointerNode;
             currentProperty = propertyChain[terminalPropertyIndex];
             return this;
@@ -91,7 +91,6 @@ class CellMapping {
                 navigator = navigator.get(propertyChain[index]);
                 index++;
             }
-
             currentNode = navigator;
             return index;
         }

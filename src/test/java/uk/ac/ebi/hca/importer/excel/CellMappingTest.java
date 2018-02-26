@@ -145,6 +145,37 @@ public class CellMappingTest {
     }
 
     @Test
+    public void testImportToDeeplyNestedField() throws Exception {
+        //given:
+        ObjectNode node = objectMapper.createObjectNode();
+
+        //and:
+        CellMapping ageMapping = new CellMapping("personal.info.age", NUMERIC);
+        CellMapping sexMapping = new CellMapping("personal.info.sex", STRING);
+
+        //and:
+        Cell ageCell = mock(Cell.class);
+        doReturn(CellType.NUMERIC).when(ageCell).getCellTypeEnum();
+        double ageValue = 39D;
+        doReturn(ageValue).when(ageCell).getNumericCellValue();
+
+        //and:
+        Cell sexCell = mock(Cell.class);
+        doReturn(CellType.STRING).when(sexCell).getCellTypeEnum();
+        String male = "male";
+        doReturn(male).when(sexCell).getStringCellValue();
+
+        //when:
+        ageMapping.importTo(node, ageCell);
+        sexMapping.importTo(node, sexCell);
+
+        //then:
+        JsonAssert.with(objectMapper.writeValueAsString(node))
+                .assertEquals("$.personal.info.age", ageValue)
+                .assertEquals("$.personal.info.sex", male);
+    }
+
+    @Test
     public void testAttemptImportToModularFieldOfArrayType() {
         //given: a node with friends array
         ObjectNode node = objectMapper.createObjectNode();
