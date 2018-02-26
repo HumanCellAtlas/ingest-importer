@@ -30,8 +30,8 @@ public class SpreadsheetImporter {
                 new WorksheetMapping()
                         .map("Project shortname", "project_shortname", STRING)
                         .map("Related projects", "related_projects", STRING_ARRAY)
-                        .map("INSDC project accession", "extra.indsc", STRING)
-                        .map("GEO series accession", "extra.geo_series", STRING));
+                        .map("INSDC project accession", "extra.a1.indsc", STRING)
+                        .map("GEO series accession", "extra.a2.geo_series", STRING));
 
         //Worksheet to importer mapping
         registry = new ImmutableMap.Builder<String, WorksheetImporter>()
@@ -69,9 +69,10 @@ public class SpreadsheetImporter {
                     XSSFSheet worksheet = workbook.getSheetAt(index);
                     WorksheetImporter importer = registry.get(worksheet
                             .getSheetName());
-                    String fieldName = importer.getFieldName();
                     JsonNode importedNode = importer.importFrom(worksheet);
-                    json.set(fieldName, importedNode.get(fieldName));
+                    importedNode.fieldNames().forEachRemaining(fieldName -> {
+                        json.set(fieldName, importedNode.get(fieldName));
+                    });
                 });
         return json;
     }
