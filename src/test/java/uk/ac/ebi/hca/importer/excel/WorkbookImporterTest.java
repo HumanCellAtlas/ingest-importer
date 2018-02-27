@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.jayway.jsonassert.JsonAssert;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.junit.Test;
 
 import java.util.Arrays;
@@ -26,14 +27,9 @@ public class WorkbookImporterTest {
     @Test
     public void testImportFrom() throws Exception {
         //given:
-        Sheet productSheet = mock(Sheet.class);
-        doReturn("product").when(productSheet).getSheetName();
-        Sheet orderSheet = mock(Sheet.class);
-        doReturn("order").when(orderSheet).getSheetName();
-
-        //and:
-        Workbook workbook = mock(Workbook.class);
-        doReturn(asList(productSheet, orderSheet).iterator()).when(workbook).iterator();
+        Workbook workbook = new XSSFWorkbook();
+        Sheet productWorksheet = workbook.createSheet("product");
+        Sheet orderWorksheet = workbook.createSheet("order");
 
         //and:
         WorksheetImporter productImporter = createProductImporter(new Product("P001", "Milk", 1.09),
@@ -43,8 +39,8 @@ public class WorkbookImporterTest {
 
         //and:
         WorkbookImporter workbookImporter = new WorkbookImporter(objectMapper)
-                .register(productSheet.getSheetName(), productImporter)
-                .register(orderSheet.getSheetName(), orderImporter);
+                .register(productWorksheet.getSheetName(), productImporter)
+                .register(orderWorksheet.getSheetName(), orderImporter);
 
         //when:
         JsonNode workbookJson = workbookImporter.importFrom(workbook);
@@ -66,14 +62,9 @@ public class WorkbookImporterTest {
     @Test
     public void testImportFromWorkbookWithNonRegisteredWorksheet() throws Exception {
         //given:
-        Sheet productSheet = mock(Sheet.class);
-        doReturn("product").when(productSheet).getSheetName();
-        Sheet orderSheet = mock(Sheet.class);
-        doReturn("order").when(orderSheet).getSheetName();
-
-        //and:
-        Workbook workbook = mock(Workbook.class);
-        doReturn(asList(productSheet, orderSheet).iterator()).when(workbook).iterator();
+        Workbook workbook = new XSSFWorkbook();
+        Sheet productWorksheet = workbook.createSheet("product");
+        Sheet orderWorksheet = workbook.createSheet("order");
 
         //and:
         WorksheetImporter productImporter = createProductImporter(
@@ -81,7 +72,7 @@ public class WorkbookImporterTest {
 
         //and:
         WorkbookImporter workbookImporter = new WorkbookImporter(objectMapper).register
-                (productSheet.getSheetName(), productImporter);
+                (productWorksheet.getSheetName(), productImporter);
 
         //when:
         JsonNode workbookJson = workbookImporter.importFrom(workbook);
