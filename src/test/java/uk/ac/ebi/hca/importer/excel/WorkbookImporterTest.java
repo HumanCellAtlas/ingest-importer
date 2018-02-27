@@ -65,14 +65,23 @@ public class WorkbookImporterTest {
         assertThat(workbookJson).isNotNull();
         JsonAssert.with(objectMapper.writeValueAsString(workbookJson))
                 .assertThat("$.products", hasSize(products.size()))
-                .assertThat("$.orders", hasSize(orders.size()));
+                .assertEquals("$.products[0].product_id", "P001")
+                .assertEquals("$.products[0].name", "Milk")
+                .assertEquals("$.products[1].name", "Eggs")
+                .assertEquals("$.products[2].price", 2D)
+                .assertThat("$.orders", hasSize(orders.size()))
+                .assertEquals("$.orders[0].product_id", "P001")
+                .assertEquals("$.orders[1].order_number", "O002")
+                .assertEquals("$.orders[2].quantity", 3);
     }
 
     private static class Product {
 
         @JsonProperty("product_id")
         String productId;
+        @JsonProperty
         String name;
+        @JsonProperty
         Double price; //ideally BigDecimal, but simplified for testing
 
         Product(String productId, String name, Double price) {
@@ -89,6 +98,7 @@ public class WorkbookImporterTest {
         String orderNumber;
         @JsonProperty("product_id")
         String productId;
+        @JsonProperty
         Integer quantity;
 
         public Order(String orderNumber, String productId, Integer quantity) {
