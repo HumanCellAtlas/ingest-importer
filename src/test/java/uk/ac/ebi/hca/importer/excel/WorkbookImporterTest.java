@@ -10,6 +10,7 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.junit.Test;
 
+import java.util.Arrays;
 import java.util.List;
 
 import static java.util.Arrays.asList;
@@ -36,26 +37,14 @@ public class WorkbookImporterTest {
         doReturn(asList(productSheet, orderSheet).iterator()).when(workbook).iterator();
 
         //and:
-        ObjectNode productJson = objectMapper.createObjectNode();
-        ArrayNode productArray = productJson.putArray("products");
-        List<Product> products = asList(new Product("P001", "Milk", 1.09),
+        WorksheetImporter productImporter = createProductImporter(new Product("P001", "Milk", 1.09),
                 new Product("P002", "Eggs", 1.75), new Product("P003", "Cereal", 2.00));
-        products.forEach(productArray::addPOJO);
-        WorksheetImporter productImporter = mock(WorksheetImporter.class);
-        doReturn(productJson).when(productImporter).importFrom(any(Sheet.class));
+        WorksheetImporter orderImporter = createOrderImporter(new Order("O001", "P001", 2),
+                new Order("O002", "P001", 1), new Order("O003", "P003", 3));
 
         //and:
-        ObjectNode orderJson = objectMapper.createObjectNode();
-        ArrayNode orderArray = orderJson.putArray("orders");
-        List<Order> orders = asList(new Order("O001", "P001", 2), new Order("O002", "P001", 1),
-                new Order("O003", "P003", 3));
-        orders.forEach(orderArray::addPOJO);
-        WorksheetImporter orderImporter = mock(WorksheetImporter.class);
-        doReturn(orderJson).when(orderImporter).importFrom(any(Sheet.class));
-
-        //and:
-        WorkbookImporter workbookImporter = new WorkbookImporter(objectMapper);
-        workbookImporter.register(productSheet.getSheetName(), productImporter)
+        WorkbookImporter workbookImporter = new WorkbookImporter(objectMapper)
+                .register(productSheet.getSheetName(), productImporter)
                 .register(orderSheet.getSheetName(), orderImporter);
 
         //when:
@@ -64,15 +53,33 @@ public class WorkbookImporterTest {
         //then:
         assertThat(workbookJson).isNotNull();
         JsonAssert.with(objectMapper.writeValueAsString(workbookJson))
-                .assertThat("$.products", hasSize(products.size()))
+                .assertThat("$.products", hasSize(3))
                 .assertEquals("$.products[0].product_id", "P001")
                 .assertEquals("$.products[0].name", "Milk")
                 .assertEquals("$.products[1].name", "Eggs")
                 .assertEquals("$.products[2].price", 2D)
-                .assertThat("$.orders", hasSize(orders.size()))
+                .assertThat("$.orders", hasSize(3))
                 .assertEquals("$.orders[0].product_id", "P001")
                 .assertEquals("$.orders[1].order_number", "O002")
                 .assertEquals("$.orders[2].quantity", 3);
+    }
+
+    private WorksheetImporter createProductImporter(Product... products) {
+        ObjectNode productJson = objectMapper.createObjectNode();
+        ArrayNode productArray = productJson.putArray("products");
+        Arrays.stream(products).forEach(productArray::addPOJO);
+        WorksheetImporter productImporter = mock(WorksheetImporter.class);
+        doReturn(productJson).when(productImporter).importFrom(any(Sheet.class));
+        return productImporter;
+    }
+
+    private WorksheetImporter createOrderImporter(Order... orders) {
+        ObjectNode orderJson = objectMapper.createObjectNode();
+        ArrayNode orderArray = orderJson.putArray("orders");
+        Arrays.stream(orders).forEach(orderArray::addPOJO);
+        WorksheetImporter orderImporter = mock(WorksheetImporter.class);
+        doReturn(orderJson).when(orderImporter).importFrom(any(Sheet.class));
+        return orderImporter;
     }
 
     private static class Product {
