@@ -21,10 +21,13 @@ public class WorkbookImporter {
     public JsonNode importFrom(Workbook workbook) {
         ObjectNode json = objectMapper.createObjectNode();
         workbook.iterator().forEachRemaining(worksheet -> {
-            JsonNode worksheetJson = registry.get(worksheet.getSheetName()).importFrom(worksheet);
-            worksheetJson.fieldNames().forEachRemaining(fieldName -> {
-                json.set(fieldName, worksheetJson.get(fieldName));
-            });
+            WorksheetImporter importer = registry.get(worksheet.getSheetName());
+            if (importer != null) {
+                JsonNode worksheetJson = importer.importFrom(worksheet);
+                worksheetJson.fieldNames().forEachRemaining(fieldName -> {
+                    json.set(fieldName, worksheetJson.get(fieldName));
+                });
+            }
         });
         return json;
     }

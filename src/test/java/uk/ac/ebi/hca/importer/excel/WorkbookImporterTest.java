@@ -11,7 +11,6 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.junit.Test;
 
 import java.util.Arrays;
-import java.util.List;
 
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -62,6 +61,39 @@ public class WorkbookImporterTest {
                 .assertEquals("$.orders[0].product_id", "P001")
                 .assertEquals("$.orders[1].order_number", "O002")
                 .assertEquals("$.orders[2].quantity", 3);
+    }
+
+    @Test
+    public void testImportFromWorkbookWithNonRegisteredWorksheet() throws Exception {
+        //given:
+        Sheet productSheet = mock(Sheet.class);
+        doReturn("product").when(productSheet).getSheetName();
+        Sheet orderSheet = mock(Sheet.class);
+        doReturn("order").when(orderSheet).getSheetName();
+
+        //and:
+        Workbook workbook = mock(Workbook.class);
+        doReturn(asList(productSheet, orderSheet).iterator()).when(workbook).iterator();
+
+        //and:
+        WorksheetImporter productImporter = createProductImporter(
+                new Product("P211", "Cereal", 2.25));
+
+        //and:
+        WorkbookImporter workbookImporter = new WorkbookImporter(objectMapper).register
+                (productSheet.getSheetName(), productImporter);
+
+        //when:
+        JsonNode workbookJson = workbookImporter.importFrom(workbook);
+
+        //then:
+        assertThat(workbookJson).isNotNull();
+        JsonAssert.with(objectMapper.writeValueAsString(workbookJson))
+                .assertThat("$.products", hasSize(1))
+                .assertEquals("$.products[0].product_id", "P211")
+                .assertEquals("$.products[0].name", "Cereal")
+                .assertEquals("$.products[0].price", 2.25)
+                .assertNotDefined("$.orders");
     }
 
     private WorksheetImporter createProductImporter(Product... products) {
