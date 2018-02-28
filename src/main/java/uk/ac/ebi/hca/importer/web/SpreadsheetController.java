@@ -1,9 +1,14 @@
 package uk.ac.ebi.hca.importer.web;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import uk.ac.ebi.hca.importer.SpreadsheetImporter;
+import uk.ac.ebi.hca.importer.excel.WorkbookImporter;
 
 import java.io.IOException;
 
@@ -11,7 +16,11 @@ import java.io.IOException;
 @RequestMapping("/upload")
 public class SpreadsheetController {
 
-    private SpreadsheetImporter spreadsheetImporter = new SpreadsheetImporter();
+    @Autowired
+    private WorkbookImporter workbookImporter;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @GetMapping
     public void upload() {}
@@ -19,13 +28,15 @@ public class SpreadsheetController {
     @PostMapping(produces="application/json")
     @ResponseBody
     public String importSpreadsheet(@RequestParam("spreadsheet") MultipartFile spreadsheet) {
-        String json = "{}";
+        String jsonString = "{}";
         try {
-            json = spreadsheetImporter.importSpreadsheetInPrettyPrint(spreadsheet.getInputStream());
+            Workbook workbook = new XSSFWorkbook(spreadsheet.getInputStream());
+            JsonNode json = workbookImporter.importFrom(workbook);
+            jsonString = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(json);
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return json;
+        return jsonString;
     }
 
 }
