@@ -3,13 +3,11 @@ package uk.ac.ebi.hca.importer.excel;
 import java.util.HashMap;
 import java.util.Map;
 
-import static uk.ac.ebi.hca.importer.excel.CellDataType.NUMERIC_ARRAY;
 import static uk.ac.ebi.hca.importer.excel.CellDataType.STRING;
-import static uk.ac.ebi.hca.importer.excel.CellDataType.STRING_ARRAY;
 
 public class WorksheetMapping {
 
-    private Map<String, CellMapping> mapping = new HashMap<>();
+    protected Map<String, CellMapping> mapping = new HashMap<>();
 
     public WorksheetMapping() {}
 
