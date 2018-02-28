@@ -1,6 +1,6 @@
 package uk.ac.ebi.hca.importer.excel;
 
-enum CellDataType {
+public enum CellDataType {
 
     STRING, STRING_ARRAY, NUMERIC
 
