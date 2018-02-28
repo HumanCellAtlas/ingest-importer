@@ -183,7 +183,7 @@ public class CellMappingTest {
                 .add("Juan")
                 .add("Pedro");
 
-        //and: a cell mapping that attempts to put a field under friends property
+        //and: a cell mapping that attempts to putNext a field under friends property
         CellMapping cellMapping = new CellMapping("friends.count", NUMERIC);
 
         //and:
