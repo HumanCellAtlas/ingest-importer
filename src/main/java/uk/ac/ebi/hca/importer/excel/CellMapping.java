@@ -6,6 +6,7 @@ import org.apache.poi.ss.usermodel.CellType;
 
 import static uk.ac.ebi.hca.importer.excel.CellDataType.NUMERIC;
 import static uk.ac.ebi.hca.importer.excel.CellDataType.STRING_ARRAY;
+import static uk.ac.ebi.hca.importer.excel.NodeNavigator.navigate;
 
 class CellMapping {
 
@@ -24,7 +25,7 @@ class CellMapping {
     }
 
     void importTo(final ObjectNode node, final Cell dataCell) {
-        NodeNavigator nodeNavigator = new NodeNavigator(node).prepareObjectNode(jsonProperty);
+        NodeNavigator nodeNavigator = navigate(node).prepareObjectNode(jsonProperty);
         if (NUMERIC.equals(dataType)) {
             dataCell.setCellType(CellType.NUMERIC);
             nodeNavigator.putNext(dataCell.getNumericCellValue());

@@ -16,11 +16,16 @@ class NodeNavigator {
 
     String nextProperty;
 
-    NodeNavigator(ObjectNode currentNode) {
+    NodeNavigator(JsonNode currentNode) {
         this.currentNode = currentNode;
         this.nextProperty = "";
     }
 
+    static NodeNavigator navigate(JsonNode currentNode) {
+        return new NodeNavigator(currentNode);
+    }
+
+    //TODO add unit tests?
     NodeNavigator prepareObjectNode(String path) {
         String[] propertyChain = path.split(PROPERTY_NESTING_DELIMETER);
 
@@ -60,6 +65,7 @@ class NodeNavigator {
         return index;
     }
 
+    //TODO add unit tests?
     NodeNavigator moveTo(String path) {
         String[] propertyChain = path.split(PROPERTY_NESTING_DELIMETER);
         for(int index = 0; index < propertyChain.length; index++) {
@@ -82,6 +88,7 @@ class NodeNavigator {
         Arrays.stream(value).forEach(array::add);
     }
 
+    //TODO add unit tests?
     void addValuesFrom(JsonNode json) {
         json.fieldNames().forEachRemaining(fieldName -> {
             ((ObjectNode) currentNode).set(fieldName, json.get(fieldName));

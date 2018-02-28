@@ -11,6 +11,8 @@ import org.apache.poi.ss.usermodel.Sheet;
 import java.util.HashMap;
 import java.util.Map;
 
+import static uk.ac.ebi.hca.importer.excel.NodeNavigator.navigate;
+
 public class WorksheetImporter {
 
     private final ObjectMapper objectMapper;
@@ -59,7 +61,7 @@ public class WorksheetImporter {
                 cellMapping.importTo(rowJson, dataCell);
             });
             modulePredefinedValues.forEach((module, json) -> {
-                new NodeNavigator(rowJson).moveTo(module).addValuesFrom(json);
+                navigate(rowJson).moveTo(module).addValuesFrom(json);
             });
             arrayNode.add(rowJson);
         }
