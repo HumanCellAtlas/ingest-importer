@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.jayway.jsonassert.JsonAssert;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -201,6 +202,73 @@ public class WorksheetImporterTest {
                 .assertEquals("$.profiles[1].developer.info.years", 2D)
                 .assertThat("$.profiles[2].developer.preferences.languages",
                         contains("Haskell", "Perl", "Erlang"));
+    }
+
+    @IntegrationTest
+    public void testImportWithPredefinedValues() throws Exception {
+        //given:
+        XSSFSheet profileWorksheet = loadGenericWorkbook().getSheet("Profile");
+
+        //and:
+        String schemaUrl = "https://schema.sample.com/profile";
+        String schemaVersion = "1.2.7";
+        ObjectNode predefinedValues = objectMapper.createObjectNode()
+                .put("describedBy", schemaUrl)
+                .put("schema_version", schemaVersion);
+
+        //and:
+        WorksheetImporter worksheetImporter = new WorksheetImporter(objectMapper, "profiles",
+                profileMapping.copy(), predefinedValues);
+
+        //when:
+        JsonNode profileJson = worksheetImporter.importFrom(profileWorksheet);
+
+        //then:
+        JsonAssert.with(objectMapper.writeValueAsString(profileJson))
+                .assertThat("$.profiles", hasSize(3))
+                .assertEquals("$.profiles[0].describedBy", schemaUrl)
+                .assertEquals("$.profiles[0].schema_version", schemaVersion)
+                .assertEquals("$.profiles[1].describedBy", schemaUrl)
+                .assertEquals("$.profiles[1].schema_version", schemaVersion)
+                .assertEquals("$.profiles[2].describedBy", schemaUrl)
+                .assertEquals("$.profiles[2].schema_version", schemaVersion);
+    }
+
+    @IntegrationTest
+    public void testImportWithPredefinedValuesInModules() throws Exception {
+        //given:
+        XSSFSheet profileWorksheet = loadGenericWorkbook().getSheet("Profile");
+
+        //and:
+        String description = "developer module";
+        String version = "2.2.8";
+        ObjectNode modulePredefinedValues = objectMapper.createObjectNode()
+                .put("description", description)
+                .put("version", version);
+
+        //and:
+        WorksheetMapping modularMapping = profileMapping.copy()
+                .map("Developer Grade", "developer.grade", STRING)
+                .map("Favorite Languages", "developer.languages", STRING_ARRAY)
+                .map("Years of Experience", "developer.years", NUMERIC);
+
+        //and:
+        WorksheetImporter worksheetImporter = new WorksheetImporter(objectMapper, "profiles",
+                modularMapping);
+        worksheetImporter.defineValuesFor("developer", modulePredefinedValues);
+
+        //when:
+        JsonNode profileJson = worksheetImporter.importFrom(profileWorksheet);
+
+        //then:
+        JsonAssert.with(objectMapper.writeValueAsString(profileJson))
+                .assertThat("$.profiles", hasSize(3))
+                .assertEquals("$.profiles[0].developer.description", description)
+                .assertEquals("$.profiles[0].developer.version", version)
+                .assertEquals("$.profiles[1].developer.description", description)
+                .assertEquals("$.profiles[1].developer.version", version)
+                .assertEquals("$.profiles[2].developer.description", description)
+                .assertEquals("$.profiles[2].developer.version", version);
     }
 
     private XSSFWorkbook loadGenericWorkbook() {
