@@ -8,6 +8,9 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class WorksheetImporter {
 
     private final ObjectMapper objectMapper;
@@ -17,6 +20,8 @@ public class WorksheetImporter {
     private final String fieldName;
 
     private final JsonNode predefinedValues;
+
+    private final Map<String, JsonNode> modulePredefinedValues = new HashMap<>();
 
     public WorksheetImporter(ObjectMapper objectMapper, WorksheetMapping worksheetMapping) {
         this(objectMapper, "", worksheetMapping);
@@ -53,10 +58,17 @@ public class WorksheetImporter {
                 CellMapping cellMapping = worksheetMapping.getMappingFor(header);
                 cellMapping.importTo(rowJson, dataCell);
             });
+            modulePredefinedValues.forEach((module, json) -> {
+                new NodeNavigator(rowJson).moveTo(module).addValuesFrom(json);
+            });
             arrayNode.add(rowJson);
         }
 
         return objectNode;
+    }
+
+    public void defineValuesFor(String module, JsonNode predefinedValues) {
+        modulePredefinedValues.put(module, predefinedValues);
     }
 
 }
