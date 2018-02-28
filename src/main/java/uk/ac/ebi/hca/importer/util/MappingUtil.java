@@ -20,7 +20,7 @@ public class MappingUtil {
             JSONObject propertyObject = propertiesObject.getJSONObject(keyStr);
             if (propertyObject.has("user_friendly")) {
                 worksheetMapping.map(propertyObject.getString("user_friendly"), keyStr, CellDataType.STRING);
-                System.out.println("key: " + propertyObject.getString("user_friendly") + " value: " + keyStr);
+                System.out.println("header: " + propertyObject.getString("user_friendly") + " id: " + keyStr);
             }
         }
     }
