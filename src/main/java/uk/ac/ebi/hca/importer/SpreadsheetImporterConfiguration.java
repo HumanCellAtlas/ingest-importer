@@ -32,14 +32,15 @@ public class SpreadsheetImporterConfiguration {
     @Bean("importer.project")
     public WorksheetImporter projectImporter(@Autowired ObjectMapper objectMapper) {
         String schemaUrl = "https://schema.humancellatlas.org/type/project/5.0.0/project";
-        ObjectNode predefinedValues = objectMapper.createObjectNode()
-                .put("describedBy", schemaUrl)
-                .put("schema_version", "5.0.0")
-                .put("schema_type", "project");
+
         WorksheetMapping worksheetMapping = new WorksheetMapping();
-        mappingUtil().addMappingsFromSchema(worksheetMapping, schemaUrl, "");
+        mappingUtil().populateMappingsFromSchema(worksheetMapping, schemaUrl, "");
+
+        ObjectNode predefinedValues =  objectMapper.createObjectNode();
+        mappingUtil().populatePredefinedValuesForSchema(predefinedValues, schemaUrl);
         WorksheetImporter importer = new WorksheetImporter(objectMapper, worksheetMapping,
                 predefinedValues);
+
         ObjectNode coreModuleValues = objectMapper
                 .createObjectNode()
                 .put("describedBy",
