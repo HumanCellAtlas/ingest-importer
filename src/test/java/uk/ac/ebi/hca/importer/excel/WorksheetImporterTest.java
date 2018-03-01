@@ -15,6 +15,7 @@ import uk.ac.ebi.hca.test.IntegrationTest;
 import java.io.File;
 import java.net.URI;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.function.Function;
 import java.util.stream.StreamSupport;
 
@@ -43,18 +44,13 @@ public class WorksheetImporterTest {
         WorksheetImporter projectImporter = new WorksheetImporter(objectMapper, profileMapping);
 
         //when:
-        JsonNode profileJson = projectImporter.importFrom(profileWorksheet);
+        List<JsonNode> profiles = projectImporter.importFrom(profileWorksheet);
 
         //then:
-        assertThat(profileJson).isNotNull();
-        assertThat(profileJson.has("Profile")).as("Expected field [Profile].").isTrue();
-        assertThat(profileJson.get("Profile").isArray()).isTrue();
-        JsonAssert.with(objectMapper.writeValueAsString(profileJson))
-                .assertThat("Profile", hasSize(3));
+        assertThat(profiles).hasSize(3);
 
         //and:
-        ArrayNode profileArray = (ArrayNode) profileJson.get("Profile");
-        Function<String, JsonNode> firstNameFinder = firstNameFinder(profileArray);
+        Function<String, JsonNode> firstNameFinder = firstNameFinder(profiles);
         assertCorrectJuanProfile(firstNameFinder.apply("Juan"));
         assertCorrectJohnProfile(firstNameFinder.apply("John"));
         assertCorrectMaryProfile(firstNameFinder.apply("Mary"));
@@ -118,64 +114,31 @@ public class WorksheetImporterTest {
                 modularProfileMapping);
 
         //when:
-        JsonNode profileJson = worksheetImporter.importFrom(profileWorksheet);
+        List<JsonNode> profiles = worksheetImporter.importFrom(profileWorksheet);
 
         //then:
-        assertThat(profileJson).isNotNull();
-        assertThat(profileJson.has("Profile")).as("Expected [Profile] field.");
+        assertThat(profiles).hasSize(3);
 
         //and:
-        assertThat(profileJson.get("Profile").isArray())
-                .as("[Profile] should be an array.")
-                .isTrue();
-        ArrayNode profileArray = (ArrayNode) profileJson.get("Profile");
-
-        //and:
-        Function<String, JsonNode> firstNameFinder = firstNameFinder(profileArray);
+        Function<String, JsonNode> firstNameFinder = firstNameFinder(profiles);
         JsonAssert.with(objectMapper.writeValueAsString(firstNameFinder.apply("Juan")))
                 .assertEquals("$.developer.grade", "Senior")
                 .assertThat("$.developer.fav_langs", contains("Java", "Python"))
                 .assertEquals("$.developer.years", 20D);
     }
 
-    //aren't we overdoing encapsulation here?
-    private Function<String, JsonNode> firstNameFinder(ArrayNode profileArray) {
+    private Function<String, JsonNode> firstNameFinder(List<JsonNode> profiles) {
         return new Function<String, JsonNode>() {
             @Override
             public JsonNode apply(String firstName) {
-                return StreamSupport
-                        .stream(profileArray.spliterator(), false)
-                        .filter(node -> {
-                            return node.has("first_name") &&
-                                    node.get("first_name").asText().equals(firstName);
+                return profiles.stream()
+                        .filter(json -> {
+                            return json.has("first_name") &&
+                                    json.get("first_name").asText().equals(firstName);
                         })
                         .findFirst().orElse(null);
             }
         };
-    }
-
-    @IntegrationTest
-    public void testImportFromWorksheetUseSetFieldName() throws Exception {
-        //given:
-        XSSFSheet productWorksheet = loadGenericWorkbook().getSheet("Product");
-
-        //and:
-        String products = "products";
-        WorksheetImporter worksheetImporter = new WorksheetImporter(objectMapper, products,
-                new WorksheetMapping()
-                        .map("ID", "id", STRING)
-                        .map("NAME", "name", STRING)
-                        .map("QUANTITY", "quantity", NUMERIC));
-
-        //when:
-        JsonNode productJson = worksheetImporter.importFrom(productWorksheet);
-
-        //then:
-        JsonAssert.with(objectMapper.writeValueAsString(productJson))
-                .assertThat("$.products", hasSize(3))
-                .assertEquals("$.products[0].id", "A001")
-                .assertEquals("$.products[1].name", "Butter")
-                .assertEquals("$.products[2].quantity", 37D);
     }
 
     @IntegrationTest
@@ -190,17 +153,17 @@ public class WorksheetImporterTest {
                 .map("Years of Experience", "developer.info.years", NUMERIC);
 
         //and:
-        WorksheetImporter worksheetImporter = new WorksheetImporter(objectMapper, "profiles",
-                deepMapping);
+        WorksheetImporter worksheetImporter = new WorksheetImporter(objectMapper, deepMapping);
 
         //when:
-        JsonNode profileJson = worksheetImporter.importFrom(profileWorksheet);
+        List<JsonNode> profiles = worksheetImporter.importFrom(profileWorksheet);
 
         //then:
-        JsonAssert.with(objectMapper.writeValueAsString(profileJson))
-                .assertEquals("$.profiles[0].developer.info.grade", "Senior")
-                .assertEquals("$.profiles[1].developer.info.years", 2D)
-                .assertThat("$.profiles[2].developer.preferences.languages",
+        String listAsJson = objectMapper.writeValueAsString(profiles);
+        JsonAssert.with(listAsJson)
+                .assertEquals("$[0].developer.info.grade", "Senior")
+                .assertEquals("$[1].developer.info.years", 2D)
+                .assertThat("$[2].developer.preferences.languages",
                         contains("Haskell", "Perl", "Erlang"));
     }
 
@@ -217,21 +180,22 @@ public class WorksheetImporterTest {
                 .put("schema_version", schemaVersion);
 
         //and:
-        WorksheetImporter worksheetImporter = new WorksheetImporter(objectMapper, "profiles",
+        WorksheetImporter worksheetImporter = new WorksheetImporter(objectMapper,
                 profileMapping.copy(), predefinedValues);
 
         //when:
-        JsonNode profileJson = worksheetImporter.importFrom(profileWorksheet);
+        List<JsonNode> profiles = worksheetImporter.importFrom(profileWorksheet);
 
         //then:
-        JsonAssert.with(objectMapper.writeValueAsString(profileJson))
-                .assertThat("$.profiles", hasSize(3))
-                .assertEquals("$.profiles[0].describedBy", schemaUrl)
-                .assertEquals("$.profiles[0].schema_version", schemaVersion)
-                .assertEquals("$.profiles[1].describedBy", schemaUrl)
-                .assertEquals("$.profiles[1].schema_version", schemaVersion)
-                .assertEquals("$.profiles[2].describedBy", schemaUrl)
-                .assertEquals("$.profiles[2].schema_version", schemaVersion);
+        String listAsJson = objectMapper.writeValueAsString(profiles);
+        JsonAssert.with(listAsJson)
+                .assertThat("$", hasSize(3))
+                .assertEquals("$[0].describedBy", schemaUrl)
+                .assertEquals("$[0].schema_version", schemaVersion)
+                .assertEquals("$[1].describedBy", schemaUrl)
+                .assertEquals("$[1].schema_version", schemaVersion)
+                .assertEquals("$[2].describedBy", schemaUrl)
+                .assertEquals("$[2].schema_version", schemaVersion);
     }
 
     @IntegrationTest
@@ -253,22 +217,22 @@ public class WorksheetImporterTest {
                 .map("Years of Experience", "developer.years", NUMERIC);
 
         //and:
-        WorksheetImporter worksheetImporter = new WorksheetImporter(objectMapper, "profiles",
-                modularMapping);
+        WorksheetImporter worksheetImporter = new WorksheetImporter(objectMapper, modularMapping);
         worksheetImporter.defineValuesFor("developer", modulePredefinedValues);
 
         //when:
-        JsonNode profileJson = worksheetImporter.importFrom(profileWorksheet);
+        List<JsonNode> profiles = worksheetImporter.importFrom(profileWorksheet);
 
         //then:
-        JsonAssert.with(objectMapper.writeValueAsString(profileJson))
-                .assertThat("$.profiles", hasSize(3))
-                .assertEquals("$.profiles[0].developer.description", description)
-                .assertEquals("$.profiles[0].developer.version", version)
-                .assertEquals("$.profiles[1].developer.description", description)
-                .assertEquals("$.profiles[1].developer.version", version)
-                .assertEquals("$.profiles[2].developer.description", description)
-                .assertEquals("$.profiles[2].developer.version", version);
+        String listAsJson = objectMapper.writeValueAsString(profiles);
+        JsonAssert.with(listAsJson)
+                .assertThat("$", hasSize(3))
+                .assertEquals("$[0].developer.description", description)
+                .assertEquals("$[0].developer.version", version)
+                .assertEquals("$[1].developer.description", description)
+                .assertEquals("$[1].developer.version", version)
+                .assertEquals("$[2].developer.description", description)
+                .assertEquals("$[2].developer.version", version);
     }
 
     private XSSFWorkbook loadGenericWorkbook() {

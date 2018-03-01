@@ -7,7 +7,7 @@ import static uk.ac.ebi.hca.importer.excel.CellDataType.STRING;
 
 public class WorksheetMapping {
 
-    private Map<String, CellMapping> mapping = new HashMap<>();
+    protected Map<String, CellMapping> mapping = new HashMap<>();
 
     public WorksheetMapping() {}
 
