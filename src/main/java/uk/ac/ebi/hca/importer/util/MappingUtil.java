@@ -1,8 +1,8 @@
 package uk.ac.ebi.hca.importer.util;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.ac.ebi.hca.importer.excel.CellDataType;
@@ -26,47 +26,42 @@ public class MappingUtil {
     public void populateMappingsFromSchema(WorksheetMapping worksheetMapping, String schemaUrl, String prefix) {
         try {
             String text = getText(schemaUrl).trim();
-            JSONObject rootObject = new JSONObject(text);
-            JSONObject propertiesObject = rootObject.getJSONObject("properties");
-            for (Object key : iteratorToIterable(propertiesObject.keys())) {
-                String keyStr = (String) key;
-                try {
-                    JSONObject propertyObject = propertiesObject.getJSONObject(keyStr);
-                    if (propertyObject.has("user_friendly")) {
-                        String id = prefix.isEmpty() ? keyStr : prefix + "." + keyStr;
-                        mapUserFriendlyField(worksheetMapping, id, propertyObject);
-                    }
-                    if (propertyObject.has("$ref")) {
-                        String ref_schema_url = propertyObject.getString("$ref");
-                        populateMappingsFromSchema(worksheetMapping, ref_schema_url, keyStr);
-                    }
-                } catch (JSONException jsonException) {
-                    LOGGER.info("Error processing attribute : " + keyStr + " in " + schemaUrl + " \n" + jsonException);
+            JsonNode root = new ObjectMapper().readTree(text);
+            JsonNode properties = root.get("properties");
+            for (String field : iteratorToIterable(properties.fieldNames())) {
+                JsonNode property = properties.get(field);
+                if (property.has("user_friendly")) {
+                    String id = prefix.isEmpty() ? field : prefix + "." + field;
+                    mapUserFriendlyField(worksheetMapping, id, property);
+                }
+                if (property.has("$ref")) {
+                    String ref_schema_url = property.get("$ref").textValue();
+                    populateMappingsFromSchema(worksheetMapping, ref_schema_url, field);
                 }
             }
-        } catch (JSONException jsonException) {
-            LOGGER.info("Error processing json: " + jsonException);
+        } catch (IOException e) {
+            LOGGER.info("Error processing json: " + e);
         }
     }
 
-    private void mapUserFriendlyField(WorksheetMapping worksheetMapping, String id, JSONObject propertyObject) throws JSONException {
-        String header = propertyObject.getString("user_friendly");
-        worksheetMapping.map(header, id, determineDataType(propertyObject));
+    private void mapUserFriendlyField(WorksheetMapping worksheetMapping, String id, JsonNode property) {
+        String header = property.get("user_friendly").textValue();
+        worksheetMapping.map(header, id, determineDataType(property));
     }
 
-    private CellDataType determineDataType(JSONObject jsonObject) throws JSONException {
-        if (jsonObject.has("enum")) {
+    private CellDataType determineDataType(JsonNode property) {
+        if (property.has("enum")) {
             return CellDataType.ENUM;
         }
         String typeStr = "";
         String arrayTypeStr = "";
-        if (jsonObject.has("type")) {
-            typeStr = jsonObject.getString("type");
+        if (property.has("type")) {
+            typeStr = property.get("type").textValue();
 
-            if (jsonObject.has("items")) {
-                JSONObject itemsObject = jsonObject.getJSONObject("items");
-                if (itemsObject.has("type")) {
-                    arrayTypeStr = itemsObject.getString("type");
+            if (property.has("items")) {
+                JsonNode items = property.get("items");
+                if (items.has("type")) {
+                    arrayTypeStr = items.get("type").textValue();
                 }
             }
         }
