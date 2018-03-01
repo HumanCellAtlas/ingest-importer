@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import uk.ac.ebi.hca.importer.excel.WorkbookImporter;
@@ -19,6 +20,9 @@ public class UploadController {
 
     @Autowired
     private ObjectMapper objectMapper;
+
+    @Value("${ingest.api.url}")
+    private String ingestApiUrl;
 
     @GetMapping
     public void upload() {}
@@ -40,10 +44,8 @@ public class UploadController {
     @RequestMapping(value = "/api_upload", method = RequestMethod.POST)
     @ResponseBody
     UploadSuccessResponse apiUpload(@RequestHeader("Authorization") String token, @RequestParam("file") MultipartFile file) {
-        System.out.println("token: " + token);
-        System.out.println("file: " + file);
         String submissionUUID = "submissionUUID";
-        String submissionUrl = "submissionUrl";
+        String submissionUrl = ingestApiUrl;
         String displayId = "displayId";
         String submissionId = "submissionId";
         String message = "Your spreadsheet was uploaded and processed successfully";
