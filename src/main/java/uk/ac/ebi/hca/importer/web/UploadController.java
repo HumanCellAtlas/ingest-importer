@@ -1,14 +1,11 @@
 package uk.ac.ebi.hca.importer.web;
 
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 public class UploadController {
 
-    @RequestMapping("/api_upload")
+    @RequestMapping(value = "/api_upload", method = RequestMethod.PUT)
     @ResponseBody
     UploadSuccessResponse apiUpload(@RequestHeader("Authorization") String token) {
         System.out.println("token: " + token);
@@ -34,11 +31,12 @@ public class UploadController {
 
         private UploadDetails details;
 
-        public UploadSuccessResponse() {}
+        public UploadSuccessResponse() {
+        }
 
         public UploadSuccessResponse(String submissionUUID, String submissionUrl, String displayId, String submissionId, String message) {
             this.message = message;
-            this.details = new UploadDetails( submissionUUID,  submissionUrl,  displayId,  submissionId);
+            this.details = new UploadDetails(submissionUUID, submissionUrl, displayId, submissionId);
         }
 
         public String getMessage() {
