@@ -40,4 +40,11 @@ class CellMapping {
         }
     }
 
+    @Override
+    public String toString() {
+        return "CellMapping{" +
+                "jsonProperty='" + jsonProperty + '\'' +
+                ", dataType=" + dataType +
+                '}';
+    }
 }
