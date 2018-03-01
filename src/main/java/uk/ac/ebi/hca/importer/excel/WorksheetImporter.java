@@ -2,13 +2,14 @@ package uk.ac.ebi.hca.importer.excel;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static uk.ac.ebi.hca.importer.excel.NodeNavigator.navigate;
@@ -19,37 +20,23 @@ public class WorksheetImporter {
 
     private final WorksheetMapping worksheetMapping;
 
-    private final String fieldName;
-
     private final JsonNode predefinedValues;
 
     private final Map<String, JsonNode> modulePredefinedValues = new HashMap<>();
 
     public WorksheetImporter(ObjectMapper objectMapper, WorksheetMapping worksheetMapping) {
-        this(objectMapper, "", worksheetMapping);
+        this(objectMapper, worksheetMapping, objectMapper.createObjectNode());
     }
 
-    public WorksheetImporter(ObjectMapper objectMapper, String fieldName,
-            WorksheetMapping worksheetMapping) {
-        this(objectMapper, fieldName, worksheetMapping, objectMapper.createObjectNode());
-    }
-
-    public WorksheetImporter(ObjectMapper objectMapper, String fieldName,
-            WorksheetMapping worksheetMapping, ObjectNode predefinedValues) {
+    public WorksheetImporter(ObjectMapper objectMapper, WorksheetMapping worksheetMapping,
+            ObjectNode predefinedValues) {
         this.objectMapper = objectMapper;
-        this.fieldName = fieldName;
         this.worksheetMapping = worksheetMapping;
         this.predefinedValues = predefinedValues;
     }
 
-    public String getFieldName() {
-        return fieldName;
-    }
-
-    public JsonNode importFrom(Sheet worksheet) {
-        ObjectNode objectNode = objectMapper.createObjectNode();
-        String arrayName = fieldName.isEmpty() ? worksheet.getSheetName() : fieldName;
-        ArrayNode arrayNode = objectNode.putArray(arrayName);
+    public List<JsonNode> importFrom(Sheet worksheet) {
+        List<JsonNode> nodes = new ArrayList<>();
 
         Row headerRow = worksheet.getRow(2);
         for (int row = 3; row <= worksheet.getLastRowNum(); row++) {
@@ -63,10 +50,10 @@ public class WorksheetImporter {
             modulePredefinedValues.forEach((module, json) -> {
                 navigate(rowJson).moveTo(module).addValuesFrom(json);
             });
-            arrayNode.add(rowJson);
+            nodes.add(rowJson);
         }
 
-        return objectNode;
+        return nodes;
     }
 
     public void defineValuesFor(String module, JsonNode predefinedValues) {
