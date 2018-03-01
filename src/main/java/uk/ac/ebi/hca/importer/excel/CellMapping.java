@@ -2,6 +2,7 @@ package uk.ac.ebi.hca.importer.excel;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.primitives.Doubles;
+import com.google.common.primitives.Ints;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
 
@@ -41,11 +42,11 @@ class CellMapping {
             if (STRING_ARRAY.equals(dataType)) {
                 nodeNavigator.putNext(data.split(ARRAY_SEPARATOR));
             } else if (NUMERIC_ARRAY.equals(dataType)) {
-                List<Double> numericValues = Arrays
+                List<Integer> numericValues = Arrays
                         .stream(data.split(ARRAY_SEPARATOR))
-                        .map(Double::parseDouble)
+                        .map(Integer::parseInt)
                         .collect(Collectors.toList());
-                nodeNavigator.putNext(Doubles.toArray(numericValues));
+                nodeNavigator.putNext(Ints.toArray(numericValues));
             } else {
                 nodeNavigator.putNext(data);
             }

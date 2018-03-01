@@ -118,7 +118,7 @@ public class CellMappingTest {
 
         //then:
         JsonAssert.with(objectMapper.writeValueAsString(node))
-                .assertThat("$.fibonacci", hasSize(6));
+                .assertThat("$.fibonacci", contains(1, 1, 2, 3, 5, 8));
     }
 
     @Test
