@@ -37,7 +37,7 @@ public class SpreadsheetImporterConfiguration {
                 .put("schema_version", "5.0.0")
                 .put("schema_type", "project");
         WorksheetMapping worksheetMapping = new WorksheetMapping();
-        mappingUtil().addMappingsFromSchema(worksheetMapping, schemaUrl);
+        mappingUtil().addMappingsFromSchema(worksheetMapping, schemaUrl, "");
         WorksheetImporter importer = new WorksheetImporter(objectMapper, "projects", worksheetMapping, predefinedValues);
         ObjectNode coreModuleValues = objectMapper
                 .createObjectNode()

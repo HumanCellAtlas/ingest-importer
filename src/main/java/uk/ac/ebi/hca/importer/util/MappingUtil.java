@@ -20,7 +20,7 @@ public class MappingUtil {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MappingUtil.class);
 
-    public void addMappingsFromSchema(WorksheetMapping worksheetMapping, String schemaUrl) {
+    public void addMappingsFromSchema(WorksheetMapping worksheetMapping, String schemaUrl, String prefix) {
         try {
             String text = getText(schemaUrl).trim();
             JSONObject rootObject = new JSONObject(text);
@@ -30,10 +30,12 @@ public class MappingUtil {
                 try {
                     JSONObject propertyObject = propertiesObject.getJSONObject(keyStr);
                     if (propertyObject.has("user_friendly")) {
-                        mapUserFriendlyField(worksheetMapping, keyStr, propertyObject);
+                        String id = prefix.isEmpty() ? keyStr : prefix + "." + keyStr;
+                        mapUserFriendlyField(worksheetMapping, id, propertyObject);
                     }
                     if (propertyObject.has("$ref")) {
-                        mapFieldsInRefSchema(worksheetMapping, propertyObject);
+                        String ref_schema_url = propertyObject.getString("$ref");
+                        addMappingsFromSchema(worksheetMapping, ref_schema_url, keyStr);
                     }
                 } catch (JSONException jsonException) {
                     LOGGER.info("Error processing attribute : " + keyStr + " in " + schemaUrl + " \n" + jsonException);
@@ -44,38 +46,34 @@ public class MappingUtil {
         }
     }
 
-    private void mapFieldsInRefSchema(WorksheetMapping worksheetMapping, JSONObject propertyObject) throws JSONException {
-        String ref_schema_url = propertyObject.getString("$ref");
-        addMappingsFromSchema(worksheetMapping, ref_schema_url);
+    private void mapUserFriendlyField(WorksheetMapping worksheetMapping, String id, JSONObject propertyObject) throws JSONException {
+        String header = propertyObject.getString("user_friendly");
+        worksheetMapping.map(header, id, determineDataType(propertyObject));
     }
 
-    private void mapUserFriendlyField(WorksheetMapping worksheetMapping, String keyStr, JSONObject propertyObject) throws JSONException {
-        CellDataType type = CellDataType.STRING;
-        //TODO: Check for enum
-        if (propertyObject.has("type")) {
-            String typeStr = propertyObject.getString("type");
-            String arrayTypeStr = "";
-            if (propertyObject.has("items")) {
-                JSONObject itemsObject = propertyObject.getJSONObject("items");
+    private CellDataType determineDataType(JSONObject jsonObject) throws JSONException {
+        if (jsonObject.has("enum")) {
+            return CellDataType.ENUM;
+        }
+        String typeStr = "";
+        String arrayTypeStr = "";
+        if (jsonObject.has("type")) {
+            typeStr = jsonObject.getString("type");
+
+            if (jsonObject.has("items")) {
+                JSONObject itemsObject = jsonObject.getJSONObject("items");
                 if (itemsObject.has("type")) {
                     arrayTypeStr = itemsObject.getString("type");
                 }
             }
-            type = determineDataType(typeStr, arrayTypeStr);
         }
-        String header = propertyObject.getString("user_friendly");
-        String id = keyStr;
-        worksheetMapping.map(header, id, type);
-    }
-
-    private CellDataType determineDataType(String type, String arrayType) {
-        switch (type) {
+        switch (typeStr) {
             case "string":
                 return CellDataType.STRING;
             case "integer":
                 return CellDataType.NUMERIC;
             case "array":
-                switch (arrayType) {
+                switch (arrayTypeStr) {
                     case "string":
                         return CellDataType.STRING_ARRAY;
                     case "integer":
