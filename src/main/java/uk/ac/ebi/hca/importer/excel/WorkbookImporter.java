@@ -26,10 +26,12 @@ public class WorkbookImporter {
                 .filter(this::hasImporter)
                 .forEach(worksheet -> {
                     String sheetName = worksheet.getSheetName();
+                    /*
                     JsonNode worksheetJson = registry.get(sheetName).importFrom(worksheet);
                     worksheetJson.fieldNames().forEachRemaining(fieldName -> {
                         json.set(fieldName, worksheetJson.get(fieldName));
                     });
+                    */
                 });
         return json;
     }

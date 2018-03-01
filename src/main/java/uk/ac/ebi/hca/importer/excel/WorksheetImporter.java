@@ -8,7 +8,9 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static uk.ac.ebi.hca.importer.excel.NodeNavigator.navigate;
@@ -46,10 +48,8 @@ public class WorksheetImporter {
         return fieldName;
     }
 
-    public JsonNode importFrom(Sheet worksheet) {
-        ObjectNode objectNode = objectMapper.createObjectNode();
-        String arrayName = fieldName.isEmpty() ? worksheet.getSheetName() : fieldName;
-        ArrayNode arrayNode = objectNode.putArray(arrayName);
+    public List<JsonNode> importFrom(Sheet worksheet) {
+        List<JsonNode> nodes = new ArrayList<>();
 
         Row headerRow = worksheet.getRow(2);
         for (int row = 3; row <= worksheet.getLastRowNum(); row++) {
@@ -63,10 +63,10 @@ public class WorksheetImporter {
             modulePredefinedValues.forEach((module, json) -> {
                 navigate(rowJson).moveTo(module).addValuesFrom(json);
             });
-            arrayNode.add(rowJson);
+            nodes.add(rowJson);
         }
 
-        return objectNode;
+        return nodes;
     }
 
     public void defineValuesFor(String module, JsonNode predefinedValues) {
