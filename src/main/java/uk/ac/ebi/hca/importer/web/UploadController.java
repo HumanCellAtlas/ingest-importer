@@ -11,6 +11,7 @@ import org.springframework.web.multipart.MultipartFile;
 import uk.ac.ebi.hca.importer.excel.WorkbookImporter;
 
 import java.io.IOException;
+import java.util.List;
 
 @RestController
 public class UploadController {
@@ -33,8 +34,8 @@ public class UploadController {
         String jsonString = "{}";
         try {
             Workbook workbook = new XSSFWorkbook(file.getInputStream());
-            JsonNode json = workbookImporter.importFrom(workbook);
-            jsonString = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(json);
+            List<JsonNode> records = workbookImporter.importFrom(workbook);
+            jsonString = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(records);
         } catch (IOException e) {
             e.printStackTrace();
         }
