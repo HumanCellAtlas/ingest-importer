@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import uk.ac.ebi.hca.importer.excel.WorkbookImporter;
@@ -43,6 +44,7 @@ public class UploadController {
 
     @RequestMapping(value = "/api_upload", method = RequestMethod.POST)
     @ResponseBody
+    @ResponseStatus(HttpStatus.CREATED)
     UploadSuccessResponse apiUpload(@RequestHeader("Authorization") String token, @RequestParam("file") MultipartFile file) {
         String submissionUUID = "submissionUUID";
         String submissionUrl = "";//ingestApiUrl;
