@@ -24,29 +24,51 @@ public class SpreadsheetImporterConfiguration {
         return new ObjectMapper();
     }
 
-    @Bean
-    public MappingUtil mappingUtil() {
-        return new MappingUtil();
-    }
+    private MappingUtil mappingUtil = new MappingUtil();
 
     @Bean("importer.project")
     public WorksheetImporter projectImporter(@Autowired ObjectMapper objectMapper) {
         String schemaUrl = "https://schema.humancellatlas.org/type/project/5.0.0/project";
 
         WorksheetMapping worksheetMapping = new WorksheetMapping();
-        mappingUtil().populateMappingsFromSchema(worksheetMapping, schemaUrl, "");
+        mappingUtil.populateMappingsFromSchema(worksheetMapping, schemaUrl, "");
 
         ObjectNode predefinedValues =  objectMapper.createObjectNode();
-        mappingUtil().populatePredefinedValuesForSchema(predefinedValues, schemaUrl);
+        mappingUtil.populatePredefinedValuesForSchema(predefinedValues, schemaUrl);
         WorksheetImporter importer = new WorksheetImporter(objectMapper, worksheetMapping,
                 predefinedValues);
 
+        String coreUrl = "https://schema.humancellatlas.org/core/project/5.0.0/project_core";
         ObjectNode coreModuleValues = objectMapper
                 .createObjectNode()
-                .put("describedBy",
-                        "https://schema.humancellatlas.org/core/project/5.0.0/project_core")
+                .put("describedBy", coreUrl)
                 .put("schema_version", "5.0.0");
         importer.defineValuesFor("project_core", coreModuleValues);
+        return importer;
+    }
+
+    @Bean(name="importer.specimen_from_organism")
+    public WorksheetImporter specimenFromOrganismImporter(ObjectMapper objectMapper) {
+        String schemaUrl = "https://schema.humancellatlas.org/type/biomaterial/5.0.0/" +
+                "specimen_from_organism";
+
+        WorksheetMapping worksheetMapping = new WorksheetMapping();
+        mappingUtil.populateMappingsFromSchema(worksheetMapping, schemaUrl, "");
+
+        ObjectNode predefinedValues =  objectMapper.createObjectNode();
+        mappingUtil.populatePredefinedValuesForSchema(predefinedValues, schemaUrl);
+
+        WorksheetImporter importer = new WorksheetImporter(objectMapper,
+                worksheetMapping, predefinedValues);
+
+        String coreUrl = "https://schema.humancellatlas.org/core/biomaterial/" +
+                "5.0.0/biomaterial_core";
+        ObjectNode coreModuleValues = objectMapper
+                .createObjectNode()
+                .put("describedBy", coreUrl)
+                .put("schema_version", "5.0.0");
+        importer.defineValuesFor("biomaterial_core", coreModuleValues);
+
         return importer;
     }
 
