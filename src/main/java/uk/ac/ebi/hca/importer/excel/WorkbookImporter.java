@@ -2,11 +2,12 @@ package uk.ac.ebi.hca.importer.excel;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.StreamSupport;
 
@@ -20,20 +21,16 @@ public class WorkbookImporter {
         this.objectMapper = objectMapper;
     }
 
-    public JsonNode importFrom(Workbook workbook) {
-        ObjectNode json = objectMapper.createObjectNode();
+    public List<JsonNode> importFrom(Workbook workbook) {
+        List<JsonNode> workbookRecords = new ArrayList<>();
         StreamSupport.stream(workbook.spliterator(), false)
                 .filter(this::hasImporter)
                 .forEach(worksheet -> {
                     String sheetName = worksheet.getSheetName();
-                    /*
-                    JsonNode worksheetJson = registry.get(sheetName).importFrom(worksheet);
-                    worksheetJson.fieldNames().forEachRemaining(fieldName -> {
-                        json.set(fieldName, worksheetJson.get(fieldName));
-                    });
-                    */
+                    List<JsonNode> worksheetRecords = registry.get(sheetName).importFrom(worksheet);
+                    workbookRecords.addAll(worksheetRecords);
                 });
-        return json;
+        return workbookRecords;
     }
 
     public WorkbookImporter register(String sheetName, WorksheetImporter worksheetImporter) {
