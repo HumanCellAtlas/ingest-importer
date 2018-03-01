@@ -1,14 +1,47 @@
 package uk.ac.ebi.hca.importer.web;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import uk.ac.ebi.hca.importer.excel.WorkbookImporter;
+
+import java.io.IOException;
 
 @RestController
 public class UploadController {
 
-    @RequestMapping(value = "/api_upload", method = RequestMethod.PUT)
+    @Autowired
+    private WorkbookImporter workbookImporter;
+
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    @GetMapping
+    public void upload() {}
+
+    @RequestMapping(value = "/test", method = RequestMethod.POST)
     @ResponseBody
-    UploadSuccessResponse apiUpload(@RequestHeader("Authorization") String token) {
+    public String testSpreadsheet(@RequestHeader("Authorization") String token, @RequestParam("file") MultipartFile file) {
+        String jsonString = "{}";
+        try {
+            Workbook workbook = new XSSFWorkbook(file.getInputStream());
+            JsonNode json = workbookImporter.importFrom(workbook);
+            jsonString = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(json);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return jsonString;
+    }
+
+    @RequestMapping(value = "/api_upload", method = RequestMethod.POST)
+    @ResponseBody
+    UploadSuccessResponse apiUpload(@RequestHeader("Authorization") String token, @RequestParam("file") MultipartFile file) {
         System.out.println("token: " + token);
+        System.out.println("file: " + file);
         String submissionUUID = "submissionUUID";
         String submissionUrl = "submissionUrl";
         String displayId = "displayId";
