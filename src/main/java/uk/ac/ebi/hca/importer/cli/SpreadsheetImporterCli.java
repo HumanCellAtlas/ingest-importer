@@ -12,6 +12,7 @@ import uk.ac.ebi.hca.importer.excel.WorkbookImporter;
 
 import java.io.File;
 import java.nio.file.Paths;
+import java.util.List;
 
 //@Component
 public class SpreadsheetImporterCli implements CommandLineRunner {
@@ -30,10 +31,10 @@ public class SpreadsheetImporterCli implements CommandLineRunner {
             String fileName = args[0];
             File spreadsheetFile = Paths.get(fileName).toFile();
             Workbook workbook = new XSSFWorkbook(spreadsheetFile);
-            JsonNode json = workbookImporter.importFrom(workbook);
+            List<JsonNode> records = workbookImporter.importFrom(workbook);
             System.out.println(objectMapper
                     .writerWithDefaultPrettyPrinter()
-                    .writeValueAsString(json));
+                    .writeValueAsString(records));
         } else {
             LOGGER.error("Expected to have exactly one argument.");
         }
