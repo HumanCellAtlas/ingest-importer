@@ -59,4 +59,13 @@ public class MappingUtilTest {
         assertEquals("5.0.0", predefinedValues.get("schema_version").textValue());
         assertEquals("project", predefinedValues.get("schema_type").textValue());
     }
+
+    @Test
+    public void test_generatePredefinedValuesForSchema_with_valid_donor_organism_schema() {
+        ObjectNode predefinedValues =  objectMapper.createObjectNode();
+        mappingUtil.populatePredefinedValuesForSchema(predefinedValues,"https://schema.humancellatlas.org/type/biomaterial/5.0.0/donor_organism");
+        assertEquals("https://schema.humancellatlas.org/type/biomaterial/5.0.0/donor_organism", predefinedValues.get("describedBy").textValue());
+        assertEquals("5.0.0", predefinedValues.get("schema_version").textValue());
+        assertEquals("donor_organism", predefinedValues.get("schema_type").textValue());
+    }
 }
