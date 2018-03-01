@@ -21,8 +21,8 @@ public class UploadController {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @Value("${ingest.api.url}")
-    private String ingestApiUrl;
+    //@Value("${ingest.api.url}")
+    //private String ingestApiUrl;
 
     @GetMapping
     public void upload() {}
@@ -45,7 +45,7 @@ public class UploadController {
     @ResponseBody
     UploadSuccessResponse apiUpload(@RequestHeader("Authorization") String token, @RequestParam("file") MultipartFile file) {
         String submissionUUID = "submissionUUID";
-        String submissionUrl = ingestApiUrl;
+        String submissionUrl = "";//ingestApiUrl;
         String displayId = "displayId";
         String submissionId = "submissionId";
         String message = "Your spreadsheet was uploaded and processed successfully";

@@ -1,5 +1,6 @@
 package uk.ac.ebi.hca.importer.util;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -14,13 +15,15 @@ import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.Arrays;
 import java.util.Iterator;
+import java.util.List;
 
 public class MappingUtil {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MappingUtil.class);
 
-    public void addMappingsFromSchema(WorksheetMapping worksheetMapping, String schemaUrl, String prefix) {
+    public void populateMappingsFromSchema(WorksheetMapping worksheetMapping, String schemaUrl, String prefix) {
         try {
             String text = getText(schemaUrl).trim();
             JSONObject rootObject = new JSONObject(text);
@@ -35,7 +38,7 @@ public class MappingUtil {
                     }
                     if (propertyObject.has("$ref")) {
                         String ref_schema_url = propertyObject.getString("$ref");
-                        addMappingsFromSchema(worksheetMapping, ref_schema_url, keyStr);
+                        populateMappingsFromSchema(worksheetMapping, ref_schema_url, keyStr);
                     }
                 } catch (JSONException jsonException) {
                     LOGGER.info("Error processing attribute : " + keyStr + " in " + schemaUrl + " \n" + jsonException);
@@ -108,5 +111,15 @@ public class MappingUtil {
 
     private <T> Iterable<T> iteratorToIterable(Iterator<T> iterator) {
         return () -> iterator;
+    }
+
+    public void populatePredefinedValuesForSchema(ObjectNode objectNode, String schemaUrl) {
+        List<String> parts = Arrays.asList(schemaUrl.split("/"));
+        if (parts.size() > 2) {
+            objectNode
+                    .put("describedBy", schemaUrl)
+                    .put("schema_version", parts.get(parts.size() - 2))
+                    .put("schema_type", parts.get(parts.size() - 1));
+        }
     }
 }
