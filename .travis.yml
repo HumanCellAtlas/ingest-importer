@@ -2,3 +2,5 @@ language: java
 jdk: oraclejdk9
 services:
   - docker
+notifications:
+  slack: humancellatlas:BpnE92Kj26Xr0qRpNxZOkJa2
