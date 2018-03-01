@@ -11,6 +11,7 @@ import uk.ac.ebi.hca.importer.excel.exception.NotAnObjectNode;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static uk.ac.ebi.hca.importer.excel.CellDataType.*;
@@ -96,6 +97,28 @@ public class CellMappingTest {
         //then:
         assertThat(node.has(quantity)).as("quantity field expected").isTrue();
         assertThat(node.get(quantity).asDouble()).isEqualTo(cellValue);
+    }
+
+    @Test
+    public void testNumericArrayTypeImportTo() throws Exception {
+       //given:
+        String fibonacci = "fibonacci";
+        CellMapping fibonacciMapping = new CellMapping(fibonacci, NUMERIC_ARRAY);
+
+        //and:
+        Cell cell = mock(Cell.class);
+        doReturn(CellType.STRING).when(cell).getCellTypeEnum();
+        doReturn("1||1||2||3||5||8").when(cell).getStringCellValue();
+
+        //and:
+        ObjectNode node = objectMapper.createObjectNode();
+
+        //when:
+        fibonacciMapping.importTo(node, cell);
+
+        //then:
+        JsonAssert.with(objectMapper.writeValueAsString(node))
+                .assertThat("$.fibonacci", hasSize(6));
     }
 
     @Test

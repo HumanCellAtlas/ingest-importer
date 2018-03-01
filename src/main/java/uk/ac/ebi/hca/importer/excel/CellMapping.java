@@ -1,10 +1,16 @@
 package uk.ac.ebi.hca.importer.excel;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.google.common.primitives.Doubles;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import static uk.ac.ebi.hca.importer.excel.CellDataType.NUMERIC;
+import static uk.ac.ebi.hca.importer.excel.CellDataType.NUMERIC_ARRAY;
 import static uk.ac.ebi.hca.importer.excel.CellDataType.STRING_ARRAY;
 import static uk.ac.ebi.hca.importer.excel.NodeNavigator.navigate;
 
@@ -34,6 +40,12 @@ class CellMapping {
             String data = dataCell.getStringCellValue();
             if (STRING_ARRAY.equals(dataType)) {
                 nodeNavigator.putNext(data.split(ARRAY_SEPARATOR));
+            } else if (NUMERIC_ARRAY.equals(dataType)) {
+                List<Double> numericValues = Arrays
+                        .stream(data.split(ARRAY_SEPARATOR))
+                        .map(Double::parseDouble)
+                        .collect(Collectors.toList());
+                nodeNavigator.putNext(Doubles.toArray(numericValues));
             } else {
                 nodeNavigator.putNext(data);
             }
