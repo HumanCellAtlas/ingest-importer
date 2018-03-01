@@ -5,12 +5,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import uk.ac.ebi.hca.importer.excel.WorkbookImporter;
 
 import java.io.IOException;
+import java.util.List;
 
 @RestController
 public class UploadController {
@@ -33,8 +33,8 @@ public class UploadController {
         String jsonString = "{}";
         try {
             Workbook workbook = new XSSFWorkbook(file.getInputStream());
-            JsonNode json = workbookImporter.importFrom(workbook);
-            jsonString = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(json);
+            List<JsonNode> json = workbookImporter.importFrom(workbook);
+            jsonString = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(json.get(0));
         } catch (IOException e) {
             e.printStackTrace();
         }
