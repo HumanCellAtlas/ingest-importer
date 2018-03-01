@@ -31,9 +31,19 @@ public class Dataset {
         Matcher matcher = typePattern.matcher(schema);
         if (matcher.matches()) {
             String schemaPath = matcher.group(1);
-            if (schemaPath.startsWith(BIOMATERIAL.pathPrefix)) {
-                dataset.get(BIOMATERIAL).add(data);
-            }
+            /*
+            We can iterate through the categories every time since there aren't that many anyway;
+            there's a predefined number of Categories. It's O(n) but we can guarantee that n is
+            small, to the point that it's rather similar to if we had a long list of if-else.
+
+            Thoughts?
+            */
+            Arrays.stream(Category.values())
+                    .filter(category -> schemaPath.startsWith(category.pathPrefix))
+                    .findAny()
+                    .ifPresent(category -> {
+                        dataset.get(category).add(data);
+                    });
         }
     }
 
@@ -43,7 +53,8 @@ public class Dataset {
 
     public enum Category {
 
-        BIOMATERIAL("type/biomaterial");
+        BIOMATERIAL("type/biomaterial"),
+        PROCESS("type/process");
 
         private String pathPrefix;
 
