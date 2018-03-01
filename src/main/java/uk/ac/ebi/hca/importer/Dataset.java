@@ -11,11 +11,17 @@ import static uk.ac.ebi.hca.importer.Dataset.Category.BIOMATERIAL;
 
 public class Dataset {
 
+    private static final String DEFAULT_SCHEMA_URL_PREFIX = "https://schema.humancellatlas.org";
+
     private final String schemaUrlPrefix;
 
     private final Pattern typePattern;
 
-    private Map<Category, List<JsonNode>> dataset = new HashMap<>();
+    private final Map<Category, List<JsonNode>> dataset = new HashMap<>();
+
+    public Dataset() {
+        this(DEFAULT_SCHEMA_URL_PREFIX);
+    }
 
     public Dataset(String schemaUrlPrefix) {
         this.schemaUrlPrefix = schemaUrlPrefix;
