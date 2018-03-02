@@ -42,11 +42,13 @@ class CellMapping {
             if (STRING_ARRAY.equals(dataType)) {
                 nodeNavigator.putNext(data.split(ARRAY_SEPARATOR));
             } else if (NUMERIC_ARRAY.equals(dataType)) {
-                List<Integer> numericValues = Arrays
-                        .stream(data.split(ARRAY_SEPARATOR))
-                        .map(Integer::parseInt)
-                        .collect(Collectors.toList());
-                nodeNavigator.putNext(Ints.toArray(numericValues));
+                if (!data.isEmpty()) {
+                    List<Integer> numericValues = Arrays
+                            .stream(data.split(ARRAY_SEPARATOR))
+                            .map(Integer::parseInt)
+                            .collect(Collectors.toList());
+                    nodeNavigator.putNext(Ints.toArray(numericValues));
+                }
             } else {
                 nodeNavigator.putNext(data);
             }

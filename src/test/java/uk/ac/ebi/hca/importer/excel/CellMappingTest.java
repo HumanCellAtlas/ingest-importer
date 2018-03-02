@@ -101,7 +101,7 @@ public class CellMappingTest {
 
     @Test
     public void testNumericArrayTypeImportTo() throws Exception {
-       //given:
+        //given:
         String fibonacci = "fibonacci";
         CellMapping fibonacciMapping = new CellMapping(fibonacci, NUMERIC_ARRAY);
 
@@ -119,6 +119,28 @@ public class CellMappingTest {
         //then:
         JsonAssert.with(objectMapper.writeValueAsString(node))
                 .assertThat("$.fibonacci", contains(1, 1, 2, 3, 5, 8));
+    }
+
+    @Test
+    public void testEmptyNumericArrayTypeImportTo() throws Exception {
+        //given:
+        String intList = "int_list";
+        CellMapping integerListMapping = new CellMapping(intList, NUMERIC_ARRAY);
+
+        //and:
+        Cell cell = mock(Cell.class);
+        doReturn(CellType.STRING).when(cell).getCellTypeEnum();
+        doReturn("").when(cell).getStringCellValue();
+
+        //and:
+        ObjectNode node = objectMapper.createObjectNode();
+
+        //when:
+        integerListMapping.importTo(node, cell);
+
+        //then:
+        JsonAssert.with(objectMapper.writeValueAsString(node))
+                .assertNotDefined(intList);
     }
 
     @Test
