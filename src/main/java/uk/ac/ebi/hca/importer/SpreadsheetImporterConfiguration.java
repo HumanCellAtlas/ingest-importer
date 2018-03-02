@@ -20,11 +20,12 @@ import java.util.regex.Pattern;
 public class SpreadsheetImporterConfiguration {
 
     private static final Pattern SCHEMA_URL_PATTERN = Pattern.compile(
-            "https://schema.humancellatlas.org/(?<mainType>[\\p{Alpha}_]+/[\\p{Alpha}_]+)/" +
+            "https://schema.humancellatlas.org/(?<mainType>[\\p{Alpha}_]+[/[\\p{Alpha}_]+]*)/" +
                     "(?<version>\\p{Digit}+[.\\p{Digit}+]*)/(?<schemaType>[\\p{Alpha}_]+)");
 
     public static final String CORE_BIOMATERIAL_PATH = "core/biomaterial/5.0.0/biomaterial_core";
     public static final String CORE_FILE_PATH = "core/file/5.0.0/file_core";
+    public static final String CORE_PROCESS_PATH = "core/process/5.0.0/process_core";
 
     @Bean
     public ObjectMapper objectMapper() {
@@ -80,6 +81,48 @@ public class SpreadsheetImporterConfiguration {
     public WorksheetImporter sequenceFile(@Autowired ObjectMapper objectMapper) {
         String schemaPath = "type/file/5.0.0/sequence_file";
         return createWorksheetImporter(objectMapper, schemaPath, CORE_FILE_PATH);
+    }
+
+    @Bean(name="importer.analysis_process")
+    public WorksheetImporter analysisProcess(@Autowired ObjectMapper objectMapper) {
+        String schemaPath = "type/process/analysis/5.0.0/analysis_process";
+        return createWorksheetImporter(objectMapper, schemaPath, CORE_PROCESS_PATH);
+    }
+
+    @Bean("importer.collection_process")
+    public WorksheetImporter collectionProcess(@Autowired ObjectMapper objectMapper) {
+        String schemaPath = "type/process/biomaterial_collection/5.0.0/collection_process";
+        return createWorksheetImporter(objectMapper, schemaPath, CORE_PROCESS_PATH);
+    }
+
+    @Bean("importer.dissociation_process")
+    public WorksheetImporter dissociationProcess(@Autowired ObjectMapper objectMapper) {
+        String schemaPath = "type/process/biomaterial_collection/5.0.0/dissociation_process";
+        return createWorksheetImporter(objectMapper, schemaPath, CORE_PROCESS_PATH);
+    }
+
+    @Bean("importer.enrichment_process")
+    public WorksheetImporter enrichmentProcess(@Autowired ObjectMapper objectMapper) {
+        String schemaPath = "type/process/biomaterial_collection/5.0.0/enrichment_process";
+        return createWorksheetImporter(objectMapper, schemaPath, CORE_PROCESS_PATH);
+    }
+
+    @Bean("importer.imaging_process")
+    public WorksheetImporter imagingProcess(@Autowired ObjectMapper objectMapper) {
+        String schemaPath = "type/process/imaging/5.0.0/imaging_process";
+        return createWorksheetImporter(objectMapper, schemaPath, CORE_PROCESS_PATH);
+    }
+
+    @Bean("importer.library_preparation_process")
+    public WorksheetImporter libraryPreparationProcess(@Autowired ObjectMapper objectMapper) {
+        String schemaPath = "type/process/sequencing/5.0.0/library_preparation_process";
+        return createWorksheetImporter(objectMapper, schemaPath, CORE_PROCESS_PATH);
+    }
+
+    @Bean("importer.sequencing_process")
+    public WorksheetImporter sequencingProcess(@Autowired ObjectMapper objectMapper) {
+        String schemaPath = "type/process/sequencing/5.0.0/sequencing_process";
+        return createWorksheetImporter(objectMapper, schemaPath, CORE_PROCESS_PATH);
     }
 
     private WorksheetImporter createWorksheetImporter(ObjectMapper objectMapper,
