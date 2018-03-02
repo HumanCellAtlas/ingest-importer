@@ -26,6 +26,7 @@ public class SpreadsheetImporterConfiguration {
     public static final String CORE_BIOMATERIAL_PATH = "core/biomaterial/5.0.0/biomaterial_core";
     public static final String CORE_FILE_PATH = "core/file/5.0.0/file_core";
     public static final String CORE_PROCESS_PATH = "core/process/5.0.0/process_core";
+    public static final String CORE_PROTOCOL_PATH = "core/protocol/5.0.0/protocol_core";
 
     @Bean
     public ObjectMapper objectMapper() {
@@ -123,6 +124,36 @@ public class SpreadsheetImporterConfiguration {
     public WorksheetImporter sequencingProcess(@Autowired ObjectMapper objectMapper) {
         String schemaPath = "type/process/sequencing/5.0.0/sequencing_process";
         return createWorksheetImporter(objectMapper, schemaPath, CORE_PROCESS_PATH);
+    }
+
+    @Bean("importer.protocol")
+    public WorksheetImporter protocol(ObjectMapper objectMapper) {
+        String schemaPath = "type/protocol/5.0.0/protocol";
+        return createWorksheetImporter(objectMapper, schemaPath, CORE_PROTOCOL_PATH);
+    }
+
+    @Bean("importer.analysis_protocol")
+    public WorksheetImporter analysisProtocol(@Autowired ObjectMapper objectMapper) {
+        String schemaPath = "type/protocol/analysis/5.0.0/analysis_protocol";
+        return createWorksheetImporter(objectMapper, schemaPath, CORE_PROTOCOL_PATH);
+    }
+
+    @Bean("importer.biomaterial_collection_protocol")
+    public WorksheetImporter biomaterialCollectionProtocol(@Autowired ObjectMapper objectMapper) {
+        String schemaPath = "type/protocol/biomaterial/5.0.0/biomaterial_collection_protocol";
+        return createWorksheetImporter(objectMapper, schemaPath, CORE_PROTOCOL_PATH);
+    }
+
+    @Bean("importer.imaging_protocol")
+    public WorksheetImporter imagingProtocol(@Autowired ObjectMapper objectMapper) {
+        String schemaPath = "type/protocol/imaging/5.0.0/imaging_protocol";
+        return createWorksheetImporter(objectMapper, schemaPath, CORE_PROTOCOL_PATH);
+    }
+
+    @Bean("importer.sequencing_protocol")
+    public WorksheetImporter sequencingProtocol(@Autowired ObjectMapper objectMapper) {
+        String schemaPath = "type/protocol/sequencing/5.0.0/sequencing_protocol";
+        return createWorksheetImporter(objectMapper, schemaPath, CORE_PROTOCOL_PATH);
     }
 
     private WorksheetImporter createWorksheetImporter(ObjectMapper objectMapper,
