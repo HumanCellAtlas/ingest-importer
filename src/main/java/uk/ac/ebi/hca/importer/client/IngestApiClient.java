@@ -3,6 +3,7 @@ package uk.ac.ebi.hca.importer.client;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.util.JSONPObject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.hateoas.hal.Jackson2HalModule;
 import org.springframework.http.HttpEntity;
@@ -50,7 +51,7 @@ public class IngestApiClient {
         String response = template.postForObject(ingestApiUrl + "/submissionEnvelopes", httpEntity, String.class);
         try {
             JsonNode root = new ObjectMapper().readTree(response);
-            return root.get("_links").get("self").get("href").asText();
+            return getObjectId(root);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -68,6 +69,41 @@ public class IngestApiClient {
             e.printStackTrace();
         }
         return "";
+    }
+
+    public String linkEntity(JsonNode fromEntity, JsonNode toEntity, String relationship) {
+        String fromUri = getRelationshipId(fromEntity);
+        String toUri = getObjectId(toEntity);
+        HttpHeaders requestHeaders = new HttpHeaders();
+        requestHeaders.add("Content-type", "text/uri-list");
+        HttpEntity<?> httpEntity = new HttpEntity<Object>(toUri, requestHeaders);
+        String response = template.postForObject(fromUri, httpEntity, String.class);
+        try {
+            JsonNode root = new ObjectMapper().readTree(response);
+            return root.asText();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return "";
+    }
+
+
+    protected String getRelationshipId(JsonNode jsonNode)
+    {
+        if (jsonNode.has("_links"))
+        {
+            return jsonNode.get("_links").get("relationship").get("href").asText();
+        }
+        throw new IllegalArgumentException("Can't get relationship id for ' + " + jsonNode.toString() + " is it a HCA entity?");
+    }
+
+    protected String getObjectId(JsonNode jsonNode)
+    {
+        if (jsonNode.has("_links"))
+        {
+            return jsonNode.get("_links").get("self").get("href").asText();
+        }
+        throw new IllegalArgumentException("Can't get id for ' + " + jsonNode.toString() + " is it a HCA entity?");
     }
 
     private HttpHeaders getRequestHeaders(String token) {
