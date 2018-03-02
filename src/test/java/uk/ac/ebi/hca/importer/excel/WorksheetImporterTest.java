@@ -185,11 +185,11 @@ public class WorksheetImporterTest {
 
         //when:
         List<JsonNode> profiles = worksheetImporter.importFrom(profileWorksheet);
+        assertThat(profiles).hasSize(3);
 
         //then:
         String listAsJson = objectMapper.writeValueAsString(profiles);
         JsonAssert.with(listAsJson)
-                .assertThat("$", hasSize(3))
                 .assertEquals("$[0].describedBy", schemaUrl)
                 .assertEquals("$[0].schema_version", schemaVersion)
                 .assertEquals("$[1].describedBy", schemaUrl)
