@@ -8,6 +8,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import uk.ac.ebi.hca.importer.Dataset;
+import uk.ac.ebi.hca.importer.client.IngestApiClient;
+import uk.ac.ebi.hca.importer.client.IngestApiClient.EntityType;
 import uk.ac.ebi.hca.importer.excel.WorkbookImporter;
 
 import java.io.IOException;
@@ -21,6 +24,9 @@ public class UploadController {
 
     @Autowired
     private ObjectMapper objectMapper;
+
+    @Autowired
+    private IngestApiClient apiClient;
 
     @GetMapping
     public void upload() {}
@@ -42,12 +48,40 @@ public class UploadController {
     @RequestMapping(value = "/api_upload", method = RequestMethod.POST)
     @ResponseBody
     @ResponseStatus(HttpStatus.CREATED)
-    UploadSuccessResponse apiUpload(@RequestHeader("Authorization") String token, @RequestParam("file") MultipartFile file) {
+    UploadSuccessResponse apiUpload(@RequestHeader("Authorization") String token,
+            @RequestParam("file") MultipartFile file) throws Exception {
         String submissionUUID = "submissionUUID";
-        String submissionUrl = "submissionUrl";
         String displayId = "displayId";
         String submissionId = "submissionId";
         String message = "Your spreadsheet was uploaded and processed successfully";
+
+        Workbook workbook = new XSSFWorkbook(file.getInputStream());
+        List<JsonNode> records = workbookImporter.importFrom(workbook);
+        Dataset dataset = new Dataset();
+        records.forEach(dataset::add);
+
+        String submissionUrl = apiClient.createSubmission(token);
+        dataset.get(Dataset.Category.BIOMATERIAL).forEach(biomaterial -> {
+            apiClient.createEntity(token, submissionUrl, EntityType.BIOMATERIAL,
+                    biomaterial.asText());
+        });
+        dataset.get(Dataset.Category.FILE).forEach(biomaterial -> {
+            apiClient.createEntity(token, submissionUrl, EntityType.FILE,
+                    biomaterial.asText());
+        });
+        dataset.get(Dataset.Category.PROCESS).forEach(biomaterial -> {
+            apiClient.createEntity(token, submissionUrl, EntityType.PROCESS,
+                    biomaterial.asText());
+        });
+        dataset.get(Dataset.Category.PROJECT).forEach(biomaterial -> {
+            apiClient.createEntity(token, submissionUrl, EntityType.PROJECT,
+                    biomaterial.asText());
+        });
+        dataset.get(Dataset.Category.PROTOCOL).forEach(biomaterial -> {
+            apiClient.createEntity(token, submissionUrl, EntityType.PROTOCOL,
+                    biomaterial.asText());
+        });
+
         return new UploadSuccessResponse(submissionUUID, submissionUrl, displayId, submissionId, message);
     }
 

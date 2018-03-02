@@ -16,6 +16,7 @@ public class IngestApiClient {
 
     public enum EntityType {
 
+        BIOMATERIAL("biomaterials"),
         PROJECT("projects"),
         PROCESS("processes"),
         PROTOCOL("protocols"),
@@ -50,9 +51,8 @@ public class IngestApiClient {
             JsonNode root = new ObjectMapper().readTree(response);
             return root.get("_links").get("self").get("href").asText();
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new RuntimeException(e);
         }
-        return "";
     }
 
     public String createEntity(String token, String submissionUrl, EntityType entityType, String json) {

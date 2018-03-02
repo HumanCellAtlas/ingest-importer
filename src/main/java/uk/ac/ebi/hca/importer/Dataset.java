@@ -60,7 +60,10 @@ public class Dataset {
     public enum Category {
 
         BIOMATERIAL("type/biomaterial"),
-        PROCESS("type/process");
+        FILE("type/file"),
+        PROCESS("type/process"),
+        PROJECT("type/project"),
+        PROTOCOL("type/protocol");
 
         private String pathPrefix;
 
