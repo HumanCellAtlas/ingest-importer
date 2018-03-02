@@ -19,6 +19,10 @@ import java.util.regex.Pattern;
 @Configuration
 public class SpreadsheetImporterConfiguration {
 
+    private static final Pattern SCHEMA_URL_PATTERN = Pattern.compile(
+            "https://schema.humancellatlas.org/(?<mainType>[\\p{Alpha}_]+/[\\p{Alpha}_]+)/" +
+                    "(?<version>\\p{Digit}+[.\\p{Digit}+]*)/(?<schemaType>[\\p{Alpha}_]+)");
+
     @Bean
     public ObjectMapper objectMapper() {
         return new ObjectMapper();
@@ -28,46 +32,40 @@ public class SpreadsheetImporterConfiguration {
 
     @Bean("importer.project")
     public WorksheetImporter projectImporter(@Autowired ObjectMapper objectMapper) {
-        String schemaUrl = "https://schema.humancellatlas.org/type/project/5.0.0/project";
-
-        WorksheetMapping worksheetMapping = new WorksheetMapping();
-        mappingUtil.populateMappingsFromSchema(worksheetMapping, schemaUrl, "");
-
-        ObjectNode predefinedValues =  objectMapper.createObjectNode();
-        mappingUtil.populatePredefinedValuesForSchema(predefinedValues, schemaUrl);
-        WorksheetImporter importer = new WorksheetImporter(objectMapper, worksheetMapping,
-                predefinedValues);
-
-        String coreUrl = "https://schema.humancellatlas.org/core/project/5.0.0/project_core";
-        ObjectNode coreModuleValues = objectMapper
-                .createObjectNode()
-                .put("describedBy", coreUrl)
-                .put("schema_version", "5.0.0");
-        importer.defineValuesFor("project_core", coreModuleValues);
-        return importer;
+        String schemaPath = "type/project/5.0.0/project";
+        String corePath = "core/project/5.0.0/project_core";
+        return createWorksheetImporter(objectMapper, schemaPath, corePath);
     }
 
     @Bean(name="importer.specimen_from_organism")
     public WorksheetImporter specimenFromOrganismImporter(ObjectMapper objectMapper) {
-        String schemaUrl = "https://schema.humancellatlas.org/type/biomaterial/5.0.0/" +
-                "specimen_from_organism";
+        String schemaPath = "type/biomaterial/5.0.0/specimen_from_organism";
+        String corePath = "core/biomaterial/5.0.0/biomaterial_core";
+        return createWorksheetImporter(objectMapper, schemaPath, corePath);
+    }
+
+    private WorksheetImporter createWorksheetImporter(ObjectMapper objectMapper,
+            String schemaPath, String corePath) {
+        String baseUrl = "https://schema.humancellatlas.org";
+        String schemaUrl = String.format("%s/%s", baseUrl, schemaPath);
+        String coreSchemaUrl = String.format("%s/%s", baseUrl, corePath);
 
         WorksheetMapping worksheetMapping = new WorksheetMapping();
         mappingUtil.populateMappingsFromSchema(worksheetMapping, schemaUrl, "");
 
-        ObjectNode predefinedValues =  objectMapper.createObjectNode();
-        mappingUtil.populatePredefinedValuesForSchema(predefinedValues, schemaUrl);
+        ObjectNode predefinedSchemaValues = objectMapper.createObjectNode();
+        mappingUtil.populatePredefinedValuesForSchema(predefinedSchemaValues, schemaUrl);
 
-        WorksheetImporter importer = new WorksheetImporter(objectMapper,
-                worksheetMapping, predefinedValues);
+        WorksheetImporter importer = new WorksheetImporter(objectMapper, worksheetMapping);
 
-        String coreUrl = "https://schema.humancellatlas.org/core/biomaterial/" +
-                "5.0.0/biomaterial_core";
-        ObjectNode coreModuleValues = objectMapper
-                .createObjectNode()
-                .put("describedBy", coreUrl)
-                .put("schema_version", "5.0.0");
-        importer.defineValuesFor("biomaterial_core", coreModuleValues);
+        Matcher matcher = SCHEMA_URL_PATTERN.matcher(coreSchemaUrl);
+        if (matcher.matches()) {
+            ObjectNode predefinedCoreSchemaValues = objectMapper.createObjectNode()
+                    .put("describedBy", coreSchemaUrl)
+                    .put("schema_version", matcher.group("version"));
+            String coreType = matcher.group("schemaType");
+            importer.defineValuesFor(coreType, predefinedCoreSchemaValues);
+        }
 
         return importer;
     }
