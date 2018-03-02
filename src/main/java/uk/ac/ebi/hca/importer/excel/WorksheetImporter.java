@@ -39,18 +39,21 @@ public class WorksheetImporter {
         List<JsonNode> nodes = new ArrayList<>();
 
         Row headerRow = worksheet.getRow(2);
-        for (int row = 3; row <= worksheet.getLastRowNum(); row++) {
+        for (int rowIndex = 3; rowIndex <= worksheet.getLastRowNum(); rowIndex++) {
             ObjectNode rowJson = predefinedValues.deepCopy();
-            worksheet.getRow(row).iterator().forEachRemaining(dataCell -> {
-                Cell headerCell = headerRow.getCell(dataCell.getColumnIndex());
-                String header = headerCell.getStringCellValue();
-                CellMapping cellMapping = worksheetMapping.getMappingFor(header);
-                cellMapping.importTo(rowJson, dataCell);
-            });
-            modulePredefinedValues.forEach((module, json) -> {
-                navigate(rowJson).moveTo(module).addValuesFrom(json);
-            });
-            nodes.add(rowJson);
+            Row row = worksheet.getRow(rowIndex);
+            if (row != null) {
+                row.iterator().forEachRemaining(dataCell -> {
+                    Cell headerCell = headerRow.getCell(dataCell.getColumnIndex());
+                    String header = headerCell.getStringCellValue();
+                    CellMapping cellMapping = worksheetMapping.getMappingFor(header);
+                    cellMapping.importTo(rowJson, dataCell);
+                });
+                modulePredefinedValues.forEach((module, json) -> {
+                    navigate(rowJson).moveTo(module).addValuesFrom(json);
+                });
+                nodes.add(rowJson);
+            }
         }
 
         return nodes;
