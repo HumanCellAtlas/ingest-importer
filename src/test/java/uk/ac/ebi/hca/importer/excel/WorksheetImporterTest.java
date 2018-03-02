@@ -235,11 +235,32 @@ public class WorksheetImporterTest {
                 .assertEquals("$[2].developer.version", version);
     }
 
+    @IntegrationTest
+    public void testImportFromSheetWithEmptyRow() throws Exception {
+        //given:
+        XSSFSheet expensesWorksheet = loadGenericWorkbook().getSheet("Expenses");
+
+        //and:
+        WorksheetImporter worksheetImporter = new WorksheetImporter(objectMapper,
+                new WorksheetMapping()
+                        .map("Entry No", "entry_number", STRING)
+                        .map("Amount", "amount", NUMERIC));
+
+        //when:
+        List<JsonNode> expenses = worksheetImporter.importFrom(expensesWorksheet);
+
+        //then:
+        JsonAssert.with(objectMapper.writeValueAsString(expenses))
+                .assertEquals("$[3].entry_number", "A4")
+                .assertEquals("$[3].amount", 5.6D)
+                .assertEquals("$[4].entry_number", "A6")
+                .assertEquals("$[4].amount", 2.56D);
+    }
+
     private XSSFWorkbook loadGenericWorkbook() {
         try {
             URI spreadsheetUri = ClassLoader.getSystemResource("spreadsheets/generic.xlsx").toURI();
-            File spreadsheet = Paths
-                    .get(spreadsheetUri).toFile();
+            File spreadsheet = Paths.get(spreadsheetUri).toFile();
             return new XSSFWorkbook(spreadsheet);
         } catch (Exception e) {
             throw new RuntimeException(e);
