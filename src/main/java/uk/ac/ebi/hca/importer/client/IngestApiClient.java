@@ -17,7 +17,10 @@ public class IngestApiClient {
 
     public enum EntityType {
 
-        PROJECT("project");
+        PROJECT("projects"),
+        PROCESS("processes"),
+        PROTOCOL("protocols"),
+        FILE("files");
 
         private final String path;
 
@@ -54,10 +57,10 @@ public class IngestApiClient {
         return "";
     }
 
-    public String createEntity(String token, EntityType entityType, String json) {
-        String submissionUrl = ingestApiUrl + "/" + entityType.getPath();
+    public String createEntity(String token, String submissionUrl, EntityType entityType, String json) {
+        String postUrl = submissionUrl + "/" + entityType.getPath();
         HttpEntity<?> httpEntity = new HttpEntity<Object>(json, getRequestHeaders(token));
-        String response = template.postForObject(ingestApiUrl + "/submissionEnvelopes", httpEntity, String.class);
+        String response = template.postForObject(postUrl, httpEntity, String.class);
         try {
             JsonNode root = new ObjectMapper().readTree(response);
             return root.asText();
