@@ -36,46 +36,45 @@ public class SpreadsheetImporterConfiguration {
 
     enum CoreType {
 
-        BIOMATERIAL("biomaterial", "5.0.0"),
-        FILE("file", "5.0.0"),
-        PROCESS("process", "5.0.0"),
-        PROJECT("project", "5.0.0"),
-        PROTOCOL("protocol", "5.0.0");
+        //use lower case so that enum name() = schema type -> easier to configure
+        biomaterial("5.0.0"),
+        file("5.0.0"),
+        process("5.0.0"),
+        project("5.0.0"),
+        protocol("5.0.0");
 
         private String path;
-        private String type;
         private String version;
 
-        CoreType(String type, String version) {
-            this.type = type;
+        CoreType(String version) {
             this.version = version;
-            this.path = String.format("core/%s/%s/%s_core", type, version, type);
+            this.path = String.format("core/%s/%s/%s_core", name(), version, name());
         }
 
     }
 
     enum SubmittableType {
 
-        //Use lower case so that enum name() = schema type -> easier to configure
-        project("5.0.1", CoreType.PROJECT),
-        cell_line("5.0.1", CoreType.BIOMATERIAL),
-        cell_suspension("5.0.0", CoreType.BIOMATERIAL),
-        donor_organism("5.0.0", CoreType.BIOMATERIAL),
-        organoid("5.0.0", CoreType.BIOMATERIAL),
-        speciment_from_organism("5.0.0", CoreType.BIOMATERIAL),
-        analysis_file("5.0.0", CoreType.FILE),
-        sequence_file("5.0.0", CoreType.FILE),
-        analysis_process("5.0.0", CoreType.PROCESS, "analysis"),
-        collection_process("5.0.0", CoreType.PROCESS, "biomaterial_collection"),
-        dissociation_process("5.0.0", CoreType.PROCESS, "biomaterial_collection"),
-        enrichment_process("5.0.0", CoreType.PROCESS, "biomaterial_collection"),
-        imaging_process("5.0.0", CoreType.PROCESS, "imaging"),
-        library_preparation_process("5.0.0", CoreType.PROCESS, "sequencing"),
-        sequencing_process("5.0.0", CoreType.PROCESS, "sequencing"),
-        protocol("5.0.0", CoreType.PROTOCOL),
-        biomaterial_collection_protocol("5.0.0", CoreType.PROTOCOL),
-        imaging_protocol("5.0.0", CoreType.PROTOCOL),
-        sequencing_protocol("5.0.0", CoreType.PROTOCOL);
+        //use lower case so that enum name() = schema type -> easier to configure
+        project("5.0.1", CoreType.project),
+        cell_line("5.0.1", CoreType.biomaterial),
+        cell_suspension("5.0.0", CoreType.biomaterial),
+        donor_organism("5.0.0", CoreType.biomaterial),
+        organoid("5.0.0", CoreType.biomaterial),
+        speciment_from_organism("5.0.0", CoreType.biomaterial),
+        analysis_file("5.0.0", CoreType.file),
+        sequence_file("5.0.0", CoreType.file),
+        analysis_process("5.0.0", CoreType.process, "analysis"),
+        collection_process("5.0.0", CoreType.process, "biomaterial_collection"),
+        dissociation_process("5.0.0", CoreType.process, "biomaterial_collection"),
+        enrichment_process("5.0.0", CoreType.process, "biomaterial_collection"),
+        imaging_process("5.0.0", CoreType.process, "imaging"),
+        library_preparation_process("5.0.0", CoreType.process, "sequencing"),
+        sequencing_process("5.0.0", CoreType.process, "sequencing"),
+        protocol("5.0.0", CoreType.protocol),
+        biomaterial_collection_protocol("5.0.0", CoreType.protocol),
+        imaging_protocol("5.0.0", CoreType.protocol),
+        sequencing_protocol("5.0.0", CoreType.protocol);
 
         private String[] coreSubTypes;
         private String version;
@@ -89,10 +88,10 @@ public class SpreadsheetImporterConfiguration {
             this.coreType = coreType;
             this.coreSubTypes = coreSubTypes;
             if (coreSubTypes == null || coreSubTypes.length <= 0) {
-                this.path = String.format("type/%s/%s/%s", coreType.type, version, name());
+                this.path = String.format("type/%s/%s/%s", coreType.name(), version, name());
             } else {
                 String subPath = String.join("/", coreSubTypes);
-                this.path = String.format("type/%s/%s/%s/%s", coreType.type, subPath,
+                this.path = String.format("type/%s/%s/%s/%s", coreType.name(), subPath,
                         version, name());
             }
         }
