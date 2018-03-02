@@ -24,6 +24,7 @@ public class SpreadsheetImporterConfiguration {
                     "(?<version>\\p{Digit}+[.\\p{Digit}+]*)/(?<schemaType>[\\p{Alpha}_]+)");
 
     public static final String CORE_BIOMATERIAL_PATH = "core/biomaterial/5.0.0/biomaterial_core";
+    public static final String CORE_FILE_PATH = "core/file/5.0.0/file_core";
 
     @Bean
     public ObjectMapper objectMapper() {
@@ -67,6 +68,18 @@ public class SpreadsheetImporterConfiguration {
     public WorksheetImporter specimenFromOrganismImporter(@Autowired ObjectMapper objectMapper) {
         String schemaPath = "type/biomaterial/5.0.0/specimen_from_organism";
         return createWorksheetImporter(objectMapper, schemaPath, CORE_BIOMATERIAL_PATH);
+    }
+
+    @Bean(name="importer.analysis_file")
+    public WorksheetImporter analysisFile(@Autowired ObjectMapper objectMapper) {
+        String schemaPath = "type/file/5.0.0/analysis_file";
+        return createWorksheetImporter(objectMapper, schemaPath, CORE_FILE_PATH);
+    }
+
+    @Bean(name="importer.sequence_file")
+    public WorksheetImporter sequenceFile(@Autowired ObjectMapper objectMapper) {
+        String schemaPath = "type/file/5.0.0/sequence_file";
+        return createWorksheetImporter(objectMapper, schemaPath, CORE_FILE_PATH);
     }
 
     private WorksheetImporter createWorksheetImporter(ObjectMapper objectMapper,
