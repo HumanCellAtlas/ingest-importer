@@ -41,49 +41,49 @@ public class SpreadsheetImporterConfiguration {
         return createWorksheetImporter(objectMapper, schemaPath, corePath);
     }
 
-    @Bean(name="importer.cell_line")
+    @Bean("importer.cell_line")
     public WorksheetImporter cellLine(@Autowired ObjectMapper objectMapper) {
         String schemaPath = "type/biomaterial/5.0.1/cell_line";
         return createWorksheetImporter(objectMapper, schemaPath, CORE_BIOMATERIAL_PATH);
     }
 
-    @Bean(name="importer.cell_suspension")
+    @Bean("importer.cell_suspension")
     public WorksheetImporter cellSuspension(@Autowired ObjectMapper objectMapper) {
         String schemaPath = "type/biomaterial/5.0.0/cell_suspension";
         return createWorksheetImporter(objectMapper, schemaPath, CORE_BIOMATERIAL_PATH);
     }
 
-    @Bean(name="importer.donor_organism")
+    @Bean("importer.donor_organism")
     public WorksheetImporter donorOrganism(@Autowired ObjectMapper objectMapper) {
         String schemaPath = "type/biomaterial/5.0.0/donor_organism";
         return createWorksheetImporter(objectMapper, schemaPath, CORE_BIOMATERIAL_PATH);
     }
 
-    @Bean(name="importer.organoid")
+    @Bean("importer.organoid")
     public WorksheetImporter organoid(@Autowired ObjectMapper objectMapper) {
         String schemaPath = "type/biomaterial/5.0.0/organoid";
         return createWorksheetImporter(objectMapper, schemaPath, CORE_BIOMATERIAL_PATH);
     }
 
-    @Bean(name="importer.specimen_from_organism")
+    @Bean("importer.specimen_from_organism")
     public WorksheetImporter specimenFromOrganismImporter(@Autowired ObjectMapper objectMapper) {
         String schemaPath = "type/biomaterial/5.0.0/specimen_from_organism";
         return createWorksheetImporter(objectMapper, schemaPath, CORE_BIOMATERIAL_PATH);
     }
 
-    @Bean(name="importer.analysis_file")
+    @Bean("importer.analysis_file")
     public WorksheetImporter analysisFile(@Autowired ObjectMapper objectMapper) {
         String schemaPath = "type/file/5.0.0/analysis_file";
         return createWorksheetImporter(objectMapper, schemaPath, CORE_FILE_PATH);
     }
 
-    @Bean(name="importer.sequence_file")
+    @Bean("importer.sequence_file")
     public WorksheetImporter sequenceFile(@Autowired ObjectMapper objectMapper) {
         String schemaPath = "type/file/5.0.0/sequence_file";
         return createWorksheetImporter(objectMapper, schemaPath, CORE_FILE_PATH);
     }
 
-    @Bean(name="importer.analysis_process")
+    @Bean("importer.analysis_process")
     public WorksheetImporter analysisProcess(@Autowired ObjectMapper objectMapper) {
         String schemaPath = "type/process/analysis/5.0.0/analysis_process";
         return createWorksheetImporter(objectMapper, schemaPath, CORE_PROCESS_PATH);
