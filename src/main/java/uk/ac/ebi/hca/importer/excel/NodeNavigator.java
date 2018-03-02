@@ -83,6 +83,11 @@ class NodeNavigator {
         ((ObjectNode) currentNode).put(nextProperty, value);
     }
 
+    public void putNext(int[] value) {
+        ArrayNode array = ((ObjectNode) currentNode).putArray(nextProperty);
+        Arrays.stream(value).forEach(array::add);
+    }
+
     void putNext(String[] value) {
         ArrayNode array = ((ObjectNode) currentNode).putArray(nextProperty);
         Arrays.stream(value).forEach(array::add);

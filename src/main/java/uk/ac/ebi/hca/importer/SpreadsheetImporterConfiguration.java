@@ -19,34 +19,167 @@ import java.util.regex.Pattern;
 @Configuration
 public class SpreadsheetImporterConfiguration {
 
+    private static final Pattern SCHEMA_URL_PATTERN = Pattern.compile(
+            "https://schema.humancellatlas.org/(?<mainType>[\\p{Alpha}_]+[/[\\p{Alpha}_]+]*)/" +
+                    "(?<version>\\p{Digit}+[.\\p{Digit}+]*)/(?<schemaType>[\\p{Alpha}_]+)");
+
+    public static final String CORE_BIOMATERIAL_PATH = "core/biomaterial/5.0.0/biomaterial_core";
+    public static final String CORE_FILE_PATH = "core/file/5.0.0/file_core";
+    public static final String CORE_PROCESS_PATH = "core/process/5.0.0/process_core";
+    public static final String CORE_PROTOCOL_PATH = "core/protocol/5.0.0/protocol_core";
+
     @Bean
     public ObjectMapper objectMapper() {
         return new ObjectMapper();
     }
 
-    @Bean
-    public MappingUtil mappingUtil() {
-        return new MappingUtil();
-    }
+    private MappingUtil mappingUtil = new MappingUtil();
 
     @Bean("importer.project")
     public WorksheetImporter projectImporter(@Autowired ObjectMapper objectMapper) {
-        String schemaUrl = "https://schema.humancellatlas.org/type/project/5.0.0/project";
+        String schemaPath = "type/project/5.0.1/project";
+        String corePath = "core/project/5.0.0/project_core";
+        return createWorksheetImporter(objectMapper, schemaPath, corePath);
+    }
+
+    @Bean("importer.cell_line")
+    public WorksheetImporter cellLine(@Autowired ObjectMapper objectMapper) {
+        String schemaPath = "type/biomaterial/5.0.1/cell_line";
+        return createWorksheetImporter(objectMapper, schemaPath, CORE_BIOMATERIAL_PATH);
+    }
+
+    @Bean("importer.cell_suspension")
+    public WorksheetImporter cellSuspension(@Autowired ObjectMapper objectMapper) {
+        String schemaPath = "type/biomaterial/5.0.0/cell_suspension";
+        return createWorksheetImporter(objectMapper, schemaPath, CORE_BIOMATERIAL_PATH);
+    }
+
+    @Bean("importer.donor_organism")
+    public WorksheetImporter donorOrganism(@Autowired ObjectMapper objectMapper) {
+        String schemaPath = "type/biomaterial/5.0.0/donor_organism";
+        return createWorksheetImporter(objectMapper, schemaPath, CORE_BIOMATERIAL_PATH);
+    }
+
+    @Bean("importer.organoid")
+    public WorksheetImporter organoid(@Autowired ObjectMapper objectMapper) {
+        String schemaPath = "type/biomaterial/5.0.0/organoid";
+        return createWorksheetImporter(objectMapper, schemaPath, CORE_BIOMATERIAL_PATH);
+    }
+
+    @Bean("importer.specimen_from_organism")
+    public WorksheetImporter specimenFromOrganismImporter(@Autowired ObjectMapper objectMapper) {
+        String schemaPath = "type/biomaterial/5.0.0/specimen_from_organism";
+        return createWorksheetImporter(objectMapper, schemaPath, CORE_BIOMATERIAL_PATH);
+    }
+
+    @Bean("importer.analysis_file")
+    public WorksheetImporter analysisFile(@Autowired ObjectMapper objectMapper) {
+        String schemaPath = "type/file/5.0.0/analysis_file";
+        return createWorksheetImporter(objectMapper, schemaPath, CORE_FILE_PATH);
+    }
+
+    @Bean("importer.sequence_file")
+    public WorksheetImporter sequenceFile(@Autowired ObjectMapper objectMapper) {
+        String schemaPath = "type/file/5.0.0/sequence_file";
+        return createWorksheetImporter(objectMapper, schemaPath, CORE_FILE_PATH);
+    }
+
+    @Bean("importer.analysis_process")
+    public WorksheetImporter analysisProcess(@Autowired ObjectMapper objectMapper) {
+        String schemaPath = "type/process/analysis/5.0.0/analysis_process";
+        return createWorksheetImporter(objectMapper, schemaPath, CORE_PROCESS_PATH);
+    }
+
+    @Bean("importer.collection_process")
+    public WorksheetImporter collectionProcess(@Autowired ObjectMapper objectMapper) {
+        String schemaPath = "type/process/biomaterial_collection/5.0.0/collection_process";
+        return createWorksheetImporter(objectMapper, schemaPath, CORE_PROCESS_PATH);
+    }
+
+    @Bean("importer.dissociation_process")
+    public WorksheetImporter dissociationProcess(@Autowired ObjectMapper objectMapper) {
+        String schemaPath = "type/process/biomaterial_collection/5.0.0/dissociation_process";
+        return createWorksheetImporter(objectMapper, schemaPath, CORE_PROCESS_PATH);
+    }
+
+    @Bean("importer.enrichment_process")
+    public WorksheetImporter enrichmentProcess(@Autowired ObjectMapper objectMapper) {
+        String schemaPath = "type/process/biomaterial_collection/5.0.0/enrichment_process";
+        return createWorksheetImporter(objectMapper, schemaPath, CORE_PROCESS_PATH);
+    }
+
+    @Bean("importer.imaging_process")
+    public WorksheetImporter imagingProcess(@Autowired ObjectMapper objectMapper) {
+        String schemaPath = "type/process/imaging/5.0.0/imaging_process";
+        return createWorksheetImporter(objectMapper, schemaPath, CORE_PROCESS_PATH);
+    }
+
+    @Bean("importer.library_preparation_process")
+    public WorksheetImporter libraryPreparationProcess(@Autowired ObjectMapper objectMapper) {
+        String schemaPath = "type/process/sequencing/5.0.0/library_preparation_process";
+        return createWorksheetImporter(objectMapper, schemaPath, CORE_PROCESS_PATH);
+    }
+
+    @Bean("importer.sequencing_process")
+    public WorksheetImporter sequencingProcess(@Autowired ObjectMapper objectMapper) {
+        String schemaPath = "type/process/sequencing/5.0.0/sequencing_process";
+        return createWorksheetImporter(objectMapper, schemaPath, CORE_PROCESS_PATH);
+    }
+
+    @Bean("importer.protocol")
+    public WorksheetImporter protocol(ObjectMapper objectMapper) {
+        String schemaPath = "type/protocol/5.0.0/protocol";
+        return createWorksheetImporter(objectMapper, schemaPath, CORE_PROTOCOL_PATH);
+    }
+
+    @Bean("importer.analysis_protocol")
+    public WorksheetImporter analysisProtocol(@Autowired ObjectMapper objectMapper) {
+        String schemaPath = "type/protocol/analysis/5.0.0/analysis_protocol";
+        return createWorksheetImporter(objectMapper, schemaPath, CORE_PROTOCOL_PATH);
+    }
+
+    @Bean("importer.biomaterial_collection_protocol")
+    public WorksheetImporter biomaterialCollectionProtocol(@Autowired ObjectMapper objectMapper) {
+        String schemaPath = "type/protocol/biomaterial/5.0.0/biomaterial_collection_protocol";
+        return createWorksheetImporter(objectMapper, schemaPath, CORE_PROTOCOL_PATH);
+    }
+
+    @Bean("importer.imaging_protocol")
+    public WorksheetImporter imagingProtocol(@Autowired ObjectMapper objectMapper) {
+        String schemaPath = "type/protocol/imaging/5.0.0/imaging_protocol";
+        return createWorksheetImporter(objectMapper, schemaPath, CORE_PROTOCOL_PATH);
+    }
+
+    @Bean("importer.sequencing_protocol")
+    public WorksheetImporter sequencingProtocol(@Autowired ObjectMapper objectMapper) {
+        String schemaPath = "type/protocol/sequencing/5.0.0/sequencing_protocol";
+        return createWorksheetImporter(objectMapper, schemaPath, CORE_PROTOCOL_PATH);
+    }
+
+    private WorksheetImporter createWorksheetImporter(ObjectMapper objectMapper,
+            String schemaPath, String corePath) {
+        String baseUrl = "https://schema.humancellatlas.org";
+        String schemaUrl = String.format("%s/%s", baseUrl, schemaPath);
+        String coreSchemaUrl = String.format("%s/%s", baseUrl, corePath);
 
         WorksheetMapping worksheetMapping = new WorksheetMapping();
-        mappingUtil().populateMappingsFromSchema(worksheetMapping, schemaUrl, "");
+        mappingUtil.populateMappingsFromSchema(worksheetMapping, schemaUrl, "");
 
-        ObjectNode predefinedValues =  objectMapper.createObjectNode();
-        mappingUtil().populatePredefinedValuesForSchema(predefinedValues, schemaUrl);
+        ObjectNode predefinedSchemaValues = objectMapper.createObjectNode();
+        mappingUtil.populatePredefinedValuesForSchema(predefinedSchemaValues, schemaUrl);
+
         WorksheetImporter importer = new WorksheetImporter(objectMapper, worksheetMapping,
-                predefinedValues);
+                predefinedSchemaValues);
 
-        ObjectNode coreModuleValues = objectMapper
-                .createObjectNode()
-                .put("describedBy",
-                        "https://schema.humancellatlas.org/core/project/5.0.0/project_core")
-                .put("schema_version", "5.0.0");
-        importer.defineValuesFor("project_core", coreModuleValues);
+        Matcher matcher = SCHEMA_URL_PATTERN.matcher(coreSchemaUrl);
+        if (matcher.matches()) {
+            ObjectNode predefinedCoreSchemaValues = objectMapper.createObjectNode()
+                    .put("describedBy", coreSchemaUrl)
+                    .put("schema_version", matcher.group("version"));
+            String coreType = matcher.group("schemaType");
+            importer.defineValuesFor(coreType, predefinedCoreSchemaValues);
+        }
+
         return importer;
     }
 

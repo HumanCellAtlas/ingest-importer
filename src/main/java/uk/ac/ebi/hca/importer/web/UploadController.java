@@ -34,8 +34,8 @@ public class UploadController {
         String jsonString = "{}";
         try {
             Workbook workbook = new XSSFWorkbook(file.getInputStream());
-            List<JsonNode> json = workbookImporter.importFrom(workbook);
-            jsonString = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(json.get(0));
+            List<JsonNode> records = workbookImporter.importFrom(workbook);
+            jsonString = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(records);
         } catch (IOException e) {
             e.printStackTrace();
         }
