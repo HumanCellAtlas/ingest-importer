@@ -23,6 +23,8 @@ public class SpreadsheetImporterConfiguration {
             "https://schema.humancellatlas.org/(?<mainType>[\\p{Alpha}_]+/[\\p{Alpha}_]+)/" +
                     "(?<version>\\p{Digit}+[.\\p{Digit}+]*)/(?<schemaType>[\\p{Alpha}_]+)");
 
+    public static final String CORE_BIOMATERIAL_PATH = "core/biomaterial/5.0.0/biomaterial_core";
+
     @Bean
     public ObjectMapper objectMapper() {
         return new ObjectMapper();
@@ -37,11 +39,34 @@ public class SpreadsheetImporterConfiguration {
         return createWorksheetImporter(objectMapper, schemaPath, corePath);
     }
 
+    @Bean(name="importer.cell_line")
+    public WorksheetImporter cellLine(@Autowired ObjectMapper objectMapper) {
+        String schemaPath = "type/biomaterial/5.0.1/cell_line";
+        return createWorksheetImporter(objectMapper, schemaPath, CORE_BIOMATERIAL_PATH);
+    }
+
+    @Bean(name="importer.cell_suspension")
+    public WorksheetImporter cellSuspension(@Autowired ObjectMapper objectMapper) {
+        String schemaPath = "type/biomaterial/5.0.0/cell_suspension";
+        return createWorksheetImporter(objectMapper, schemaPath, CORE_BIOMATERIAL_PATH);
+    }
+
+    @Bean(name="importer.donor_organism")
+    public WorksheetImporter donorOrganism(@Autowired ObjectMapper objectMapper) {
+        String schemaPath = "type/biomaterial/5.0.0/donor_organism";
+        return createWorksheetImporter(objectMapper, schemaPath, CORE_BIOMATERIAL_PATH);
+    }
+
+    @Bean(name="importer.organoid")
+    public WorksheetImporter organoid(@Autowired ObjectMapper objectMapper) {
+        String schemaPath = "type/biomaterial/5.0.0/organoid";
+        return createWorksheetImporter(objectMapper, schemaPath, CORE_BIOMATERIAL_PATH);
+    }
+
     @Bean(name="importer.specimen_from_organism")
-    public WorksheetImporter specimenFromOrganismImporter(ObjectMapper objectMapper) {
+    public WorksheetImporter specimenFromOrganismImporter(@Autowired ObjectMapper objectMapper) {
         String schemaPath = "type/biomaterial/5.0.0/specimen_from_organism";
-        String corePath = "core/biomaterial/5.0.0/biomaterial_core";
-        return createWorksheetImporter(objectMapper, schemaPath, corePath);
+        return createWorksheetImporter(objectMapper, schemaPath, CORE_BIOMATERIAL_PATH);
     }
 
     private WorksheetImporter createWorksheetImporter(ObjectMapper objectMapper,
@@ -56,7 +81,8 @@ public class SpreadsheetImporterConfiguration {
         ObjectNode predefinedSchemaValues = objectMapper.createObjectNode();
         mappingUtil.populatePredefinedValuesForSchema(predefinedSchemaValues, schemaUrl);
 
-        WorksheetImporter importer = new WorksheetImporter(objectMapper, worksheetMapping);
+        WorksheetImporter importer = new WorksheetImporter(objectMapper, worksheetMapping,
+                predefinedSchemaValues);
 
         Matcher matcher = SCHEMA_URL_PATTERN.matcher(coreSchemaUrl);
         if (matcher.matches()) {
