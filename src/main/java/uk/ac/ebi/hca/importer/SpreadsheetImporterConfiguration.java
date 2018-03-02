@@ -36,7 +36,7 @@ public class SpreadsheetImporterConfiguration {
 
     @Bean("importer.project")
     public WorksheetImporter projectImporter(@Autowired ObjectMapper objectMapper) {
-        String schemaPath = "type/project/5.0.0/project";
+        String schemaPath = "type/project/5.0.1/project";
         String corePath = "core/project/5.0.0/project_core";
         return createWorksheetImporter(objectMapper, schemaPath, corePath);
     }
