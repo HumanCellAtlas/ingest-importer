@@ -44,6 +44,8 @@ class CellMapping {
             } else if (NUMERIC_ARRAY.equals(dataType)) {
                 if (!data.isEmpty()) {
                     List<Integer> numericValues = Arrays
+                            //FIXME fix the NumberFormatException
+                            //when the data cell has float type string e.g. "9606.0"
                             .stream(data.split(ARRAY_SEPARATOR))
                             .map(Integer::parseInt)
                             .collect(Collectors.toList());
