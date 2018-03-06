@@ -1,5 +1,7 @@
-package uk.ac.ebi.hca.importer.client;
+package uk.ac.ebi.hca.core.rest;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -10,15 +12,16 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.client.MockRestServiceServer;
-import org.springframework.test.web.client.match.MockRestRequestMatchers;
-import org.springframework.test.web.client.response.MockRestResponseCreators;
 import org.springframework.web.client.RestTemplate;
 import uk.ac.ebi.hca.core.CoreService;
-import uk.ac.ebi.hca.core.RestCoreService;
+import uk.ac.ebi.hca.core.SubmissionEnvelope;
+import uk.ac.ebi.hca.importer.client.IngestApiClient;
 
 import java.io.IOException;
 
 import static junit.framework.TestCase.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
@@ -53,6 +56,8 @@ public class RestCoreServiceTest {
     @Autowired
     private CoreService coreService;
 
+    private ObjectMapper objectMapper = new ObjectMapper();
+
     @Ignore
     //TODO define this test
     public void test_create_submission() throws IOException {
@@ -73,20 +78,29 @@ public class RestCoreServiceTest {
     }
 
     @Test
-    public void testPrepareSubmission() {
+    public void testPrepareSubmission() throws Exception {
         //given:
         MockRestServiceServer server = MockRestServiceServer.bindTo(restTemplate).build();
 
+        //and: sample Core response with only the relevant details
+        String submissionUuid = "126f74fe-9ce0-4ac7-aff8-4359bacb1f33";
+        ObjectNode coreResponse = objectMapper.createObjectNode();
+        coreResponse.putObject("uuid").put("uuid", submissionUuid);
+
         //and:
+        String responseJson = objectMapper.writeValueAsString(coreResponse);
         server.expect(requestTo("http://foo.bar/submissions"))
                 .andExpect(method(HttpMethod.POST))
-                .andRespond(withSuccess());
+                .andRespond(withSuccess(responseJson, APPLICATION_JSON));
 
         //when:
-        coreService.prepareSubmission();
+        SubmissionEnvelope submissionEnvelope = coreService.prepareSubmission();
 
         //then:
         server.verify();
+
+        //and:
+        assertThat(submissionEnvelope).extracting("uuid").containsExactly(submissionUuid);
     }
 
 }
