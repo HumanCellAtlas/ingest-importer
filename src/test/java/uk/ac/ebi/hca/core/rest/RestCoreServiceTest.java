@@ -42,10 +42,12 @@ public class RestCoreServiceTest {
         MockRestServiceServer server = MockRestServiceServer.bindTo(restTemplate).build();
 
         //and: sample Core response with only the relevant details
-        String submissionUuid = "126f74fe-9ce0-4ac7-aff8-4359bacb1f33";
+        String submissionUrl = "http://core.sample.com/submissions/5a9ff7296895ad0006b79dac";
         ObjectNode coreResponse = objectMapper.createObjectNode()
                 .put("submissionDate", "2018-03-06T16:14:18.112Z");
-        coreResponse.putObject("uuid").put("uuid", submissionUuid);
+        coreResponse.putObject("_links")
+                .putObject("self")
+                .put("href", submissionUrl);
 
         //and:
         String responseJson = objectMapper.writeValueAsString(coreResponse);
@@ -61,7 +63,7 @@ public class RestCoreServiceTest {
         server.verify();
 
         //and:
-        assertThat(submissionEnvelope).extracting("uuid").containsExactly(submissionUuid);
+        assertThat(submissionEnvelope).extracting("submissionUrl").containsExactly(submissionUrl);
     }
 
     @Configuration

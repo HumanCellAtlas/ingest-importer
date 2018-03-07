@@ -26,7 +26,7 @@ public class RestCoreService implements CoreService {
         HttpEntity<String> request = new HttpEntity<>(headers);
         PrepareSubmissionResponse response = restTemplate.postForObject(submissionsUrl, request,
                 PrepareSubmissionResponse.class);
-        return new SubmissionEnvelope(response.getUuid().getUuid());
+        return new SubmissionEnvelope(response.getSubmissionUrl());
     }
 
 }

@@ -1,25 +1,24 @@
 package uk.ac.ebi.hca.core.rest;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.databind.JsonNode;
 
 public class PrepareSubmissionResponse {
 
-    @JsonProperty
-    private Uuid uuid;
+    private String submissionUrl;
 
-    public Uuid getUuid() {
-        return uuid;
+    public String getSubmissionUrl() {
+        return submissionUrl;
     }
 
-    static class Uuid {
-
-        @JsonProperty
-        private String uuid;
-
-        public String getUuid() {
-            return uuid;
+    @JsonSetter("_links")
+    private void setSubmissionUrl(JsonNode node) {
+        if (node.has("self")) {
+            JsonNode self = node.get("self");
+            if (self.has("href")) {
+                submissionUrl = self.get("href").asText();
+            }
         }
-
     }
 
 }
