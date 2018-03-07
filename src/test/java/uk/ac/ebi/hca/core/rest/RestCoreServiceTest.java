@@ -7,6 +7,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -22,30 +23,17 @@ import java.io.IOException;
 import static junit.framework.TestCase.assertTrue;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.header;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.*;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 import static uk.ac.ebi.hca.importer.client.IngestApiClient.EntityType.PROJECT;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest
+@SpringBootTest(properties={
+        "service.core.submissions.url=http://core.sample.com/submissions"
+})
 public class RestCoreServiceTest {
 
-    @Configuration
-    static class TestConfiguration {
-
-        @Bean
-        RestTemplate restTemplate() {
-            return new RestTemplate();
-        }
-
-        @Bean
-        CoreService coreService() {
-            return new RestCoreService();
-        }
-
-    }
+    private static final String URL_SUBMISSIONS = "http://core.sample.com/submissions";
 
     private final String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImtpZCI6Ik1qTkZRa1U0UWtGRlFqUXdRVVEwUlVZNFJqWkZOa1kxUmtVMk9EWXdORE5EUWprd1FrRTFPQSJ9.eyJpc3MiOiJodHRwczovL2RhbmllbHZhdWdoYW4uZXUuYXV0aDAuY29tLyIsInN1YiI6Ilpkc29nNG5EQW5oUTk5eWlLd01RV0FQYzJxVURsUjk5QGNsaWVudHMiLCJhdWQiOiJodHRwOi8vbG9jYWxob3N0OjgwODAiLCJpYXQiOjE1MTk5ODgyNTMsImV4cCI6MTUyMDA3NDY1MywiYXpwIjoiWmRzb2c0bkRBbmhROTl5aUt3TVFXQVBjMnFVRGxSOTkiLCJndHkiOiJjbGllbnQtY3JlZGVudGlhbHMifQ.FJINm7PDG8s3qlzFHmk3Os9vdS1mDdXTsXkDKNZ4z9rRLfd0IICu7b2g81d7YFv6dIrtoCsN3GpE3A4CSysCo3bdtQEZmvyRE1ZQbcqhEGh2sIDqIVd9Q_T_e3eaGBJbs2x0GHnKk-fXtWItjzo5LNddRK1QEGXmggb5eDL60Ms4HCR82YxB84IeshbX5grZvzbLgYbQMjaoPA5aBngcEMrlyLFLccKAGMvu8Gc2GGP9Bpsx5hEZbDGnT4IPag0Sk7Ik8W_jQEcz0AtMfKlFekyYWKwM_22DDsgYm9RQSNVhFY8RKEVFLP-h4wSlncIZ7OWmbkMzSThW9dn172h4Gg";
 
@@ -85,12 +73,13 @@ public class RestCoreServiceTest {
 
         //and: sample Core response with only the relevant details
         String submissionUuid = "126f74fe-9ce0-4ac7-aff8-4359bacb1f33";
-        ObjectNode coreResponse = objectMapper.createObjectNode();
+        ObjectNode coreResponse = objectMapper.createObjectNode()
+                .put("submissionDate", "2018-03-06T16:14:18.112Z");
         coreResponse.putObject("uuid").put("uuid", submissionUuid);
 
         //and:
         String responseJson = objectMapper.writeValueAsString(coreResponse);
-        server.expect(requestTo("http://foo.bar/submissions"))
+        server.expect(requestTo(URL_SUBMISSIONS))
                 .andExpect(method(HttpMethod.POST))
                 .andExpect(header("Authorization", "Bearer cd9bcf"))
                 .andRespond(withSuccess(responseJson, APPLICATION_JSON));
@@ -103,6 +92,21 @@ public class RestCoreServiceTest {
 
         //and:
         assertThat(submissionEnvelope).extracting("uuid").containsExactly(submissionUuid);
+    }
+
+    @Configuration
+    static class TestConfiguration {
+
+        @Bean
+        RestTemplate restTemplate() {
+            return new RestTemplate();
+        }
+
+        @Bean
+        CoreService coreService() {
+            return new RestCoreService();
+        }
+
     }
 
 }
