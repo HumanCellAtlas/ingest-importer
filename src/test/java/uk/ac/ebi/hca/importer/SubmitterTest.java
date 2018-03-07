@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -55,7 +54,7 @@ public class SubmitterTest {
         submitter.submit(json);
 
         //then:
-        verify(coreService).prepareSubmission();
+        verify(coreService).prepareSubmission("cd9bcf");
     }
 
     private static class Project {

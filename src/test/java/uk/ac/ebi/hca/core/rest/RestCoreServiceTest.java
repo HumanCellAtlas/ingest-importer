@@ -22,6 +22,7 @@ import java.io.IOException;
 import static junit.framework.TestCase.assertTrue;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.header;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
@@ -91,10 +92,11 @@ public class RestCoreServiceTest {
         String responseJson = objectMapper.writeValueAsString(coreResponse);
         server.expect(requestTo("http://foo.bar/submissions"))
                 .andExpect(method(HttpMethod.POST))
+                .andExpect(header("Authorization", "Bearer cd9bcf"))
                 .andRespond(withSuccess(responseJson, APPLICATION_JSON));
 
         //when:
-        SubmissionEnvelope submissionEnvelope = coreService.prepareSubmission();
+        SubmissionEnvelope submissionEnvelope = coreService.prepareSubmission("cd9bcf");
 
         //then:
         server.verify();

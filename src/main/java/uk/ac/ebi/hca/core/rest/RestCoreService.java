@@ -1,10 +1,14 @@
 package uk.ac.ebi.hca.core.rest;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.web.client.RestTemplate;
 import uk.ac.ebi.hca.core.CoreService;
 import uk.ac.ebi.hca.core.SubmissionEnvelope;
+
+import static java.lang.String.format;
+import static java.util.Arrays.asList;
 
 public class RestCoreService implements CoreService {
 
@@ -12,9 +16,12 @@ public class RestCoreService implements CoreService {
     private RestTemplate restTemplate;
 
     @Override
-    public SubmissionEnvelope prepareSubmission() {
-        PrepareSubmissionResponse response = restTemplate
-                .postForObject("http://foo.bar/submissions", null, PrepareSubmissionResponse.class);
+    public SubmissionEnvelope prepareSubmission(String authenticationToken) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.put("Authorization", asList(format("Bearer %s", authenticationToken)));
+        HttpEntity<String> request = new HttpEntity<>(headers);
+        PrepareSubmissionResponse response = restTemplate.postForObject(
+                "http://foo.bar/submissions", request, PrepareSubmissionResponse.class);
         return new SubmissionEnvelope(response.getUuid().getUuid());
     }
 

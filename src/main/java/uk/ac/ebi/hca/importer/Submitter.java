@@ -10,7 +10,7 @@ public class Submitter {
     private CoreService coreService;
 
     public void submit(JsonNode dataset) {
-        coreService.prepareSubmission();
+        coreService.prepareSubmission("cd9bcf");
     }
 
 }
