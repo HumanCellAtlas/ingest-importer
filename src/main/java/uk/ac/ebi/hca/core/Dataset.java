@@ -1,4 +1,4 @@
-package uk.ac.ebi.hca.importer;
+package uk.ac.ebi.hca.core;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
@@ -7,7 +7,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static java.lang.String.format;
-import static uk.ac.ebi.hca.importer.Dataset.Category.BIOMATERIAL;
 
 public class Dataset {
 

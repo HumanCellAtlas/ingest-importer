@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import uk.ac.ebi.hca.importer.Dataset;
+import uk.ac.ebi.hca.core.Dataset;
 import uk.ac.ebi.hca.importer.client.IngestApiClient;
 import uk.ac.ebi.hca.importer.client.IngestApiClient.EntityType;
 import uk.ac.ebi.hca.importer.excel.WorkbookImporter;

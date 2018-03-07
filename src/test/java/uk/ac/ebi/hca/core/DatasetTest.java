@@ -1,15 +1,16 @@
-package uk.ac.ebi.hca.importer;
+package uk.ac.ebi.hca.core;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
+import uk.ac.ebi.hca.core.Dataset;
 
 import java.util.List;
 
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
-import static uk.ac.ebi.hca.importer.Dataset.Category.BIOMATERIAL;
-import static uk.ac.ebi.hca.importer.Dataset.Category.PROCESS;
+import static uk.ac.ebi.hca.core.Dataset.Category.BIOMATERIAL;
+import static uk.ac.ebi.hca.core.Dataset.Category.PROCESS;
 
 public class DatasetTest {
 
