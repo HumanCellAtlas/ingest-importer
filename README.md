@@ -20,6 +20,12 @@ Below are some general guidelines on how to set up Java 9 for development. For m
 
 [SDKMAN!](http://sdkman.io/) helps ease much of the burden of setting up development environment on *nix systems, especially for Java related technologies. It allows users to install different tools of different versions at the same time and leaves it up to them to choose which of the available utilities to use at any given context. At the time of writing, SDKMAN! hosts several versions of the JDK from 7 up to 9.
 
+### Gradle
+
+Ingest Importer uses *Gradle* for most development related tasks. As the Gradle wrapper is checked into the version control, no further set up is necessary. Gradle wrapper can be run on the project root using `./gradlew`. For example to see all defined tasks:
+
+    ./gradlew tasks
+
 ## Deployment
 
 You can build and run the app with docker. To run the web application with docker for build the docker image with: 
