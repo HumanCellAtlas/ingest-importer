@@ -21,11 +21,16 @@ public class WorksheetMapping {
         return this;
     }
 
+    public WorksheetMapping map(String header, String jsonProperty, CellDataType type, String ref) {
+        mapping.put(header, new CellMapping(jsonProperty, type, ref));
+        return this;
+    }
+
     public CellMapping getMappingFor(String header) {
         CellMapping cellMapping = mapping.get(header);
         if (cellMapping == null) {
             String jsonProperty = header.toLowerCase().replaceAll(" ", "_");
-            cellMapping = new CellMapping(jsonProperty, STRING);
+            cellMapping = new CellMapping(jsonProperty, STRING, "");
         }
         return cellMapping;
     }

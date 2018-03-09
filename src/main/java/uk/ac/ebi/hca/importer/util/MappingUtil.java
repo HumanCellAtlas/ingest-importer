@@ -11,8 +11,6 @@ import uk.ac.ebi.hca.importer.excel.WorksheetMapping;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Arrays;
@@ -40,16 +38,52 @@ public class MappingUtil {
                 }
             }
         } catch (IOException e) {
-            LOGGER.info("Error processing json: " + e);
+            LOGGER.info("Error processing json at " + schemaUrl + ": " + e);
+            throw new RuntimeException("Invalid schema: " + prefix + ": " + schemaUrl);
         }
     }
 
     private void mapUserFriendlyField(WorksheetMapping worksheetMapping, String id, JsonNode property) {
         String header = property.get("user_friendly").textValue();
-        worksheetMapping.map(header, id, determineDataType(property));
+        CellDataType cellDataType = determineDataType(id, property);
+        String ref;
+        ref = determineRef(id, property, cellDataType);
+        worksheetMapping.map(header, id, cellDataType, ref);
     }
 
-    private CellDataType determineDataType(JsonNode property) {
+    private String determineRef(String id, JsonNode property, CellDataType cellDataType) {
+        String ref = "";
+        if (cellDataType == CellDataType.OBJECT)
+        {
+            if (property.has("$ref"))
+            {
+                ref = property.get("$ref").textValue();
+            }
+            else {
+                throw new RuntimeException("$ref not found for " + id);
+            }
+        }
+        if (cellDataType == CellDataType.OBJECT_ARRAY)
+        {
+            if (property.has("items"))
+            {
+                JsonNode items = property.get("items");
+                if (items.has("$ref"))
+                {
+                    ref = items.get("$ref").textValue();
+                }
+                else {
+                    throw new RuntimeException("$ref not found for " + id);
+                }
+            }
+            else {
+                throw new RuntimeException("$ref not found for " + id);
+            }
+        }
+        return ref;
+    }
+
+    private CellDataType determineDataType(String id, JsonNode property) {
         if (property.has("enum")) {
             return CellDataType.ENUM;
         }
@@ -57,31 +91,44 @@ public class MappingUtil {
         String arrayTypeStr = "";
         if (property.has("type")) {
             typeStr = property.get("type").textValue();
-
             if (property.has("items")) {
                 JsonNode items = property.get("items");
                 if (items.has("type")) {
                     arrayTypeStr = items.get("type").textValue();
                 }
+                if (items.has("$ref")) {
+                    arrayTypeStr = items.get("$ref").textValue();
+                }
+            }
+            switch (typeStr) {
+                case "string":
+                    return CellDataType.STRING;
+                case "integer":
+                    return CellDataType.INTEGER;
+                case "number":
+                    return CellDataType.NUMBER;
+                case "boolean":
+                    return CellDataType.BOOLEAN;
+                case "object":
+                    return CellDataType.OBJECT;
+                case "array":
+                    switch (arrayTypeStr) {
+                        case "string":
+                            return CellDataType.STRING_ARRAY;
+                        case "integer":
+                            return CellDataType.INTEGER_ARRAY;
+                        default:
+                            if (arrayTypeStr.contains("http"))
+                            {
+                                return CellDataType.OBJECT_ARRAY;
+                            }
+                            throw new RuntimeException("Unknown array type in " + id + ": " + arrayTypeStr + " type: " + typeStr);
+                    }
+                default:
+                    throw new RuntimeException("Unknown type in " + id + ": " + typeStr);
             }
         }
-        switch (typeStr) {
-            case "string":
-                return CellDataType.STRING;
-            case "integer":
-                return CellDataType.NUMERIC;
-            case "array":
-                switch (arrayTypeStr) {
-                    case "string":
-                        return CellDataType.STRING_ARRAY;
-                    case "integer":
-                        return CellDataType.NUMERIC_ARRAY;
-                    default:
-                        return CellDataType.STRING_ARRAY;
-                }
-            default:
-                return CellDataType.STRING;
-        }
+        throw new RuntimeException("Cannot determine type of " + id);
     }
 
     public String getText(String url) {
@@ -94,12 +141,8 @@ public class MappingUtil {
             while ((inputLine = in.readLine()) != null)
                 response.append(inputLine);
             in.close();
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
         } catch (IOException e) {
-            e.printStackTrace();
+            LOGGER.error("Error processing: " + url, e);
         }
         return response.toString();
     }
@@ -110,11 +153,11 @@ public class MappingUtil {
 
     public void populatePredefinedValuesForSchema(ObjectNode objectNode, String schemaUrl) {
         List<String> parts = Arrays.asList(schemaUrl.split("/"));
-        if (parts.size() > 2) {
+        if (parts.size() > 3) {
             objectNode
                     .put("describedBy", schemaUrl)
                     .put("schema_version", parts.get(parts.size() - 2))
-                    .put("schema_type", parts.get(parts.size() - 1));
+                    .put("schema_type", parts.get(parts.size() - 3));
         }
     }
 }

@@ -11,7 +11,6 @@ import uk.ac.ebi.hca.importer.excel.exception.NotAnObjectNode;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static uk.ac.ebi.hca.importer.excel.CellDataType.*;
@@ -83,7 +82,7 @@ public class CellMappingTest {
 
         //and:
         String quantity = "quantity";
-        CellMapping quantityMapping = new CellMapping(quantity, NUMERIC);
+        CellMapping quantityMapping = new CellMapping(quantity, INTEGER);
 
         //and:
         Cell cell = mock(Cell.class);
@@ -103,7 +102,7 @@ public class CellMappingTest {
     public void testNumericArrayTypeImportTo() throws Exception {
         //given:
         String fibonacci = "fibonacci";
-        CellMapping fibonacciMapping = new CellMapping(fibonacci, NUMERIC_ARRAY);
+        CellMapping fibonacciMapping = new CellMapping(fibonacci, INTEGER_ARRAY);
 
         //and:
         Cell cell = mock(Cell.class);
@@ -125,7 +124,7 @@ public class CellMappingTest {
     public void testEmptyNumericArrayTypeImportTo() throws Exception {
         //given:
         String intList = "int_list";
-        CellMapping integerListMapping = new CellMapping(intList, NUMERIC_ARRAY);
+        CellMapping integerListMapping = new CellMapping(intList, INTEGER_ARRAY);
 
         //and:
         Cell cell = mock(Cell.class);
@@ -150,7 +149,7 @@ public class CellMappingTest {
 
         //and:
         String warrantyLength = "warranty.warranty_length";
-        CellMapping numericCellMapping = new CellMapping(warrantyLength, NUMERIC);
+        CellMapping numericCellMapping = new CellMapping(warrantyLength, INTEGER);
 
         //and:
         Cell numericCell = mock(Cell.class);
@@ -195,7 +194,7 @@ public class CellMappingTest {
         ObjectNode node = objectMapper.createObjectNode();
 
         //and:
-        CellMapping ageMapping = new CellMapping("personal.info.age", NUMERIC);
+        CellMapping ageMapping = new CellMapping("personal.info.age", INTEGER);
         CellMapping sexMapping = new CellMapping("personal.info.sex", STRING);
 
         //and:
@@ -229,7 +228,7 @@ public class CellMappingTest {
                 .add("Pedro");
 
         //and: a cell mapping that attempts to putNext a field under friends property
-        CellMapping cellMapping = new CellMapping("friends.count", NUMERIC);
+        CellMapping cellMapping = new CellMapping("friends.count", INTEGER);
 
         //and:
         Cell cell = mock(Cell.class);

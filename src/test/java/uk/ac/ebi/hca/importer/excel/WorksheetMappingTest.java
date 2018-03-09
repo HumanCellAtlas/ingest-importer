@@ -13,7 +13,7 @@ public class WorksheetMappingTest {
         WorksheetMapping worksheetMapping = new WorksheetMapping()
                 .map("First Name", "first_name", STRING)
                 .map("Friends", "friends", STRING_ARRAY)
-                .map("Age", "age", NUMERIC);
+                .map("Age", "age", INTEGER);
 
         //when:
         CellMapping firstName = worksheetMapping.getMappingFor("First Name");
@@ -30,7 +30,7 @@ public class WorksheetMappingTest {
         assertThat(friends).extracting(cellMappingFields)
                 .containsExactly("friends", STRING_ARRAY);
         assertThat(age).extracting(cellMappingFields)
-                .containsExactly("age", NUMERIC);
+                .containsExactly("age", INTEGER);
 
         //and:
         assertThat(extraField).extracting(cellMappingFields)

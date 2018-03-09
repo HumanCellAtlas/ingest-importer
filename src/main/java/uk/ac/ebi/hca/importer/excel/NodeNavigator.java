@@ -2,11 +2,11 @@ package uk.ac.ebi.hca.importer.excel;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import uk.ac.ebi.hca.importer.excel.exception.NotAnObjectNode;
 
 import java.util.Arrays;
-import java.util.stream.StreamSupport;
 
 class NodeNavigator {
 
@@ -68,7 +68,7 @@ class NodeNavigator {
     //TODO add unit tests?
     NodeNavigator moveTo(String path) {
         String[] propertyChain = path.split(PROPERTY_NESTING_DELIMETER);
-        for(int index = 0; index < propertyChain.length; index++) {
+        for (int index = 0; index < propertyChain.length; index++) {
             currentNode = currentNode.get(propertyChain[index]);
         }
         nextProperty = null;
@@ -79,8 +79,19 @@ class NodeNavigator {
         ((ObjectNode) currentNode).put(nextProperty, value);
     }
 
+    void putNext(boolean value) {
+        ((ObjectNode) currentNode).put(nextProperty, value);
+    }
+
     void putNext(String value) {
         ((ObjectNode) currentNode).put(nextProperty, value);
+    }
+
+    void putNext(String value, String ref) {
+        ObjectNode objectNode = JsonNodeFactory.instance.objectNode();
+        objectNode.put("describedBy", ref);
+        objectNode.put("text", value);
+        ((ObjectNode) currentNode).put(nextProperty, objectNode);
     }
 
     public void putNext(int[] value) {

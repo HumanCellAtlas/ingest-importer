@@ -3,7 +3,6 @@ package uk.ac.ebi.hca.importer.excel;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.jayway.jsonassert.JsonAssert;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -17,7 +16,6 @@ import java.net.URI;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.function.Function;
-import java.util.stream.StreamSupport;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.contains;
@@ -32,7 +30,7 @@ public class WorksheetImporterTest {
     private WorksheetMapping profileMapping = new WorksheetMapping()
             .map("First Name", "first_name", STRING)
             .map("Last Name", "last_name", STRING)
-            .map("Age", "age", NUMERIC)
+            .map("Age", "age", INTEGER)
             .map("Friends", "friends", STRING_ARRAY);
 
     @IntegrationTest
@@ -107,7 +105,7 @@ public class WorksheetImporterTest {
         WorksheetMapping modularProfileMapping = profileMapping.copy()
                 .map("Developer Grade", "developer.grade", STRING)
                 .map("Favorite Languages", "developer.fav_langs", STRING_ARRAY)
-                .map("Years of Experience", "developer.years", NUMERIC);
+                .map("Years of Experience", "developer.years", INTEGER);
 
         //and:
         WorksheetImporter worksheetImporter = new WorksheetImporter(objectMapper,
@@ -150,7 +148,7 @@ public class WorksheetImporterTest {
         WorksheetMapping deepMapping = profileMapping.copy()
                 .map("Developer Grade", "developer.info.grade", STRING)
                 .map("Favorite Languages", "developer.preferences.languages", STRING_ARRAY)
-                .map("Years of Experience", "developer.info.years", NUMERIC);
+                .map("Years of Experience", "developer.info.years", INTEGER);
 
         //and:
         WorksheetImporter worksheetImporter = new WorksheetImporter(objectMapper, deepMapping);
@@ -214,7 +212,7 @@ public class WorksheetImporterTest {
         WorksheetMapping modularMapping = profileMapping.copy()
                 .map("Developer Grade", "developer.grade", STRING)
                 .map("Favorite Languages", "developer.languages", STRING_ARRAY)
-                .map("Years of Experience", "developer.years", NUMERIC);
+                .map("Years of Experience", "developer.years", INTEGER);
 
         //and:
         WorksheetImporter worksheetImporter = new WorksheetImporter(objectMapper, modularMapping);
@@ -244,7 +242,7 @@ public class WorksheetImporterTest {
         WorksheetImporter worksheetImporter = new WorksheetImporter(objectMapper,
                 new WorksheetMapping()
                         .map("Entry No", "entry_number", STRING)
-                        .map("Amount", "amount", NUMERIC));
+                        .map("Amount", "amount", NUMBER));
 
         //when:
         List<JsonNode> expenses = worksheetImporter.importFrom(expensesWorksheet);

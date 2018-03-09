@@ -61,7 +61,7 @@ public class SpreadsheetImporterConfiguration {
         cell_suspension("5.0.0", CoreType.biomaterial),
         donor_organism("5.0.0", CoreType.biomaterial),
         organoid("5.0.0", CoreType.biomaterial),
-        speciment_from_organism("5.0.0", CoreType.biomaterial),
+        specimen_from_organism("5.0.0", CoreType.biomaterial),
         analysis_file("5.0.0", CoreType.file),
         sequence_file("5.0.0", CoreType.file),
         analysis_process("5.0.0", CoreType.process, "analysis"),
@@ -72,9 +72,9 @@ public class SpreadsheetImporterConfiguration {
         library_preparation_process("5.0.0", CoreType.process, "sequencing"),
         sequencing_process("5.0.0", CoreType.process, "sequencing"),
         protocol("5.0.0", CoreType.protocol),
-        biomaterial_collection_protocol("5.0.0", CoreType.protocol),
-        imaging_protocol("5.0.0", CoreType.protocol),
-        sequencing_protocol("5.0.0", CoreType.protocol);
+        biomaterial_collection_protocol("5.0.0", CoreType.protocol, "biomaterial"),
+        imaging_protocol("5.0.0", CoreType.protocol, "imaging"),
+        sequencing_protocol("5.0.0", CoreType.protocol, "sequencing");
 
         private String[] coreSubTypes;
         private String version;
