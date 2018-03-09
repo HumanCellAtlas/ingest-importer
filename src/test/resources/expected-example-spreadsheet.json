@@ -10,70 +10,107 @@
     "schema_version" : "5.0.0"
   }
 }, {
-  "describedBy": "https://schema.humancellatlas.org/type/biomaterial/5.0.0/donor_organism",
-  "schema_version": "5.0.0",
-  "schema_type": "biomaterial",
-  "biomaterial_core": {
-    "biomaterial_id": "Q4_DEMO-donor_MGH30",
-    "biomaterial_name": "Q4 DEMO donor MGH30",
-    "ncbi_taxon_id": [ 9606 ],
-    "describedBy": "https://schema.humancellatlas.org/core/biomaterial/5.0.0/biomaterial_core",
-    "schema_version": "5.0.0"
-  },
-  "genus_species": [{
-    "describedBy": "https://schema.humancellatlas.org/module/ontology/5.0.0/species_ontology",
-    "text": "Homo sapiens"
-  }],
-  "is_living": true,
-  "biological_sex": "unknown"
-}, {
   "describedBy" : "https://schema.humancellatlas.org/type/biomaterial/5.0.0/donor_organism",
   "schema_version" : "5.0.0",
-  "schema_type" : "donor_organism",
+  "schema_type" : "biomaterial",
   "biomaterial_core" : {
-    "has_input_biomaterial" : "",
+    "biomaterial_id" : "Q4_DEMO-donor_MGH30",
+    "biomaterial_name" : "Q4 DEMO donor MGH30",
+    "ncbi_taxon_id" : [ 9606 ],
     "describedBy" : "https://schema.humancellatlas.org/core/biomaterial/5.0.0/biomaterial_core",
     "schema_version" : "5.0.0"
-  }
+  },
+  "genus_species" : [{
+    "describedBy" : "https://schema.humancellatlas.org/module/ontology/5.0.0/species_ontology",
+    "text" : "Homo sapiens"
+  }],
+  "is_living" : true,
+  "biological_sex" : "unknown"
+}, {
+  "describedBy" : "https://schema.humancellatlas.org/type/biomaterial/5.0.0/specimen_from_organism",
+  "schema_version" : "5.0.0",
+  "schema_type" : "biomaterial",
+  "biomaterial_core" : {
+    "biomaterial_id" : "Q4_DEMO-sample_SAMN02797092",
+    "biomaterial_name" : "Q4_DEMO-Single cell mRNA-seq_MGH30_A01",
+    "ncbi_taxon_id" : [ 9606 ],
+    "has_input_biomaterial" : "Q4_DEMO-donor_MGH30",
+    "supplementary_files" : [
+      "Q4_DEMO-protocol"
+    ],
+    "describedBy" : "https://schema.humancellatlas.org/core/biomaterial/5.0.0/biomaterial_core",
+    "schema_version" : "5.0.0"
+  },
+  "genus_species" : [
+    {
+      "describedBy" : "https://schema.humancellatlas.org/module/ontology/5.0.0/species_ontology",
+      "text" : "Homo sapiens"
+    }
+  ],
+  "organ" : {
+    "describedBy" : "https://schema.humancellatlas.org/module/ontology/5.0.0/organ_ontology",
+    "text" : "brain"
+  },
+  "organ_part" : {
+    "describedBy" : "https://schema.humancellatlas.org/module/ontology/5.0.0/organ_part_ontology",
+    "text" : "astrocyte"
+  },
+  "disease" : [
+    {
+      "describedBy" : "https://schema.humancellatlas.org/module/ontology/5.0.0/disease_ontology",
+      "text" : "glioblastoma"
+    }
+  ]
 }, {
   "describedBy" : "https://schema.humancellatlas.org/type/process/biomaterial_collection/5.0.0/enrichment_process",
   "schema_version" : "5.0.0",
-  "schema_type" : "enrichment_process",
+  "schema_type" : "process",
   "process_core" : {
     "process_id" : "enrichment1",
     "describedBy" : "https://schema.humancellatlas.org/core/process/5.0.0/process_core",
     "schema_version" : "5.0.0"
   },
   "enrichment_method" : "FACS",
-  "process_type" : "enrichment process"
+  "process_type" : {
+    "describedBy" : "https://schema.humancellatlas.org/module/ontology/5.0.0/process_type_ontology",
+    "text" : "enrichment process"
+  }
 }, {
   "describedBy" : "https://schema.humancellatlas.org/type/process/sequencing/5.0.0/library_preparation_process",
   "schema_version" : "5.0.0",
-  "schema_type" : "library_preparation_process",
+  "schema_type" : "process",
   "process_core" : {
     "process_id" : "preparation1",
     "describedBy" : "https://schema.humancellatlas.org/core/process/5.0.0/process_core",
     "schema_version" : "5.0.0"
   },
-  "input_nucleic_acid_molecule" : "polyA RNA",
+  "input_nucleic_acid_molecule" : {
+    "describedBy" : "https://schema.humancellatlas.org/module/ontology/5.0.0/biological_macromolecule_ontology",
+    "text" : "polyA RNA"},
   "library_construction_approach" : "Smart-seq2",
   "end_bias" : "5 prime end bias",
   "strand" : "unstranded",
-  "process_type" : "nucleic acid librarly construction process",
-  "protocol_ids" : "library_protocol1"
+  "process_type" :{
+    "text" :"nucleic acid librarly construction process",
+    "describedBy" : "https://schema.humancellatlas.org/module/ontology/5.0.0/process_type_ontology"
+  }
 }, {
   "describedBy" : "https://schema.humancellatlas.org/type/process/sequencing/5.0.0/sequencing_process",
   "schema_version" : "5.0.0",
-  "schema_type" : "sequencing_process",
+  "schema_type" : "process",
   "process_core" : {
     "process_id" : "assay1",
     "describedBy" : "https://schema.humancellatlas.org/core/process/5.0.0/process_core",
     "schema_version" : "5.0.0"
   },
-  "instrument_manufacturer_model" : "Illumina HiSeq 2500",
-  "paired_ends" : "yes",
-  "process_type" : "single cell sequencing process",
-  "protocol_ids" : "Q4_DEMO-protocol"
+  "instrument_manufacturer_model" : {
+    "text" : "Illumina HiSeq 2500",
+    "describedBy" : "https://schema.humancellatlas.org/module/ontology/5.0.0/instrument_ontology"},
+  "paired_ends" : true,
+  "process_type" : {
+    "text" : "single cell sequencing process",
+    "describedBy" : "https://schema.humancellatlas.org/module/ontology/5.0.0/process_type_ontology"
+  }
 }, {
   "describedBy" : "https://schema.humancellatlas.org/type/protocol/5.0.0/protocol",
   "schema_version" : "5.0.0",
@@ -84,7 +121,10 @@
     "describedBy" : "https://schema.humancellatlas.org/core/protocol/5.0.0/protocol_core",
     "schema_version" : "5.0.0"
   },
-  "protocol_type" : "single cell sequencing protocol"
+  "protocol_type" : {
+    "describedBy" : "https://schema.humancellatlas.org/module/ontology/5.0.0/protocol_type_ontology",
+    "text" : "single cell sequencing protocol"
+  }
 }, {
   "describedBy" : "https://schema.humancellatlas.org/type/protocol/5.0.0/protocol",
   "schema_version" : "5.0.0",
@@ -94,33 +134,34 @@
     "describedBy" : "https://schema.humancellatlas.org/core/protocol/5.0.0/protocol_core",
     "schema_version" : "5.0.0"
   },
-  "protocol_type" : "library construction protocol"
+  "protocol_type" : {
+    "describedBy" : "https://schema.humancellatlas.org/module/ontology/5.0.0/protocol_type_ontology",
+    "text" : "library construction protocol"
+  }
 }, {
   "describedBy" : "https://schema.humancellatlas.org/type/file/5.0.0/sequence_file",
   "schema_version" : "5.0.0",
-  "schema_type" : "sequence_file",
+  "schema_type" : "file",
   "file_core" : {
     "file_name" : "R1.fastq.gz",
     "file_format" : "fastq.gz",
     "describedBy" : "https://schema.humancellatlas.org/core/file/5.0.0/file_core",
     "schema_version" : "5.0.0"
   },
-  "lane_index" : 1.0,
-  "read_length" : 187.0,
-  "biomaterial_id" : "Q4_DEMO-sample_SAMN02797092",
-  "sequencing_process_id" : "assay_1"
+  "read_index" : "read1",
+  "lane_index" : 1,
+  "read_length" : 187
 }, {
   "describedBy" : "https://schema.humancellatlas.org/type/file/5.0.0/sequence_file",
   "schema_version" : "5.0.0",
-  "schema_type" : "sequence_file",
+  "schema_type" : "file",
   "file_core" : {
     "file_name" : "R2.fastq.gz",
     "file_format" : "fastq.gz",
     "describedBy" : "https://schema.humancellatlas.org/core/file/5.0.0/file_core",
     "schema_version" : "5.0.0"
   },
-  "lane_index" : 1.0,
-  "read_length" : 225.0,
-  "biomaterial_id" : "Q4_DEMO-sample_SAMN02797092",
-  "sequencing_process_id" : "assay_1"
+  "read_index" : "read2",
+  "lane_index" : 1,
+  "read_length" : 225
 } ]

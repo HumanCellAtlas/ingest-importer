@@ -157,7 +157,7 @@ public class MappingUtil {
             objectNode
                     .put("describedBy", schemaUrl)
                     .put("schema_version", parts.get(parts.size() - 2))
-                    .put("schema_type", parts.get(parts.size() - 3));
+                    .put("schema_type", parts.get(4));
         }
     }
 }

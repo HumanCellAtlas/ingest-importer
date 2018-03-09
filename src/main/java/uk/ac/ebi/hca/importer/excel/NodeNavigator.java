@@ -75,6 +75,10 @@ class NodeNavigator {
         return this;
     }
 
+    void putNext(int value) {
+        ((ObjectNode) currentNode).put(nextProperty, value);
+    }
+
     void putNext(double value) {
         ((ObjectNode) currentNode).put(nextProperty, value);
     }

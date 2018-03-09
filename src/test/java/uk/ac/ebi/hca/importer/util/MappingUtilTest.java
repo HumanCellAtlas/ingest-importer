@@ -48,6 +48,14 @@ public class MappingUtilTest {
     }
 
     @IntegrationTest
+    public void test_addMappingsFromSchema_with_valid_sequence_file_schema() {
+        WorksheetMappingSpy worksheetMapping = new WorksheetMappingSpy();
+        mappingUtil.populateMappingsFromSchema(worksheetMapping, "https://schema.humancellatlas.org/type/file/5.0.0/sequence_file", "");
+        System.out.println(worksheetMapping.toString());
+        assertEquals(7, worksheetMapping.getNumberOfMappings());
+    }
+
+    @IntegrationTest
     public void test_generatePredefinedValuesForSchema_with_valid_project_schema() {
         ObjectNode predefinedValues = objectMapper.createObjectNode();
         mappingUtil.populatePredefinedValuesForSchema(predefinedValues, "https://schema.humancellatlas.org/type/project/5.0.0/project");

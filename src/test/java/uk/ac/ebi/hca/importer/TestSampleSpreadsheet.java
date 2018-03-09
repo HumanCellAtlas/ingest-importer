@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,7 +33,6 @@ public class TestSampleSpreadsheet {
     private static String SPREADSHEET_URL = "https://github.com/HumanCellAtlas/metadata-schema/blob/master/examples/spreadsheets/v5/filled/SmartSeq2/Q4DemoSS2Metadata_v5.xlsx?raw=true";
 
     @Test
-    @Ignore
     public void testSpreadsheet() throws IOException {
         try (InputStream input = new URL(SPREADSHEET_URL).openStream();
              InputStream expectedFile = TestSampleSpreadsheet.class.getResourceAsStream("/expected-example-spreadsheet.json");
