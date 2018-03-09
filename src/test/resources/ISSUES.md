@@ -14,10 +14,10 @@ Processing [Q4DemoSS2Metadata_v5.xlsx](https://github.com/HumanCellAtlas/metadat
   * ~~integer~~
   * ~~enum~~
   * ~~object~~
-  * object array is not showed in an array
+  * ~~object array is not showed in an array~~
 * An extra, blank donor_organism is created
 * id fields are retained
-* schema_type of processes is incorrect
+* ~~schema_type of processes is incorrect~~
 
 ## Spreadsheet
 * biomaterial.biological_sex is missing on donor_organism

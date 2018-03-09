@@ -6,7 +6,9 @@ import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import uk.ac.ebi.hca.importer.excel.exception.NotAnObjectNode;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 class NodeNavigator {
 
@@ -93,9 +95,21 @@ class NodeNavigator {
 
     void putNext(String value, String ref) {
         ObjectNode objectNode = JsonNodeFactory.instance.objectNode();
-        objectNode.put("describedBy", ref);
         objectNode.put("text", value);
+        objectNode.put("describedBy", ref);
         ((ObjectNode) currentNode).put(nextProperty, objectNode);
+    }
+
+    void putNext(String[] values, String ref) {
+        List<ObjectNode> nodes = new ArrayList<>();
+        for (String value : values) {
+            ObjectNode objectNode = JsonNodeFactory.instance.objectNode();
+            objectNode.put("describedBy", ref);
+            objectNode.put("text", value);
+            nodes.add(objectNode);
+        }
+        ArrayNode array = ((ObjectNode) currentNode).putArray(nextProperty);
+        nodes.forEach(array::add);
     }
 
     public void putNext(int[] value) {

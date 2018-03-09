@@ -117,8 +117,7 @@ class CellMapping {
             case OBJECT_ARRAY:
                 switch (dataCell.getCellTypeEnum()) {
                     case STRING:
-                        String stringValue = dataCell.getStringCellValue();
-                        nodeNavigator.putNext(stringValue, ref);
+                        nodeNavigator.putNext(dataCell.getStringCellValue().split(ARRAY_SEPARATOR), ref);
                         break;
                     default:
                         throw new RuntimeException("Unable to process: " + dataType + " " + dataCell.getCellTypeEnum());
