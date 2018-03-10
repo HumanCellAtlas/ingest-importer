@@ -30,12 +30,13 @@ public class TestSampleSpreadsheet {
     @Autowired
     private ObjectMapper objectMapper;
 
-    private static String SPREADSHEET_URL = "https://github.com/HumanCellAtlas/metadata-schema/blob/master/examples/spreadsheets/v5/filled/SmartSeq2/Q4DemoSS2Metadata_v5.xlsx?raw=true";
+    private static final String EXPECTED_EXAMPLE_SPREADSHEET_JSON = "/expected-example-spreadsheet.json";
+    private static final String SPREADSHEET_URL = "https://github.com/HumanCellAtlas/metadata-schema/blob/master/examples/spreadsheets/v5/filled/SmartSeq2/Q4DemoSS2Metadata_v5.xlsx?raw=true";
 
     @Test
     public void testSpreadsheet() throws IOException {
         try (InputStream input = new URL(SPREADSHEET_URL).openStream();
-             InputStream expectedFile = TestSampleSpreadsheet.class.getResourceAsStream("/expected-example-spreadsheet.json");
+             InputStream expectedFile = TestSampleSpreadsheet.class.getResourceAsStream(EXPECTED_EXAMPLE_SPREADSHEET_JSON);
         ) {
             Workbook workbook = new XSSFWorkbook(input);
             List<JsonNode> records = workbookImporter.importFrom(workbook);

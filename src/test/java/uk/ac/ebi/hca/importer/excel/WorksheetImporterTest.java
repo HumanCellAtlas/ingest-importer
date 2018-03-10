@@ -20,7 +20,7 @@ import java.util.function.Function;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.hasSize;
-import static uk.ac.ebi.hca.importer.excel.CellDataType.*;
+import static uk.ac.ebi.hca.importer.excel.SchemaDataType.*;
 
 @RunWith(IngestTestRunner.class)
 public class WorksheetImporterTest {

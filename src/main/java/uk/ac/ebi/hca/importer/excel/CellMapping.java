@@ -16,16 +16,16 @@ class CellMapping {
     static final String ARRAY_SEPARATOR = "\\|\\|";
 
     final String jsonProperty;
-    final CellDataType dataType;
+    final SchemaDataType dataType;
     final String ref;
 
-    CellMapping(String jsonProperty, CellDataType dataType, String ref) {
+    CellMapping(String jsonProperty, SchemaDataType dataType, String ref) {
         this.jsonProperty = jsonProperty;
         this.dataType = dataType;
         this.ref = ref;
     }
 
-    CellMapping(String jsonProperty, CellDataType dataType) {
+    CellMapping(String jsonProperty, SchemaDataType dataType) {
         this.jsonProperty = jsonProperty;
         this.dataType = dataType;
         this.ref = "";

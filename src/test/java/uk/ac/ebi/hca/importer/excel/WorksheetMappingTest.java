@@ -3,7 +3,7 @@ package uk.ac.ebi.hca.importer.excel;
 import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static uk.ac.ebi.hca.importer.excel.CellDataType.*;
+import static uk.ac.ebi.hca.importer.excel.SchemaDataType.*;
 
 public class WorksheetMappingTest {
 

@@ -3,7 +3,7 @@ package uk.ac.ebi.hca.importer.excel;
 import java.util.HashMap;
 import java.util.Map;
 
-import static uk.ac.ebi.hca.importer.excel.CellDataType.STRING;
+import static uk.ac.ebi.hca.importer.excel.SchemaDataType.STRING;
 
 public class WorksheetMapping {
 
@@ -16,12 +16,12 @@ public class WorksheetMapping {
         this.mapping.putAll(mapping);
     }
 
-    public WorksheetMapping map(String header, String jsonProperty, CellDataType type) {
+    public WorksheetMapping map(String header, String jsonProperty, SchemaDataType type) {
         mapping.put(header, new CellMapping(jsonProperty, type));
         return this;
     }
 
-    public WorksheetMapping map(String header, String jsonProperty, CellDataType type, String ref) {
+    public WorksheetMapping map(String header, String jsonProperty, SchemaDataType type, String ref) {
         mapping.put(header, new CellMapping(jsonProperty, type, ref));
         return this;
     }

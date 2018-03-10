@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import uk.ac.ebi.hca.importer.excel.CellDataType;
+import uk.ac.ebi.hca.importer.excel.SchemaDataType;
 import uk.ac.ebi.hca.importer.excel.WorksheetMapping;
 
 import java.io.BufferedReader;
@@ -45,15 +45,15 @@ public class MappingUtil {
 
     private void mapUserFriendlyField(WorksheetMapping worksheetMapping, String id, JsonNode property) {
         String header = property.get("user_friendly").textValue();
-        CellDataType cellDataType = determineDataType(id, property);
+        SchemaDataType schemaDataType = determineDataType(id, property);
         String ref;
-        ref = determineRef(id, property, cellDataType);
-        worksheetMapping.map(header, id, cellDataType, ref);
+        ref = determineRef(id, property, schemaDataType);
+        worksheetMapping.map(header, id, schemaDataType, ref);
     }
 
-    private String determineRef(String id, JsonNode property, CellDataType cellDataType) {
+    private String determineRef(String id, JsonNode property, SchemaDataType schemaDataType) {
         String ref = "";
-        if (cellDataType == CellDataType.OBJECT)
+        if (schemaDataType == SchemaDataType.OBJECT)
         {
             if (property.has("$ref"))
             {
@@ -63,7 +63,7 @@ public class MappingUtil {
                 throw new RuntimeException("$ref not found for " + id);
             }
         }
-        if (cellDataType == CellDataType.OBJECT_ARRAY)
+        if (schemaDataType == SchemaDataType.OBJECT_ARRAY)
         {
             if (property.has("items"))
             {
@@ -83,9 +83,9 @@ public class MappingUtil {
         return ref;
     }
 
-    private CellDataType determineDataType(String id, JsonNode property) {
+    private SchemaDataType determineDataType(String id, JsonNode property) {
         if (property.has("enum")) {
-            return CellDataType.ENUM;
+            return SchemaDataType.ENUM;
         }
         String typeStr = "";
         String arrayTypeStr = "";
@@ -102,25 +102,25 @@ public class MappingUtil {
             }
             switch (typeStr) {
                 case "string":
-                    return CellDataType.STRING;
+                    return SchemaDataType.STRING;
                 case "integer":
-                    return CellDataType.INTEGER;
+                    return SchemaDataType.INTEGER;
                 case "number":
-                    return CellDataType.NUMBER;
+                    return SchemaDataType.NUMBER;
                 case "boolean":
-                    return CellDataType.BOOLEAN;
+                    return SchemaDataType.BOOLEAN;
                 case "object":
-                    return CellDataType.OBJECT;
+                    return SchemaDataType.OBJECT;
                 case "array":
                     switch (arrayTypeStr) {
                         case "string":
-                            return CellDataType.STRING_ARRAY;
+                            return SchemaDataType.STRING_ARRAY;
                         case "integer":
-                            return CellDataType.INTEGER_ARRAY;
+                            return SchemaDataType.INTEGER_ARRAY;
                         default:
                             if (arrayTypeStr.contains("http"))
                             {
-                                return CellDataType.OBJECT_ARRAY;
+                                return SchemaDataType.OBJECT_ARRAY;
                             }
                             throw new RuntimeException("Unknown array type in " + id + ": " + arrayTypeStr + " type: " + typeStr);
                     }

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 
@@ -42,7 +43,7 @@ public class WorksheetImporter {
         for (int rowIndex = 3; rowIndex <= worksheet.getLastRowNum(); rowIndex++) {
             ObjectNode rowJson = predefinedValues.deepCopy();
             Row row = worksheet.getRow(rowIndex);
-            if (row != null) {
+            if (row != null && !isRowEmpty(row)) {
                 row.iterator().forEachRemaining(dataCell -> {
                     Cell headerCell = headerRow.getCell(dataCell.getColumnIndex());
                     String header = headerCell.getStringCellValue();
@@ -57,6 +58,15 @@ public class WorksheetImporter {
         }
 
         return nodes;
+    }
+
+    public static boolean isRowEmpty(Row row) {
+        for (int c = row.getFirstCellNum(); c < row.getLastCellNum(); c++) {
+            Cell cell = row.getCell(c);
+            if (cell != null && cell.getCellTypeEnum() != CellType.BLANK)
+                return false;
+        }
+        return true;
     }
 
     public void defineValuesFor(String module, JsonNode predefinedValues) {

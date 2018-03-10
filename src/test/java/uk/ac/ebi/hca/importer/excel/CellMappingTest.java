@@ -13,7 +13,7 @@ import static org.assertj.core.api.Assertions.fail;
 import static org.hamcrest.Matchers.contains;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
-import static uk.ac.ebi.hca.importer.excel.CellDataType.*;
+import static uk.ac.ebi.hca.importer.excel.SchemaDataType.*;
 
 public class CellMappingTest {
 
