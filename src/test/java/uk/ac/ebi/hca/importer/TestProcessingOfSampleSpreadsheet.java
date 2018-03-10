@@ -38,13 +38,13 @@ public class TestProcessingOfSampleSpreadsheet {
 
     private static final JsonValidator VALIDATOR = JsonSchemaFactory.byDefault().getValidator();
 
-    private static final String EXPECTED_EXAMPLE_SPREADSHEET_JSON = "/expected-example-spreadsheet.json";
+    private static final String EXPECTED_JSON_URL = "https://raw.githubusercontent.com/HumanCellAtlas/metadata-schema/develop/examples/JSON/v5/SmartSeq2/Q4DemoSS2Metadata_v5.json";
     private static final String SPREADSHEET_URL = "https://github.com/HumanCellAtlas/metadata-schema/blob/master/examples/spreadsheets/v5/filled/SmartSeq2/Q4DemoSS2Metadata_v5.xlsx?raw=true";
 
     @Test
     public void test_sample_spreadsheet_matched_expected_output_and_is_valid_against_schema() throws IOException, ProcessingException {
         try (InputStream input = new URL(SPREADSHEET_URL).openStream();
-             InputStream expectedFile = TestProcessingOfSampleSpreadsheet.class.getResourceAsStream(EXPECTED_EXAMPLE_SPREADSHEET_JSON);
+             InputStream expectedFile = new URL(EXPECTED_JSON_URL).openStream();
         ) {
             Workbook workbook = new XSSFWorkbook(input);
             List<JsonNode> records = workbookImporter.importFrom(workbook);
