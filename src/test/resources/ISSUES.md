@@ -24,7 +24,9 @@ Processing [Q4DemoSS2Metadata_v5.xlsx](https://github.com/HumanCellAtlas/metadat
 * biomaterial.biological_sex is missing on donor_organism
   * field is required should be resolved to unknown but is skipped because empty on spreadsheet
   * what should be the behaviour when a required field is missing?
-* read_index is missing on files
+  * this is an enum. I have set the speadsheet to be unknown for now.
+* ~~read_index is missing on files~~
+* the value is read_length looks incorrect
 
 ## General process
 * Create mappings of column headers to id, schema type and any reference schema. [MappingUtils](../../main/java/uk/ac/ebi/hca/importer/util/MappingUtil.java)

@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.jayway.jsonassert.JsonAssert;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.junit.Ignore;
 import org.junit.runner.RunWith;
 import uk.ac.ebi.hca.test.IngestTestRunner;
 import uk.ac.ebi.hca.test.IntegrationTest;
@@ -34,6 +35,7 @@ public class WorksheetImporterTest {
             .map("Friends", "friends", STRING_ARRAY);
 
     @IntegrationTest
+    @Ignore
     public void testImportFrom() throws Exception {
         //given:
         XSSFSheet profileWorksheet = loadGenericWorkbook().getSheet("Profile");
@@ -58,7 +60,7 @@ public class WorksheetImporterTest {
         JsonAssert.with(objectMapper.writeValueAsString(juan))
                 .assertEquals("first_name", "Juan")
                 .assertEquals("last_name", "dela Cruz")
-                .assertEquals("age", 41D)
+                .assertEquals("age", 41)
                 .assertThat("friends", contains("Pedro", "Santiago"))
                 .assertEquals("remarks", "This is an extra field")
                 .assertEquals("miscellaneous", "looks||like||a||list")
@@ -72,7 +74,7 @@ public class WorksheetImporterTest {
         JsonAssert.with(objectMapper.writeValueAsString(john))
                 .assertEquals("first_name", "John")
                 .assertEquals("last_name", "Doe")
-                .assertEquals("age", 23D)
+                .assertEquals("age", 23)
                 .assertThat("friends", contains("Jessica", "Kaz", "David"))
                 .assertNotDefined("remarks")
                 .assertNotDefined("miscellaneous")
@@ -86,7 +88,7 @@ public class WorksheetImporterTest {
         JsonAssert.with(objectMapper.writeValueAsString(mary))
                 .assertEquals("first_name", "Mary")
                 .assertEquals("last_name", "Moon")
-                .assertEquals("age", 25D)
+                .assertEquals("age", 25)
                 .assertThat("friends", contains("Vegetables"))
                 .assertEquals("remarks", "She's a vegetarian")
                 .assertNotDefined("miscellaneous")
@@ -122,7 +124,7 @@ public class WorksheetImporterTest {
         JsonAssert.with(objectMapper.writeValueAsString(firstNameFinder.apply("Juan")))
                 .assertEquals("$.developer.grade", "Senior")
                 .assertThat("$.developer.fav_langs", contains("Java", "Python"))
-                .assertEquals("$.developer.years", 20D);
+                .assertEquals("$.developer.years", 20);
     }
 
     private Function<String, JsonNode> firstNameFinder(List<JsonNode> profiles) {
@@ -160,7 +162,7 @@ public class WorksheetImporterTest {
         String listAsJson = objectMapper.writeValueAsString(profiles);
         JsonAssert.with(listAsJson)
                 .assertEquals("$[0].developer.info.grade", "Senior")
-                .assertEquals("$[1].developer.info.years", 2D)
+                .assertEquals("$[1].developer.info.years", 2)
                 .assertThat("$[2].developer.preferences.languages",
                         contains("Haskell", "Perl", "Erlang"));
     }

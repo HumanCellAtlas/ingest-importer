@@ -95,8 +95,8 @@ class NodeNavigator {
 
     void putNext(String value, String ref) {
         ObjectNode objectNode = JsonNodeFactory.instance.objectNode();
-        objectNode.put("text", value);
         objectNode.put("describedBy", ref);
+        objectNode.put("text", value);
         ((ObjectNode) currentNode).put(nextProperty, objectNode);
     }
 

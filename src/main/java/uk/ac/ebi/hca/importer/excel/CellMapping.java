@@ -18,14 +18,12 @@ class CellMapping {
     final String jsonProperty;
     final SchemaDataType dataType;
     final String ref;
-    final boolean isRequired;
     final boolean isLink;
 
-    CellMapping(String jsonProperty, SchemaDataType dataType, String ref, boolean isRequired, boolean isLink) {
+    CellMapping(String jsonProperty, SchemaDataType dataType, String ref, boolean isLink) {
         this.jsonProperty = jsonProperty;
         this.dataType = dataType;
         this.ref = ref;
-        this.isRequired = isRequired;
         this.isLink = isLink;
     }
 
@@ -33,7 +31,6 @@ class CellMapping {
         this.jsonProperty = jsonProperty;
         this.dataType = dataType;
         this.ref = "";
-        this.isRequired = false;
         this.isLink = false;
     }
 

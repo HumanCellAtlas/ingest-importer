@@ -40,4 +40,5 @@ dependencies {
 
     testCompile('org.springframework.boot:spring-boot-starter-test')
     testCompile('com.jayway.jsonpath:json-path-assert:2.4.0')
+	testCompile('com.github.java-json-tools:json-schema-validator:2.2.8')
 }

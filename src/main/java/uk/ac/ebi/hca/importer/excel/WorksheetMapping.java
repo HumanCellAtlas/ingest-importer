@@ -21,8 +21,8 @@ public class WorksheetMapping {
         return this;
     }
 
-    public WorksheetMapping map(String header, String jsonProperty, SchemaDataType type, String ref, boolean isRequired, boolean isLink) {
-        mapping.put(header, new CellMapping(jsonProperty, type, ref, isRequired, isLink));
+    public WorksheetMapping map(String header, String jsonProperty, SchemaDataType type, String ref, boolean isLink) {
+        mapping.put(header, new CellMapping(jsonProperty, type, ref, isLink));
         return this;
     }
 
@@ -32,7 +32,7 @@ public class WorksheetMapping {
             //If not found assume a link
             String jsonProperty = header.toLowerCase().replaceAll(" ", "_");
             System.out.println("This is probably a link: " + header);
-            cellMapping = new CellMapping(jsonProperty, STRING, "", false, true);
+            cellMapping = new CellMapping(jsonProperty, STRING, "", true);
         }
         return cellMapping;
     }

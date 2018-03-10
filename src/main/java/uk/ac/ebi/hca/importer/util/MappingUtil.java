@@ -47,7 +47,7 @@ public class MappingUtil {
         String header = property.get("user_friendly").textValue();
         SchemaDataType schemaDataType = determineDataType(id, property);
         String ref = determineRef(id, property, schemaDataType);
-        worksheetMapping.map(header, id, schemaDataType, ref, false, false);
+        worksheetMapping.map(header, id, schemaDataType, ref, false);
     }
 
     private String determineRef(String id, JsonNode property, SchemaDataType schemaDataType) {

@@ -20,10 +20,10 @@
     "describedBy" : "https://schema.humancellatlas.org/core/biomaterial/5.0.0/biomaterial_core",
     "schema_version" : "5.0.0"
   },
-  "genus_species" : [{
+  "genus_species" : [ {
     "describedBy" : "https://schema.humancellatlas.org/module/ontology/5.0.0/species_ontology",
     "text" : "Homo sapiens"
-  }],
+  } ],
   "is_living" : true,
   "biological_sex" : "unknown"
 }, {
@@ -35,18 +35,14 @@
     "biomaterial_name" : "Q4_DEMO-Single cell mRNA-seq_MGH30_A01",
     "ncbi_taxon_id" : [ 9606 ],
     "has_input_biomaterial" : "Q4_DEMO-donor_MGH30",
-    "supplementary_files" : [
-      "Q4_DEMO-protocol"
-    ],
+    "supplementary_files" : [ "Q4_DEMO-protocol" ],
     "describedBy" : "https://schema.humancellatlas.org/core/biomaterial/5.0.0/biomaterial_core",
     "schema_version" : "5.0.0"
   },
-  "genus_species" : [
-    {
-      "describedBy" : "https://schema.humancellatlas.org/module/ontology/5.0.0/species_ontology",
-      "text" : "Homo sapiens"
-    }
-  ],
+  "genus_species" : [ {
+    "describedBy" : "https://schema.humancellatlas.org/module/ontology/5.0.0/species_ontology",
+    "text" : "Homo sapiens"
+  } ],
   "organ" : {
     "describedBy" : "https://schema.humancellatlas.org/module/ontology/5.0.0/organ_ontology",
     "text" : "brain"
@@ -55,12 +51,10 @@
     "describedBy" : "https://schema.humancellatlas.org/module/ontology/5.0.0/organ_part_ontology",
     "text" : "astrocyte"
   },
-  "disease" : [
-    {
-      "describedBy" : "https://schema.humancellatlas.org/module/ontology/5.0.0/disease_ontology",
-      "text" : "glioblastoma"
-    }
-  ]
+  "disease" : [ {
+    "describedBy" : "https://schema.humancellatlas.org/module/ontology/5.0.0/disease_ontology",
+    "text" : "glioblastoma"
+  } ]
 }, {
   "describedBy" : "https://schema.humancellatlas.org/type/process/biomaterial_collection/5.0.0/enrichment_process",
   "schema_version" : "5.0.0",
@@ -86,13 +80,14 @@
   },
   "input_nucleic_acid_molecule" : {
     "describedBy" : "https://schema.humancellatlas.org/module/ontology/5.0.0/biological_macromolecule_ontology",
-    "text" : "polyA RNA"},
+    "text" : "polyA RNA"
+  },
   "library_construction_approach" : "Smart-seq2",
   "end_bias" : "5 prime end bias",
   "strand" : "unstranded",
-  "process_type" :{
-    "text" :"nucleic acid librarly construction process",
-    "describedBy" : "https://schema.humancellatlas.org/module/ontology/5.0.0/process_type_ontology"
+  "process_type" : {
+    "describedBy" : "https://schema.humancellatlas.org/module/ontology/5.0.0/process_type_ontology",
+    "text" : "nucleic acid librarly construction process"
   }
 }, {
   "describedBy" : "https://schema.humancellatlas.org/type/process/sequencing/5.0.0/sequencing_process",
@@ -104,12 +99,13 @@
     "schema_version" : "5.0.0"
   },
   "instrument_manufacturer_model" : {
-    "text" : "Illumina HiSeq 2500",
-    "describedBy" : "https://schema.humancellatlas.org/module/ontology/5.0.0/instrument_ontology"},
+    "describedBy" : "https://schema.humancellatlas.org/module/ontology/5.0.0/instrument_ontology",
+    "text" : "Illumina HiSeq 2500"
+  },
   "paired_ends" : true,
   "process_type" : {
-    "text" : "single cell sequencing process",
-    "describedBy" : "https://schema.humancellatlas.org/module/ontology/5.0.0/process_type_ontology"
+    "describedBy" : "https://schema.humancellatlas.org/module/ontology/5.0.0/process_type_ontology",
+    "text" : "single cell sequencing process"
   }
 }, {
   "describedBy" : "https://schema.humancellatlas.org/type/protocol/5.0.0/protocol",
