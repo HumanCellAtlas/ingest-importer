@@ -19,6 +19,7 @@ Processing [Q4DemoSS2Metadata_v5.xlsx](https://github.com/HumanCellAtlas/metadat
 * ~~link fields are retained~~
   * caught an excluded
 * ~~schema_type of processes is incorrect~~
+* MODULES ARE NOT SUPPORTED
 
 ## Spreadsheet
 * biomaterial.biological_sex is missing on donor_organism
@@ -27,6 +28,9 @@ Processing [Q4DemoSS2Metadata_v5.xlsx](https://github.com/HumanCellAtlas/metadat
   * this is an enum. I have set the speadsheet to be unknown for now.
 * ~~read_index is missing on files~~
 * the value is read_length looks incorrect
+
+## Schema
+* module/process/sequencing/5.0.0/barcode and module/process/sequencing/5.0.0/smartseq2 seem to follow a different pattern from other modules
 
 ## General process
 * Create mappings of column headers to id, schema type and any reference schema. [MappingUtils](../../main/java/uk/ac/ebi/hca/importer/util/MappingUtil.java)

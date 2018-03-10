@@ -78,9 +78,7 @@ public class SpreadsheetImporterConfiguration {
 
         private String[] coreSubTypes;
         private String version;
-
         private String path;
-
         private CoreType coreType;
 
         SubmittableType(String version, CoreType coreType, String... coreSubTypes) {
@@ -98,6 +96,43 @@ public class SpreadsheetImporterConfiguration {
 
     }
 
+    enum ModuleType {
+
+        cell_morphology("5.0.0", CoreType.biomaterial),
+        death("5.0.0", CoreType.biomaterial),
+        familial_relationship("5.0.0", CoreType.biomaterial),
+        growth_conditions("5.0.0", CoreType.biomaterial),
+        homo_sapiens_specific("5.0.0", CoreType.biomaterial),
+        medical_history("5.0.0", CoreType.biomaterial),
+        mus_musculus_specific("5.0.0", CoreType.biomaterial),
+        preservation_storage("5.0.0", CoreType.biomaterial),
+        state_of_specimen("5.0.0", CoreType.biomaterial),
+
+        purchased_reagents("5.0.0", CoreType.process),
+        barcode("5.0.0", CoreType.process, "sequencing"),
+        smartseq2("5.0.0", CoreType.process, "sequencing"),
+        //contact("5.0.0", CoreType.project),
+        publication("5.0.1", CoreType.project);
+
+        private String[] coreSubTypes;
+        private String version;
+        private String path;
+        private CoreType coreType;
+
+        ModuleType(String version, CoreType coreType, String... coreSubTypes) {
+            this.version = version;
+            this.coreType = coreType;
+            this.coreSubTypes = coreSubTypes;
+            if (coreSubTypes == null || coreSubTypes.length <= 0) {
+                this.path = String.format("module/%s/%s/%s", coreType.name(), version, name());
+            } else {
+                String subPath = String.join("/", coreSubTypes);
+                this.path = String.format("module/%s/%s/%s/%s", coreType.name(), subPath,
+                        version, name());
+            }
+        }
+    }
+
     @Bean
     public WorkbookImporter spreadsheetImporter(@Autowired ObjectMapper objectMapper) {
         return new WorkbookImporter(objectMapper);
@@ -113,10 +148,15 @@ public class SpreadsheetImporterConfiguration {
                     submittableType.path, submittableType.coreType.path);
             workbookImporter.register(submittableType.name(), importer);
         });
+        Arrays.stream(ModuleType.values()).forEach(moduleType -> {
+            WorksheetImporter importer = createWorksheetImporter(objectMapper,
+                    moduleType.path, moduleType.coreType.path);
+            workbookImporter.register(moduleType.name(), importer);
+        });
     }
 
     private WorksheetImporter createWorksheetImporter(ObjectMapper objectMapper,
-            String schemaPath, String corePath) {
+                                                      String schemaPath, String corePath) {
         String schemaUrl = String.format("%s/%s", BASE_URL, schemaPath);
         String coreSchemaUrl = String.format("%s/%s", BASE_URL, corePath);
 
@@ -126,7 +166,7 @@ public class SpreadsheetImporterConfiguration {
         ObjectNode predefinedSchemaValues = objectMapper.createObjectNode();
         mappingUtil.populatePredefinedValuesForSchema(predefinedSchemaValues, schemaUrl);
 
-        WorksheetImporter importer = new WorksheetImporter(objectMapper, worksheetMapping,
+        WorksheetImporter importer = new WorksheetImporter(worksheetMapping,
                 predefinedSchemaValues);
 
         Matcher matcher = SCHEMA_URL_PATTERN.matcher(coreSchemaUrl);

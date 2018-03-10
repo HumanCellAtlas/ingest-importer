@@ -48,11 +48,27 @@ public class MappingUtilTest {
     }
 
     @IntegrationTest
+    public void test_addMappingsFromSchema_with_valid_sequencing_process_schema() {
+        WorksheetMappingSpy worksheetMapping = new WorksheetMappingSpy();
+        mappingUtil.populateMappingsFromSchema(worksheetMapping, "https://schema.humancellatlas.org/type/process/sequencing/5.0.0/sequencing_process", "");
+        System.out.println(worksheetMapping.toString());
+        assertEquals(16, worksheetMapping.getNumberOfMappings());
+    }
+
+    @IntegrationTest
     public void test_addMappingsFromSchema_with_valid_sequence_file_schema() {
         WorksheetMappingSpy worksheetMapping = new WorksheetMappingSpy();
         mappingUtil.populateMappingsFromSchema(worksheetMapping, "https://schema.humancellatlas.org/type/file/5.0.0/sequence_file", "");
         System.out.println(worksheetMapping.toString());
         assertEquals(7, worksheetMapping.getNumberOfMappings());
+    }
+
+    @IntegrationTest
+    public void test_addMappingsFromSchema_with_valid_smartseq2() {
+        WorksheetMappingSpy worksheetMapping = new WorksheetMappingSpy();
+        mappingUtil.populateMappingsFromSchema(worksheetMapping, "https://schema.humancellatlas.org/module/process/sequencing/5.0.0/smartseq2", "");
+        System.out.println(worksheetMapping.toString());
+        assertEquals(5, worksheetMapping.getNumberOfMappings());
     }
 
     @IntegrationTest
@@ -73,4 +89,21 @@ public class MappingUtilTest {
         assertEquals("biomaterial", predefinedValues.get("schema_type").textValue());
     }
 
+    @IntegrationTest
+    public void test_generatePredefinedValuesForSchema_with_valid_sequencing_process() {
+        ObjectNode predefinedValues = objectMapper.createObjectNode();
+        mappingUtil.populatePredefinedValuesForSchema(predefinedValues, "https://schema.humancellatlas.org/type/process/sequencing/5.0.0/sequencing_process");
+        assertEquals("https://schema.humancellatlas.org/type/process/sequencing/5.0.0/sequencing_process", predefinedValues.get("describedBy").textValue());
+        assertEquals("5.0.0", predefinedValues.get("schema_version").textValue());
+        assertEquals("process", predefinedValues.get("schema_type").textValue());
+    }
+
+    @IntegrationTest
+    public void test_generatePredefinedValuesForSchema_with_valid_smartseq2() {
+        ObjectNode predefinedValues = objectMapper.createObjectNode();
+        mappingUtil.populatePredefinedValuesForSchema(predefinedValues, "https://schema.humancellatlas.org/module/process/sequencing/5.0.0/smartseq2");
+        assertEquals("https://schema.humancellatlas.org/module/process/sequencing/5.0.0/smartseq2", predefinedValues.get("describedBy").textValue());
+        assertEquals("5.0.0", predefinedValues.get("schema_version").textValue());
+        assertEquals("process", predefinedValues.get("schema_type").textValue());
+    }
 }

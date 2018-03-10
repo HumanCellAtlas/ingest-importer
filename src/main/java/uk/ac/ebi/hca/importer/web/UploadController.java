@@ -1,7 +1,7 @@
 package uk.ac.ebi.hca.importer.web;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +23,8 @@ public class UploadController {
     private ObjectMapper objectMapper;
 
     @GetMapping
-    public void upload() {}
+    public void upload() {
+    }
 
     @RequestMapping(value = "/test", method = RequestMethod.POST)
     @ResponseBody
@@ -31,7 +32,7 @@ public class UploadController {
         String jsonString = "{}";
         try {
             Workbook workbook = new XSSFWorkbook(file.getInputStream());
-            List<JsonNode> records = workbookImporter.importFrom(workbook);
+            List<ObjectNode> records = workbookImporter.importFrom(workbook);
             jsonString = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(records);
         } catch (IOException e) {
             e.printStackTrace();
