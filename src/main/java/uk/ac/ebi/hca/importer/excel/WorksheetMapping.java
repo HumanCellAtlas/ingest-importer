@@ -21,16 +21,18 @@ public class WorksheetMapping {
         return this;
     }
 
-    public WorksheetMapping map(String header, String jsonProperty, SchemaDataType type, String ref) {
-        mapping.put(header, new CellMapping(jsonProperty, type, ref));
+    public WorksheetMapping map(String header, String jsonProperty, SchemaDataType type, String ref, boolean isRequired, boolean isLink) {
+        mapping.put(header, new CellMapping(jsonProperty, type, ref, isRequired, isLink));
         return this;
     }
 
     public CellMapping getMappingFor(String header) {
         CellMapping cellMapping = mapping.get(header);
         if (cellMapping == null) {
+            //If not found assume a link
             String jsonProperty = header.toLowerCase().replaceAll(" ", "_");
-            cellMapping = new CellMapping(jsonProperty, STRING, "");
+            System.out.println("This is probably a link: " + header);
+            cellMapping = new CellMapping(jsonProperty, STRING, "", false, true);
         }
         return cellMapping;
     }

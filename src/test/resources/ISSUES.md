@@ -16,7 +16,8 @@ Processing [Q4DemoSS2Metadata_v5.xlsx](https://github.com/HumanCellAtlas/metadat
   * ~~object~~
   * ~~object array is not showed in an array~~
 * ~~An extra, blank donor_organism is created~~ (checked for empty row)
-* id fields are retained
+* ~~link fields are retained~~
+  * caught an excluded
 * ~~schema_type of processes is incorrect~~
 
 ## Spreadsheet

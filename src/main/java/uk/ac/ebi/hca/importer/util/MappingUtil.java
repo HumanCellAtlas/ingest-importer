@@ -46,9 +46,8 @@ public class MappingUtil {
     private void mapUserFriendlyField(WorksheetMapping worksheetMapping, String id, JsonNode property) {
         String header = property.get("user_friendly").textValue();
         SchemaDataType schemaDataType = determineDataType(id, property);
-        String ref;
-        ref = determineRef(id, property, schemaDataType);
-        worksheetMapping.map(header, id, schemaDataType, ref);
+        String ref = determineRef(id, property, schemaDataType);
+        worksheetMapping.map(header, id, schemaDataType, ref, false, false);
     }
 
     private String determineRef(String id, JsonNode property, SchemaDataType schemaDataType) {
