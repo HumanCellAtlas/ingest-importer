@@ -50,7 +50,7 @@ Processing [Q4DemoSS2Metadata_v5.xlsx](https://github.com/HumanCellAtlas/metadat
 * With a test you should not need to use the debugger that much but it is a useful tool so don't be afraid to use it, step through and set breakpoints.
 * Attempt to keep the README.md up-to-date with how the code works. If you can't explain easily it is likely to be over-complex.
 * Start off with simple cases and a catch all. When you want to work on a specific case make it and error and then pass the error. Replete until the catch-all is not needed.
-* If you feel the need to write a comment it is probally an indication that you can extract method/s with the name of what the comment would have been.
+* If you feel the need to write a comment it is an indication that you can extract method/s with the name of what the comment would have been.
 * Only start optimising when you have working output.
     * If you find yourself doing something twice it may be time to make code more generic but not before YAGNI.
     * Remove redundant code and use source control. Do not comment out.

@@ -3,9 +3,23 @@
   "additionalProperties": false,
   "type": "array",
   "items": {
+    "required": [
+      "schema_type",
+      "content"
+    ],
     "type": "object",
     "properties": {
-      "metadata": {
+      "schema_type": {
+        "type": "string",
+        "enum": [
+          "project",
+          "biomaterial",
+          "process",
+          "protocol",
+          "file"
+        ]
+      },
+      "content": {
         "type": "array",
         "items": {
           "type": "object",

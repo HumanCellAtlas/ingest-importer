@@ -28,6 +28,7 @@ public class WorkbookImporter {
                 .forEach(worksheet -> {
                     String sheetName = worksheet.getSheetName();
                     ObjectNode worksheetRecords = registry.get(sheetName).importFrom(worksheet);
+                    System.out.println("adding " + sheetName);
                     workbookRecords.add(worksheetRecords);
                 });
         return workbookRecords;

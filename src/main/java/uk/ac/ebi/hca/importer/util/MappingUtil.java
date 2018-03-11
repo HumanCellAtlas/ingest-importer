@@ -1,18 +1,12 @@
 package uk.ac.ebi.hca.importer.util;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.ac.ebi.hca.importer.excel.SchemaDataType;
 import uk.ac.ebi.hca.importer.excel.WorksheetMapping;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.URL;
-import java.net.URLConnection;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
@@ -23,8 +17,7 @@ public class MappingUtil {
 
     public void populateMappingsFromSchema(WorksheetMapping worksheetMapping, String schemaUrl, String prefix) {
         try {
-            String text = getText(schemaUrl).trim();
-            JsonNode root = new ObjectMapper().readTree(text);
+            JsonNode root = FileUtil.buildJsonNodeFromUrl(schemaUrl);
             JsonNode properties = root.get("properties");
             for (String field : iteratorToIterable(properties.fieldNames())) {
                 JsonNode property = properties.get(field);
@@ -37,7 +30,7 @@ public class MappingUtil {
                     populateMappingsFromSchema(worksheetMapping, ref_schema_url, field);
                 }
             }
-        } catch (IOException e) {
+        } catch (RuntimeException e) {
             LOGGER.info("Error processing json at " + schemaUrl + ": " + e);
             throw new RuntimeException("Invalid schema: " + prefix + ": " + schemaUrl);
         }
@@ -52,30 +45,22 @@ public class MappingUtil {
 
     private String determineRef(String id, JsonNode property, SchemaDataType schemaDataType) {
         String ref = "";
-        if (schemaDataType == SchemaDataType.OBJECT)
-        {
-            if (property.has("$ref"))
-            {
+        if (schemaDataType == SchemaDataType.OBJECT) {
+            if (property.has("$ref")) {
                 ref = property.get("$ref").textValue();
-            }
-            else {
+            } else {
                 throw new RuntimeException("$ref not found for " + id);
             }
         }
-        if (schemaDataType == SchemaDataType.OBJECT_ARRAY)
-        {
-            if (property.has("items"))
-            {
+        if (schemaDataType == SchemaDataType.OBJECT_ARRAY) {
+            if (property.has("items")) {
                 JsonNode items = property.get("items");
-                if (items.has("$ref"))
-                {
+                if (items.has("$ref")) {
                     ref = items.get("$ref").textValue();
-                }
-                else {
+                } else {
                     throw new RuntimeException("$ref not found for " + id);
                 }
-            }
-            else {
+            } else {
                 throw new RuntimeException("$ref not found for " + id);
             }
         }
@@ -117,8 +102,7 @@ public class MappingUtil {
                         case "integer":
                             return SchemaDataType.INTEGER_ARRAY;
                         default:
-                            if (arrayTypeStr.contains("http"))
-                            {
+                            if (arrayTypeStr.contains("http")) {
                                 return SchemaDataType.OBJECT_ARRAY;
                             }
                             throw new RuntimeException("Unknown array type in " + id + ": " + arrayTypeStr + " type: " + typeStr);
@@ -130,21 +114,6 @@ public class MappingUtil {
         throw new RuntimeException("Cannot determine type of " + id);
     }
 
-    public String getText(String url) {
-        StringBuilder response = new StringBuilder();
-        try {
-            URL website = new URL(url);
-            URLConnection connection = website.openConnection();
-            BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream(), "UTF8"));
-            String inputLine;
-            while ((inputLine = in.readLine()) != null)
-                response.append(inputLine);
-            in.close();
-        } catch (IOException e) {
-            LOGGER.error("Error processing: " + url, e);
-        }
-        return response.toString();
-    }
 
     private <T> Iterable<T> iteratorToIterable(Iterator<T> iterator) {
         return () -> iterator;

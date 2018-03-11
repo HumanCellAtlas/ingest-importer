@@ -1,7 +1,5 @@
 package uk.ac.ebi.hca.importer.client;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -10,10 +8,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import java.io.IOException;
 
-import static junit.framework.TestCase.assertNotNull;
 import static junit.framework.TestCase.assertTrue;
-import static org.junit.Assert.assertFalse;
-import static uk.ac.ebi.hca.importer.client.IngestApiClient.EntityType.PROJECT;
+import static uk.ac.ebi.hca.importer.util.EntityType.PROJECT;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest

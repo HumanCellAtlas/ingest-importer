@@ -31,13 +31,13 @@ public class WorksheetImporter {
         this(worksheetMapping, objectMapper.createObjectNode());
     }
 
-    public WorksheetImporter(WorksheetMapping worksheetMapping,
-                             ObjectNode predefinedValues) {
+    public WorksheetImporter(WorksheetMapping worksheetMapping, ObjectNode predefinedValues) {
         this.worksheetMapping = worksheetMapping;
         this.predefinedValues = predefinedValues;
     }
 
     public ObjectNode importFrom(Sheet worksheet) {
+        String schemaType = predefinedValues.get("schema_type").textValue();
         ArrayNode nodes = JsonNodeFactory.instance.arrayNode();
         ArrayNode links = JsonNodeFactory.instance.arrayNode();
         Row headerRow = worksheet.getRow(2);
@@ -76,8 +76,11 @@ public class WorksheetImporter {
             }
         }
         ObjectNode resultNode = JsonNodeFactory.instance.objectNode();
-        resultNode.set("metadata", nodes);
-        resultNode.set("links", links);
+        resultNode.put("schema_type", schemaType);
+        resultNode.set("content", nodes);
+        if (links.size()>0) {
+            resultNode.set("links", links);
+        }
         return resultNode;
     }
 
