@@ -13,6 +13,7 @@ import com.github.fge.jsonschema.main.JsonSchemaFactory;
 import com.github.fge.jsonschema.main.JsonValidator;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,11 +48,13 @@ public class TestProcessingOfSampleSpreadsheets {
     private ObjectMapper objectMapper;
 
     @Test
+    @Ignore
     public void test_Glioblastoma_v5_spreadsheet_matched_expected_output_and_is_valid_against_schema() throws IOException, ProcessingException {
         checkSpreadsheetValidates(Glioblastoma_v5_SPREADSHEET_URL, Glioblastoma_v5_EXPECTED_JSON_URL, "src/test/resources/output/Glioblastoma_v5.json");
     }
 
     @Test
+    @Ignore
     public void test_Glioblastoma_v5_single_spreadsheet_matched_expected_output_and_is_valid_against_schema() throws IOException, ProcessingException {
         checkSpreadsheetValidates(Glioblastoma_v5_single_SPREADSHEET_URL, Glioblastoma_v5_single_EXPECTED_JSON_URL, "src/test/resources/output/Glioblastoma_v5_single.json");
     }
