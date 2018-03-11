@@ -20,7 +20,7 @@ public class Submitter {
         this.ingestApiClient = ingestApiClient;
     }
 
-    public void submit(String token, JsonNode jsonNode) {
+    public String submit(String token, JsonNode jsonNode) {
         String submissionUrl = ingestApiClient.createSubmission(token);
         System.out.println("Created submission: " + submissionUrl);
         if (jsonNode.getNodeType() == JsonNodeType.ARRAY) {
@@ -47,5 +47,6 @@ public class Submitter {
                 }
             }
         }
+        return submissionUrl;
     }
 }

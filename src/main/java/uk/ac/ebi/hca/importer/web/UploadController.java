@@ -1,5 +1,6 @@
 package uk.ac.ebi.hca.importer.web;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -8,7 +9,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import uk.ac.ebi.hca.importer.client.IngestApiClient;
 import uk.ac.ebi.hca.importer.excel.WorkbookImporter;
+import uk.ac.ebi.hca.importer.submitter.Submitter;
 
 import java.io.IOException;
 import java.util.List;
@@ -29,6 +32,10 @@ public class UploadController {
     @RequestMapping(value = "/test", method = RequestMethod.POST)
     @ResponseBody
     public String testSpreadsheet(@RequestHeader("Authorization") String token, @RequestParam("file") MultipartFile file) {
+        return createJson(file);
+    }
+
+    private String createJson(@RequestParam("file") MultipartFile file) {
         String jsonString = "{}";
         try {
             Workbook workbook = new XSSFWorkbook(file.getInputStream());
@@ -43,12 +50,21 @@ public class UploadController {
     @RequestMapping(value = "/api_upload", method = RequestMethod.POST)
     @ResponseBody
     @ResponseStatus(HttpStatus.CREATED)
-    UploadSuccessResponse apiUpload(@RequestHeader("Authorization") String token, @RequestParam("file") MultipartFile file) {
-        String submissionUUID = "submissionUUID";
-        String submissionUrl = "submissionUrl";
-        String displayId = "displayId";
-        String submissionId = "submissionId";
-        String message = "Your spreadsheet was uploaded and processed successfully";
+    public UploadSuccessResponse apiUpload(@RequestHeader("Authorization") String token, @RequestParam("file") MultipartFile file) {
+        String submissionUUID = "";
+        String submissionUrl = "";
+        String displayId = "";
+        String submissionId = "";
+        String message;
+        try {
+            JsonNode jsonNode = new ObjectMapper().readTree(createJson(file));
+            IngestApiClient ingestApiClient = new IngestApiClient();
+            Submitter submitter = new Submitter(ingestApiClient);
+            submissionUrl = submitter.submit(ingestApiClient.requestAuthenticationToken(), jsonNode);
+            message = "Your spreadsheet was uploaded and processed successfully";
+        } catch (IOException e) {
+            message = e.getMessage();
+        }
         return new UploadSuccessResponse(submissionUUID, submissionUrl, displayId, submissionId, message);
     }
 
