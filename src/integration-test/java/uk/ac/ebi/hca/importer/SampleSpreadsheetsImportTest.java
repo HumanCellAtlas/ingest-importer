@@ -56,30 +56,30 @@ public class SampleSpreadsheetsImportTest {
     @Test
     @Ignore
     public void testPbmc8kSample() {
-        assertCorrectOutput(pbmc8k_SPREADSHEET_URL, Glioblastoma_v5_EXPECTED_JSON_URL,
+        expectCorrectOutput(pbmc8k_SPREADSHEET_URL, Glioblastoma_v5_EXPECTED_JSON_URL,
                 "pbmc8k_v5.json");
     }
 
     @Test
     @Ignore
     public void testGlioblastomaSample() {
-        assertCorrectOutput(Glioblastoma_v5_SPREADSHEET_URL,
+        expectCorrectOutput(Glioblastoma_v5_SPREADSHEET_URL,
                 Glioblastoma_v5_EXPECTED_JSON_URL, "Glioblastoma_v5.json");
     }
 
     @Test
     public void testGlioblastomaSingleSample() {
-        assertCorrectOutput(Glioblastoma_v5_single_SPREADSHEET_URL,
+        expectCorrectOutput(Glioblastoma_v5_single_SPREADSHEET_URL,
                 Glioblastoma_v5_single_EXPECTED_JSON_URL, "Glioblastoma_v5_single.json");
     }
 
     @Test
     public void testQ4DemoSample() {
-        assertCorrectOutput(Q4DemoSS2Metadata_v5_SPREADSHEET_URL,
+        expectCorrectOutput(Q4DemoSS2Metadata_v5_SPREADSHEET_URL,
                 Q4DemoSS2Metadata_v5_EXPECTED_JSON_URL, "Q4DemoSS2Metadata_v5.json");
     }
 
-    private void assertCorrectOutput(String inputUrl, String expectedFileUrl, String outputFile) {
+    private void expectCorrectOutput(String inputUrl, String expectedFileUrl, String outputFile) {
         try (InputStream input = new URL(inputUrl).openStream()) {
             String jsonString = doImport(input, outputFile);
             final JsonNode jsonNode = new ObjectMapper().readTree(jsonString);
