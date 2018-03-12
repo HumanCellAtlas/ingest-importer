@@ -35,12 +35,16 @@ public class TestProcessingOfSampleSpreadsheets {
 
     private static final JsonValidator VALIDATOR = JsonSchemaFactory.byDefault().getValidator();
 
+
+
     private static final String Glioblastoma_v5_EXPECTED_JSON_URL = "https://github.com/HumanCellAtlas/metadata-schema/blob/develop/examples/JSON/v5/SmartSeq2/Glioblastoma.json?raw=true";
     private static final String Glioblastoma_v5_single_EXPECTED_JSON_URL = "https://github.com/HumanCellAtlas/metadata-schema/blob/develop/examples/JSON/v5/SmartSeq2/Glioblastoma_single.json?raw=true";
     private static final String Q4DemoSS2Metadata_v5_EXPECTED_JSON_URL = "https://raw.githubusercontent.com/HumanCellAtlas/metadata-schema/develop/examples/JSON/v5/SmartSeq2/Q4DemoSS2Metadata_v5.json";
     private static final String Q4DemoSS2Metadata_v5_SPREADSHEET_URL = "https://github.com/HumanCellAtlas/metadata-schema/blob/master/examples/spreadsheets/v5/filled/SmartSeq2/Q4DemoSS2Metadata_v5.xlsx?raw=true";
     private static final String Glioblastoma_v5_SPREADSHEET_URL = "https://github.com/HumanCellAtlas/metadata-schema/blob/master/examples/spreadsheets/v5/filled/SmartSeq2/Glioblastoma.xlsx?raw=true";
     private static final String Glioblastoma_v5_single_SPREADSHEET_URL = "https://github.com/HumanCellAtlas/metadata-schema/blob/develop/examples/spreadsheets/v5/filled/SmartSeq2/Glioblastoma_single.xlsx?raw=true";
+    private static final String pbmc8k_SPREADSHEET_URL = "https://github.com/HumanCellAtlas/metadata-schema/blob/develop/examples/spreadsheets/v5/filled/10x_v2/pbmc8k.xlsx?raw=true";
+    private static final String pbmc8k_EXPECTED_JSON_URL = "";
 
     @Autowired
     private WorkbookImporter workbookImporter;
@@ -49,12 +53,17 @@ public class TestProcessingOfSampleSpreadsheets {
 
     @Test
     @Ignore
+    public void test_pbmc8k_v5_spreadsheet_matched_expected_output_and_is_valid_against_schema() throws IOException, ProcessingException {
+        checkSpreadsheetValidates(pbmc8k_SPREADSHEET_URL, Glioblastoma_v5_EXPECTED_JSON_URL, "src/test/resources/output/pbmc8k_v5.json");
+    }
+
+    @Test
+    @Ignore
     public void test_Glioblastoma_v5_spreadsheet_matched_expected_output_and_is_valid_against_schema() throws IOException, ProcessingException {
         checkSpreadsheetValidates(Glioblastoma_v5_SPREADSHEET_URL, Glioblastoma_v5_EXPECTED_JSON_URL, "src/test/resources/output/Glioblastoma_v5.json");
     }
 
     @Test
-    @Ignore
     public void test_Glioblastoma_v5_single_spreadsheet_matched_expected_output_and_is_valid_against_schema() throws IOException, ProcessingException {
         checkSpreadsheetValidates(Glioblastoma_v5_single_SPREADSHEET_URL, Glioblastoma_v5_single_EXPECTED_JSON_URL, "src/test/resources/output/Glioblastoma_v5_single.json");
     }
