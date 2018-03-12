@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.ac.ebi.hca.importer.excel.SchemaDataType;
 import uk.ac.ebi.hca.importer.excel.WorksheetMapping;
+import uk.ac.ebi.hca.importer.util.FileUtil.FileUtilException;
 
 import java.util.Arrays;
 import java.util.Iterator;
@@ -30,9 +31,9 @@ public class MappingUtil {
                     populateMappingsFromSchema(worksheetMapping, ref_schema_url, field);
                 }
             }
-        } catch (RuntimeException e) {
+        } catch (FileUtilException e) {
             LOGGER.info("Error processing json at " + schemaUrl + ": " + e);
-            throw new RuntimeException("Invalid schema: " + prefix + ": " + schemaUrl);
+            throw new MappingUtilException("Invalid schema: " + prefix + ": " + schemaUrl);
         }
     }
 
@@ -105,13 +106,13 @@ public class MappingUtil {
                             if (arrayTypeStr.contains("http")) {
                                 return SchemaDataType.OBJECT_ARRAY;
                             }
-                            throw new RuntimeException("Unknown array type in " + id + ": " + arrayTypeStr + " type: " + typeStr);
+                            throw new MappingUtilException("Unknown array type in " + id + ": " + arrayTypeStr + " type: " + typeStr);
                     }
                 default:
-                    throw new RuntimeException("Unknown type in " + id + ": " + typeStr);
+                    throw new MappingUtilException("Unknown type in " + id + ": " + typeStr);
             }
         }
-        throw new RuntimeException("Cannot determine type of " + id);
+        throw new MappingUtilException("Cannot determine type of " + id);
     }
 
 
@@ -126,6 +127,12 @@ public class MappingUtil {
                     .put("describedBy", schemaUrl)
                     .put("schema_version", parts.get(parts.size() - 2))
                     .put("schema_type", parts.get(4));
+        }
+    }
+
+    public class MappingUtilException extends RuntimeException {
+        public MappingUtilException(String message) {
+            super(message);
         }
     }
 }

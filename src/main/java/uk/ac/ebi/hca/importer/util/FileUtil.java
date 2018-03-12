@@ -42,7 +42,18 @@ public class FileUtil {
             return root;
         } catch (IOException e) {
             LOGGER.error("Error processing: " + url, e);
-            throw new RuntimeException("Error building JSON for " + url, e);
+            throw new FileUtilException("Error building JSON for " + url, e);
+        }
+    }
+
+
+    public static class FileUtilException extends RuntimeException {
+        public FileUtilException(String message) {
+            super(message);
+        }
+
+        public FileUtilException(String message, Exception e) {
+            super(message, e);
         }
     }
 }
