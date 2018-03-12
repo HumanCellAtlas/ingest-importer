@@ -3,8 +3,9 @@ package uk.ac.ebi.hca.importer.excel;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.jayway.jsonassert.JsonAssert;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFCell;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.junit.Ignore;
 import org.junit.Test;
 import uk.ac.ebi.hca.importer.excel.exception.NotAnObjectNode;
@@ -191,26 +192,25 @@ public class CellMappingTest {
     }
 
     @Test
-    @Ignore
-    public void testDeeplyNestedFieldImport() throws Exception {
+    public void testImportDeeplyNestedField() throws Exception {
         //given:
         ObjectNode node = objectMapper.createObjectNode();
+        Row row = createSampleRow();
+
+        //and:
+        Cell ageCell = row.createCell(0);
+        int ageValue = 39;
+        ageCell.setCellValue(ageValue);
+
+
+        //and:
+        Cell sexCell = row.createCell(1);
+        String male = "male";
+        sexCell.setCellValue(male);
 
         //and:
         CellMapping ageMapping = new CellMapping("personal.info.age", INTEGER);
         CellMapping sexMapping = new CellMapping("personal.info.sex", STRING);
-
-        //and:
-        Cell ageCell = mock(Cell.class);
-        doReturn(CellType.NUMERIC).when(ageCell).getCellTypeEnum();
-        double ageValue = 39;
-        doReturn(ageValue).when(ageCell).getNumericCellValue();
-
-        //and:
-        Cell sexCell = mock(Cell.class);
-        doReturn(CellType.STRING).when(sexCell).getCellTypeEnum();
-        String male = "male";
-        doReturn(male).when(sexCell).getStringCellValue();
 
         //when:
         ageMapping.importTo(node, ageCell);
@@ -250,6 +250,12 @@ public class CellMappingTest {
 
         //then:
         assertThat(notAnObjectNode.getMessage()).contains("[friends] field");
+    }
+
+    private Row createSampleRow() {
+        Workbook workbook = new XSSFWorkbook();
+        Sheet worksheet = workbook.createSheet("sample");
+        return worksheet.createRow(0);
     }
 
 }
