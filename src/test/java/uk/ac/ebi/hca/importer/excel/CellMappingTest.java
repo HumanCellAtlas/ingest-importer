@@ -3,7 +3,10 @@ package uk.ac.ebi.hca.importer.excel;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.jayway.jsonassert.JsonAssert;
-import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.junit.Test;
 import uk.ac.ebi.hca.importer.excel.exception.NotAnObjectNode;
@@ -11,8 +14,6 @@ import uk.ac.ebi.hca.importer.excel.exception.NotAnObjectNode;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 import static org.hamcrest.Matchers.contains;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
 import static uk.ac.ebi.hca.importer.excel.SchemaDataType.*;
 
 public class CellMappingTest {
@@ -23,6 +24,7 @@ public class CellMappingTest {
     public void testImportStringType() {
         //given:
         ObjectNode node = objectMapper.createObjectNode();
+        Row row = createSampleRow();
 
         //and:
         String firstName = "first_name";
@@ -31,17 +33,15 @@ public class CellMappingTest {
         CellMapping lastNameMapping = new CellMapping(lastName, STRING);
 
         //when:
-        Cell juanCell = mock(Cell.class);
-        doReturn(CellType.STRING).when(juanCell).getCellTypeEnum();
+        Cell juanCell = row.createCell(0);
         String juan = "Juan";
-        doReturn(juan).when(juanCell).getStringCellValue();
+        juanCell.setCellValue(juan);
         firstNameMapping.importTo(node, juanCell);
 
         //and:
-        Cell delaCruzCell = mock(Cell.class);
-        doReturn(CellType.STRING).when(delaCruzCell).getCellTypeEnum();
+        Cell delaCruzCell = row.createCell(1);
         String delaCruz = "dela Cruz";
-        doReturn(delaCruz).when(delaCruzCell).getStringCellValue();
+        delaCruzCell.setCellValue(delaCruz);
         lastNameMapping.importTo(node, delaCruzCell);
 
         //then:
@@ -57,12 +57,12 @@ public class CellMappingTest {
     public void testImportStringArrayType() throws Exception {
         //given:
         ObjectNode node = objectMapper.createObjectNode();
+        Row row = createSampleRow();
 
         //and:
-        Cell shoppingListCell = mock(Cell.class);
-        doReturn(CellType.STRING).when(shoppingListCell).getCellTypeEnum();
+        Cell shoppingListCell = row.createCell(0);
         String items = "milk||egg||cereals";
-        doReturn(items).when(shoppingListCell).getStringCellValue();
+        shoppingListCell.setCellValue(items);
         String shoppingList = "shopping_list";
         CellMapping shoppingListMapping = new CellMapping(shoppingList, STRING_ARRAY);
 
@@ -79,16 +79,16 @@ public class CellMappingTest {
     public void testImportIntegerType() {
         //given:
         ObjectNode node = objectMapper.createObjectNode();
+        Row row = createSampleRow();
 
         //and:
         String quantity = "quantity";
         CellMapping quantityMapping = new CellMapping(quantity, INTEGER);
 
         //and:
-        Cell cell = mock(Cell.class);
-        doReturn(CellType.NUMERIC).when(cell).getCellTypeEnum();
+        Cell cell = row.createCell(0);
         double cellValue = 12D;
-        doReturn(cellValue).when(cell).getNumericCellValue();
+        cell.setCellValue(cellValue);
 
         //when:
         quantityMapping.importTo(node, cell);
@@ -103,11 +103,11 @@ public class CellMappingTest {
         //given:
         String fibonacci = "fibonacci";
         CellMapping fibonacciMapping = new CellMapping(fibonacci, INTEGER_ARRAY);
+        Row row = createSampleRow();
 
         //and:
-        Cell cell = mock(Cell.class);
-        doReturn(CellType.STRING).when(cell).getCellTypeEnum();
-        doReturn("1||1||2||3||5||8").when(cell).getStringCellValue();
+        Cell cell = row.createCell(0);
+        cell.setCellValue("1||1||2||3||5||8");
 
         //and:
         ObjectNode node = objectMapper.createObjectNode();
@@ -127,9 +127,8 @@ public class CellMappingTest {
         CellMapping integerListMapping = new CellMapping(intList, INTEGER_ARRAY);
 
         //and:
-        Cell cell = mock(Cell.class);
-        doReturn(CellType.STRING).when(cell).getCellTypeEnum();
-        doReturn("").when(cell).getStringCellValue();
+        Cell cell = createSampleRow().createCell(0);
+        cell.setCellValue("");
 
         //and:
         ObjectNode node = objectMapper.createObjectNode();
@@ -150,7 +149,7 @@ public class CellMappingTest {
 
         //and:
         String warrantyLength = "warranty.warranty_length";
-        CellMapping numericCellMapping = new CellMapping(warrantyLength, INTEGER);
+        CellMapping integerCellMapping = new CellMapping(warrantyLength, INTEGER);
 
         //and:
         Cell integerCell = row.createCell(0);
@@ -175,7 +174,7 @@ public class CellMappingTest {
         arrayCell.setCellValue("cosmetic damages||dead pixels");
 
         //when:
-        numericCellMapping.importTo(node, integerCell);
+        integerCellMapping.importTo(node, integerCell);
         stringCellMapping.importTo(node, stringCell);
         arrayCellMapping.importTo(node, arrayCell);
 
@@ -229,9 +228,8 @@ public class CellMappingTest {
         CellMapping cellMapping = new CellMapping("friends.count", INTEGER);
 
         //and:
-        Cell cell = mock(Cell.class);
-        doReturn(CellType.NUMERIC).when(cell).getCellTypeEnum();
-        doReturn(14D).when(cell).getNumericCellValue();
+        Cell cell = createSampleRow().createCell(0);
+        cell.setCellValue(14D);
 
         //when:
         NotAnObjectNode notAnObjectNode = null;
