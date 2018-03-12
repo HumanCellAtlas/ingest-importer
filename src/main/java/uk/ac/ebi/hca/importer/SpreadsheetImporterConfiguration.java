@@ -16,7 +16,6 @@ import uk.ac.ebi.hca.importer.util.MappingUtil;
 import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.StreamSupport;
 
 @Configuration
 public class SpreadsheetImporterConfiguration {
@@ -112,16 +111,15 @@ public class SpreadsheetImporterConfiguration {
             this.coreType = coreType;
             this.coreSubTypes = coreSubTypes;
             if (coreSubTypes == null || coreSubTypes.length <= 0) {
-                this.path = String.format("type/%s/%s/%s", coreType.name(), version, name());
+                this.path = String.format("module/%s/%s/%s", coreType.name(), version, name());
             } else {
                 String subPath = String.join("/", coreSubTypes);
-                this.path = String.format("type/%s/%s/%s/%s", coreType.name(), subPath,
+                this.path = String.format("module/%s/%s/%s/%s", coreType.name(), subPath,
                         version, name());
             }
         }
 
     }
-
 
     @Bean
     public WorkbookImporter spreadsheetImporter(@Autowired ObjectMapper objectMapper) {
@@ -133,18 +131,17 @@ public class SpreadsheetImporterConfiguration {
         ApplicationContext applicationContext = event.getApplicationContext();
         WorkbookImporter workbookImporter = applicationContext.getBean(WorkbookImporter.class);
         ObjectMapper objectMapper = applicationContext.getBean(ObjectMapper.class);
+        setUpWorksheetImporters(workbookImporter, objectMapper);
+    }
+
+    private void setUpWorksheetImporters(WorkbookImporter workbookImporter,
+            ObjectMapper objectMapper) {
         Arrays.stream(SubmittableType.values()).forEach(submittableType -> {
             String corePath = submittableType.coreType.path;
             WorksheetImporter importer = createWorksheetImporter(objectMapper,
                     submittableType.path, corePath);
-            addPredefinedCoreValues(objectMapper, corePath, importer);
-            Arrays.stream(ModuleType.values())
-                    .filter(moduleType -> submittableType.coreType.equals(moduleType.coreType))
-                    .forEach(moduleType -> {
-                        ObjectNode predefinedModuleValues = objectMapper.createObjectNode()
-                                .put("describedBy", moduleType.path);
-                        importer.defineValuesFor(moduleType.name(), predefinedModuleValues);
-                    });
+            addPredefinedCoreValues(importer, corePath, objectMapper);
+            addPredefinedModuleValues(importer, submittableType, objectMapper);
             workbookImporter.register(submittableType.name(), importer);
         });
     }
@@ -162,8 +159,8 @@ public class SpreadsheetImporterConfiguration {
         return new WorksheetImporter(worksheetMapping, predefinedSchemaValues);
     }
 
-    private void addPredefinedCoreValues(ObjectMapper objectMapper, String corePath,
-            WorksheetImporter importer) {
+    private void addPredefinedCoreValues(WorksheetImporter importer, String corePath,
+            ObjectMapper objectMapper) {
         String coreSchemaUrl = String.format("%s/%s", BASE_URL, corePath);
         Matcher matcher = SCHEMA_URL_PATTERN.matcher(coreSchemaUrl);
         if (matcher.matches()) {
@@ -173,6 +170,18 @@ public class SpreadsheetImporterConfiguration {
             String coreType = matcher.group("schemaType");
             importer.defineValuesFor(coreType, predefinedCoreSchemaValues);
         }
+    }
+
+    private void addPredefinedModuleValues(WorksheetImporter importer,
+            SubmittableType submittableType, ObjectMapper objectMapper) {
+        Arrays.stream(ModuleType.values())
+                .filter(moduleType -> submittableType.coreType.equals(moduleType.coreType))
+                .forEach(moduleType -> {
+                    String moduleSchemaUrl = String.format("%s/%s", BASE_URL, moduleType.path);
+                    ObjectNode predefinedModuleValues = objectMapper.createObjectNode()
+                            .put("describedBy", moduleSchemaUrl);
+                    importer.defineValuesFor(moduleType.name(), predefinedModuleValues);
+                });
     }
 
 }
