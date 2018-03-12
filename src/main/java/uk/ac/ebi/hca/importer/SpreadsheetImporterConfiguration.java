@@ -137,11 +137,11 @@ public class SpreadsheetImporterConfiguration {
     private void setUpWorksheetImporters(WorkbookImporter workbookImporter,
             ObjectMapper objectMapper) {
         Arrays.stream(SubmittableType.values()).forEach(submittableType -> {
-            String corePath = submittableType.coreType.path;
+            CoreType coreType = submittableType.coreType;
             WorksheetImporter importer = createWorksheetImporter(objectMapper,
-                    submittableType.path, corePath);
-            addPredefinedCoreValues(importer, corePath, objectMapper);
-            addPredefinedModuleValues(importer, submittableType, objectMapper);
+                    submittableType.path, coreType.path);
+            addPredefinedCoreValues(importer, coreType, objectMapper);
+            addPredefinedModuleValues(importer, coreType, objectMapper);
             workbookImporter.register(submittableType.name(), importer);
         });
     }
@@ -159,23 +159,23 @@ public class SpreadsheetImporterConfiguration {
         return new WorksheetImporter(worksheetMapping, predefinedSchemaValues);
     }
 
-    private void addPredefinedCoreValues(WorksheetImporter importer, String corePath,
+    private void addPredefinedCoreValues(WorksheetImporter importer, CoreType coreType,
             ObjectMapper objectMapper) {
-        String coreSchemaUrl = String.format("%s/%s", BASE_URL, corePath);
+        String coreSchemaUrl = String.format("%s/%s", BASE_URL, coreType.path);
         Matcher matcher = SCHEMA_URL_PATTERN.matcher(coreSchemaUrl);
         if (matcher.matches()) {
             ObjectNode predefinedCoreSchemaValues = objectMapper.createObjectNode()
                     .put("describedBy", coreSchemaUrl)
                     .put("schema_version", matcher.group("version"));
-            String coreType = matcher.group("schemaType");
-            importer.defineValuesFor(coreType, predefinedCoreSchemaValues);
+            String coreModuleName = matcher.group("schemaType");
+            importer.defineValuesFor(coreModuleName, predefinedCoreSchemaValues);
         }
     }
 
-    private void addPredefinedModuleValues(WorksheetImporter importer,
-            SubmittableType submittableType, ObjectMapper objectMapper) {
+    private void addPredefinedModuleValues(WorksheetImporter importer, CoreType coreType,
+            ObjectMapper objectMapper) {
         Arrays.stream(ModuleType.values())
-                .filter(moduleType -> submittableType.coreType.equals(moduleType.coreType))
+                .filter(moduleType -> coreType.equals(moduleType.coreType))
                 .forEach(moduleType -> {
                     String moduleSchemaUrl = String.format("%s/%s", BASE_URL, moduleType.path);
                     ObjectNode predefinedModuleValues = objectMapper.createObjectNode()
