@@ -86,13 +86,7 @@ public class SpreadsheetImporterConfiguration {
             this.version = version;
             this.coreType = coreType;
             this.coreSubTypes = coreSubTypes;
-            if (coreSubTypes == null || coreSubTypes.length <= 0) {
-                this.path = String.format("type/%s/%s/%s", coreType.name(), version, name());
-            } else {
-                String subPath = String.join("/", coreSubTypes);
-                this.path = String.format("type/%s/%s/%s/%s", coreType.name(), subPath,
-                        version, name());
-            }
+            this.path = buildPath("type", name(), version, coreType, coreSubTypes);
         }
 
     }
@@ -110,15 +104,22 @@ public class SpreadsheetImporterConfiguration {
             this.version = version;
             this.coreType = coreType;
             this.coreSubTypes = coreSubTypes;
-            if (coreSubTypes == null || coreSubTypes.length <= 0) {
-                this.path = String.format("module/%s/%s/%s", coreType.name(), version, name());
-            } else {
-                String subPath = String.join("/", coreSubTypes);
-                this.path = String.format("module/%s/%s/%s/%s", coreType.name(), subPath,
-                        version, name());
-            }
+            this.path = buildPath("module", name(), version, coreType, coreSubTypes);
         }
 
+    }
+
+    private static String buildPath(String category, String name, String version,
+            CoreType coreType, String[] coreSubTypes) {
+        String path = null;
+        if (coreSubTypes == null || coreSubTypes.length <= 0) {
+            path = String.format("%s/%s/%s/%s", category, coreType.name(), version, name);
+        } else {
+            String subPath = String.join("/", coreSubTypes);
+            path = String.format("%s/%s/%s/%s/%s", category, coreType.name(), subPath, version,
+                    name);
+        }
+        return path;
     }
 
     @Bean
