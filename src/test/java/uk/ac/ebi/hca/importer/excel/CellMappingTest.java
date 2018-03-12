@@ -21,7 +21,7 @@ public class CellMappingTest {
     private ObjectMapper objectMapper = new ObjectMapper();
 
     @Test
-    public void testStringTypeImportTo() {
+    public void testImportStringType() {
         //given:
         ObjectNode node = objectMapper.createObjectNode();
 
@@ -55,7 +55,7 @@ public class CellMappingTest {
     }
 
     @Test
-    public void testStringArrayTypeImportTo() throws Exception {
+    public void testImportStringArrayType() throws Exception {
         //given:
         ObjectNode node = objectMapper.createObjectNode();
 
@@ -100,7 +100,7 @@ public class CellMappingTest {
     }
 
     @Test
-    public void testNumericArrayTypeImportTo() throws Exception {
+    public void testImportIntegerArrayType() throws Exception {
         //given:
         String fibonacci = "fibonacci";
         CellMapping fibonacciMapping = new CellMapping(fibonacci, INTEGER_ARRAY);
@@ -122,7 +122,7 @@ public class CellMappingTest {
     }
 
     @Test
-    public void testEmptyNumericArrayTypeImportTo() throws Exception {
+    public void testImportEmptyIntegerArrayType() throws Exception {
         //given:
         String intList = "int_list";
         CellMapping integerListMapping = new CellMapping(intList, INTEGER_ARRAY);
@@ -145,7 +145,7 @@ public class CellMappingTest {
 
     @Test
     @Ignore
-    public void testModularFieldImportTo() throws Exception {
+    public void testImportModularField() throws Exception {
         //given:
         ObjectNode node = objectMapper.createObjectNode();
 
@@ -192,7 +192,7 @@ public class CellMappingTest {
 
     @Test
     @Ignore
-    public void testImportToDeeplyNestedField() throws Exception {
+    public void testDeeplyNestedFieldImport() throws Exception {
         //given:
         ObjectNode node = objectMapper.createObjectNode();
 
