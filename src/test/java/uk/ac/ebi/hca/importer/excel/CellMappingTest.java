@@ -121,6 +121,26 @@ public class CellMappingTest {
     }
 
     @Test
+    public void testImportIntegerArrayTypeFromNumericCell() throws Exception {
+        //given:
+        ObjectNode node = objectMapper.createObjectNode();
+
+        //and:
+        Cell cell = createSampleRow().createCell(0);
+        cell.setCellValue(23.0D);
+
+        //and:
+        CellMapping agesMapping = new CellMapping("allowed_ages", INTEGER_ARRAY);
+
+        //when:
+        agesMapping.importTo(node, cell);
+
+        //then:
+        JsonAssert.with(objectMapper.writeValueAsString(node))
+                .assertThat("$.allowed_ages", contains(23));
+    }
+
+    @Test
     public void testImportEmptyIntegerArrayType() throws Exception {
         //given:
         String intList = "int_list";
