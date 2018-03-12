@@ -17,6 +17,7 @@ public class WorkbookImporter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(WorkbookImporter.class);
 
+    //TODO remove this unused property
     private final ObjectMapper objectMapper;
 
     private final Map<String, WorksheetImporter> registry = new HashMap<>();
@@ -25,8 +26,7 @@ public class WorkbookImporter {
         this.objectMapper = objectMapper;
     }
 
-    public List<ObjectNode> importFrom(Workbook workbook, String fileName) {
-        LOGGER.info("Processing spreadsheet: " + fileName);
+    public List<ObjectNode> importFrom(Workbook workbook) {
         List<ObjectNode> workbookRecords = new ArrayList<>();
         StreamSupport.stream(workbook.spliterator(), false)
                 .filter(this::hasImporter)

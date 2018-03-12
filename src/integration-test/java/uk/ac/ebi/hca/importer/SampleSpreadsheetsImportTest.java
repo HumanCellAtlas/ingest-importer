@@ -84,7 +84,7 @@ public class SampleSpreadsheetsImportTest {
     private void assertCorrectOutput(String inputUrl, String expectedFileUrl, String outputFile) {
         try (InputStream input = new URL(inputUrl).openStream()) {
             Workbook workbook = new XSSFWorkbook(input);
-            List<ObjectNode> records = workbookImporter.importFrom(workbook, inputUrl);
+            List<ObjectNode> records = workbookImporter.importFrom(workbook);
             ObjectWriter writer = objectMapper.writer(new DefaultPrettyPrinter());
             String jsonString = writer.writeValueAsString(records);
             writer.writeValue(new File(outputFile), records);
