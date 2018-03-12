@@ -24,7 +24,7 @@ public class WorksheetMappingTest {
         CellMapping extraField = worksheetMapping.getMappingFor("Extra Field");
 
         //then:
-        String[] cellMappingFields = {"jsonProperty", "dataType"};
+        String[] cellMappingFields = {"jsonProperty", "schemaDataType"};
         assertThat(firstName).extracting(cellMappingFields)
                 .containsExactly("first_name", STRING);
         assertThat(friends).extracting(cellMappingFields)
