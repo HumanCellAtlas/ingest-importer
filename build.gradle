@@ -24,6 +24,15 @@ repositories {
 	mavenCentral()
 }
 
+sourceSets {
+
+    integrationTest {
+        java.srcDir 'src/integration-test/java'
+        resources.srcDir 'src/integration-test/reources'
+    }
+
+}
+
 dependencies {
 	compile('org.springframework.boot:spring-boot-starter-web')
 	compile('io.springfox:springfox-swagger2:2.+')
@@ -41,4 +50,21 @@ dependencies {
     testCompile('org.springframework.boot:spring-boot-starter-test')
     testCompile('com.jayway.jsonpath:json-path-assert:2.4.0')
 	testCompile('com.github.java-json-tools:json-schema-validator:2.2.8')
+
+    //integration test dependencies
+    integrationTestCompile sourceSets.main.output
+    integrationTestCompile sourceSets.test.output
+
+    integrationTestCompile configurations.compile
+    integrationTestCompile configurations.testCompile
+
+    integrationTestRuntime configurations.runtime
+    integrationTestRuntime configurations.testRuntime
+}
+
+task integrationTest(type:Test) {
+
+    testClassesDirs = sourceSets.integrationTest.output.classesDirs
+    classpath = sourceSets.integrationTest.runtimeClasspath
+
 }
