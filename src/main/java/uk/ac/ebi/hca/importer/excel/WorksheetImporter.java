@@ -58,10 +58,10 @@ public class WorksheetImporter {
 
                         } else {
                             if (dataCell.getColumnIndex() == 0) {
-                                if (cellMapping.dataType == SchemaDataType.STRING) {
+                                if (cellMapping.schemaDataType == SchemaDataType.STRING) {
                                     id = dataCell.getStringCellValue();
                                 } else {
-                                    LOGGER.warn("Don't know how to deal with non string id: " + cellMapping.dataType);
+                                    LOGGER.warn("Don't know how to deal with non string id: " + cellMapping.schemaDataType);
                                 }
                             }
                             cellMapping.importTo(rowJson, dataCell);
@@ -85,7 +85,7 @@ public class WorksheetImporter {
     }
 
     private JsonNode createLink(Sheet worksheet, String id, Cell dataCell, CellMapping cellMapping) {
-        if (cellMapping.dataType == SchemaDataType.STRING) {
+        if (cellMapping.schemaDataType == SchemaDataType.STRING) {
             dataCell.setCellType(CellType.STRING);
             String value = dataCell.getStringCellValue();
             String worksheetName = worksheet.getSheetName();
@@ -96,7 +96,7 @@ public class WorksheetImporter {
             objectNode.put("destination_id", value);
             return objectNode;
         } else {
-            throw new RuntimeException("Don't know how to deal with non string link: " + cellMapping.dataType);
+            throw new RuntimeException("Don't know how to deal with non string link: " + cellMapping.schemaDataType);
         }
     }
 

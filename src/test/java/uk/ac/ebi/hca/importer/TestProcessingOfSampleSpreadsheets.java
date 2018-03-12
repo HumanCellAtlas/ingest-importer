@@ -75,7 +75,6 @@ public class TestProcessingOfSampleSpreadsheets {
             System.out.println(jsonString);
             writer.writeValue(new File(outputFile), records);
             final JsonNode jsonNode = new ObjectMapper().readTree(jsonString);
-            //assertEquals(readFromInputStream(expectedFile), jsonString);
             JsonNode outputSchema = JsonLoader.fromResource("/output-schema.json");
             ProcessingReport processingReport = VALIDATOR.validate(outputSchema, jsonNode);
             for (ProcessingMessage processingMessage : processingReport) {

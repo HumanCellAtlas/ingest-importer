@@ -16,54 +16,54 @@ class CellMapping {
     static final String ARRAY_SEPARATOR = "\\|\\|";
 
     final String jsonProperty;
-    final SchemaDataType dataType;
+    final SchemaDataType schemaDataType;
     final String ref;
     final boolean isLink;
 
-    CellMapping(String jsonProperty, SchemaDataType dataType, String ref, boolean isLink) {
+    CellMapping(String jsonProperty, SchemaDataType schemaDataType, String ref, boolean isLink) {
         this.jsonProperty = jsonProperty;
-        this.dataType = dataType;
+        this.schemaDataType = schemaDataType;
         this.ref = ref;
         this.isLink = isLink;
     }
 
-    CellMapping(String jsonProperty, SchemaDataType dataType) {
+    CellMapping(String jsonProperty, SchemaDataType schemaDataType) {
         this.jsonProperty = jsonProperty;
-        this.dataType = dataType;
+        this.schemaDataType = schemaDataType;
         this.ref = "";
         this.isLink = false;
     }
 
-    void importTo(final ObjectNode node, final Cell dataCell) {
+    void importTo(final ObjectNode node, final Cell spreadsheetDataCell) {
         NodeNavigator nodeNavigator = navigate(node).prepareObjectNode(jsonProperty);
-        switch (dataType) {
+        switch (schemaDataType) {
             case INTEGER:
-                dataCell.setCellType(CellType.NUMERIC);
-                Double numericCellValue = dataCell.getNumericCellValue();
+                spreadsheetDataCell.setCellType(CellType.NUMERIC);
+                Double numericCellValue = spreadsheetDataCell.getNumericCellValue();
                 int intValue = numericCellValue.intValue();
                 nodeNavigator.putNext(intValue);
                 break;
             case NUMBER:
-                dataCell.setCellType(CellType.NUMERIC);
-                nodeNavigator.putNext(dataCell.getNumericCellValue());
+                spreadsheetDataCell.setCellType(CellType.NUMERIC);
+                nodeNavigator.putNext(spreadsheetDataCell.getNumericCellValue());
                 break;
             case STRING:
-                dataCell.setCellType(CellType.STRING);
-                nodeNavigator.putNext(dataCell.getStringCellValue());
+                spreadsheetDataCell.setCellType(CellType.STRING);
+                nodeNavigator.putNext(spreadsheetDataCell.getStringCellValue());
                 break;
             case STRING_ARRAY:
-                dataCell.setCellType(CellType.STRING);
-                nodeNavigator.putNext(dataCell.getStringCellValue().split(ARRAY_SEPARATOR));
+                spreadsheetDataCell.setCellType(CellType.STRING);
+                nodeNavigator.putNext(spreadsheetDataCell.getStringCellValue().split(ARRAY_SEPARATOR));
                 break;
             case INTEGER_ARRAY:
-                switch (dataCell.getCellTypeEnum()) {
+                switch (spreadsheetDataCell.getCellTypeEnum()) {
                     case NUMERIC:
-                        Double doubleValue = dataCell.getNumericCellValue();
+                        Double doubleValue = spreadsheetDataCell.getNumericCellValue();
                         int[] intArray = new int[]{doubleValue.intValue()};
                         nodeNavigator.putNext(intArray);
                         break;
                     case STRING:
-                        String data = dataCell.getStringCellValue();
+                        String data = spreadsheetDataCell.getStringCellValue();
                         if (!data.isEmpty()) {
                             List<Integer> numericValues = Arrays
                                     .stream(data.split(ARRAY_SEPARATOR))
@@ -75,13 +75,13 @@ class CellMapping {
                     case BLANK:
                         break;
                     default:
-                        throw new RuntimeException("Unable to process:" + dataCell.getCellTypeEnum());
+                        reportFailure(schemaDataType, spreadsheetDataCell.getCellTypeEnum());
                 }
                 break;
             case BOOLEAN:
-                switch (dataCell.getCellTypeEnum()) {
+                switch (spreadsheetDataCell.getCellTypeEnum()) {
                     case STRING:
-                        String stringValue = dataCell.getStringCellValue();
+                        String stringValue = spreadsheetDataCell.getStringCellValue();
                         switch (stringValue) {
                             case "yes":
                                 nodeNavigator.putNext(true);
@@ -90,53 +90,69 @@ class CellMapping {
                                 nodeNavigator.putNext(false);
                                 break;
                             default:
-                                throw new RuntimeException("Unable to process: " + dataType + " value: " + stringValue);
+                                reportFailure(schemaDataType, stringValue);
                         }
                         break;
                     default:
-                        throw new RuntimeException("Unable to process: " + dataType + " " + dataCell.getCellTypeEnum());
+                        reportFailure(schemaDataType, spreadsheetDataCell.getCellTypeEnum());
                 }
                 break;
             case ENUM:
-                switch (dataCell.getCellTypeEnum()) {
+                switch (spreadsheetDataCell.getCellTypeEnum()) {
                     case STRING:
-                        String stringValue = dataCell.getStringCellValue();
+                        String stringValue = spreadsheetDataCell.getStringCellValue();
                         nodeNavigator.putNext(stringValue);
                         break;
                     default:
-                        throw new RuntimeException("Unable to process: " + dataType + " " + dataCell.getCellTypeEnum());
+                        reportFailure(schemaDataType, spreadsheetDataCell.getCellTypeEnum());
                 }
                 break;
             case OBJECT:
-                switch (dataCell.getCellTypeEnum()) {
+                switch (spreadsheetDataCell.getCellTypeEnum()) {
                     case STRING:
-                        String stringValue = dataCell.getStringCellValue();
+                        String stringValue = spreadsheetDataCell.getStringCellValue();
                         nodeNavigator.putNext(stringValue, ref);
                         break;
                     default:
-                        throw new RuntimeException("Unable to process: " + dataType + " " + dataCell.getCellTypeEnum());
+                        reportFailure(schemaDataType, spreadsheetDataCell.getCellTypeEnum());
                 }
                 break;
             case OBJECT_ARRAY:
-                switch (dataCell.getCellTypeEnum()) {
+                switch (spreadsheetDataCell.getCellTypeEnum()) {
                     case STRING:
-                        nodeNavigator.putNext(dataCell.getStringCellValue().split(ARRAY_SEPARATOR), ref);
+                        nodeNavigator.putNext(spreadsheetDataCell.getStringCellValue().split(ARRAY_SEPARATOR), ref);
                         break;
                     default:
-                        throw new RuntimeException("Unable to process: " + dataType + " " + dataCell.getCellTypeEnum());
+                        reportFailure(schemaDataType, spreadsheetDataCell.getCellTypeEnum());
                 }
                 break;
             default:
-                throw new RuntimeException("Unable to process: " + dataType);
+                reportFailure(schemaDataType, spreadsheetDataCell.getCellTypeEnum());
         }
+    }
+
+    private void reportFailure(SchemaDataType schemaDataType, CellType cellTypeEnum) {
+        throw new CellMappingException("Unable to process " + cellTypeEnum + " spreadsheet field as schema data type " + schemaDataType);
+    }
+
+    private void reportFailure(SchemaDataType schemaDataType, String value) {
+        throw new CellMappingException("Unable to determine schema data type " + schemaDataType + " from " + value);
     }
 
     @Override
     public String toString() {
         return "CellMapping{" +
                 "jsonProperty='" + jsonProperty + '\'' +
-                ", dataType=" + dataType +
+                ", schemaDataType=" + schemaDataType +
                 ", ref='" + ref + '\'' +
+                ", isLink=" + isLink +
                 '}';
+    }
+
+
+    public class CellMappingException extends RuntimeException {
+        public CellMappingException(String message) {
+            super(message);
+        }
     }
 }
