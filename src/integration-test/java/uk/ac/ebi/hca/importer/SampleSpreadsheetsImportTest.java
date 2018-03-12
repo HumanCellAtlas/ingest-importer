@@ -15,6 +15,8 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -31,9 +33,10 @@ import static junit.framework.TestCase.assertTrue;
 @SpringBootTest
 public class SampleSpreadsheetsImportTest {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(
+            SampleSpreadsheetsImportTest.class);
+
     private static final JsonValidator VALIDATOR = JsonSchemaFactory.byDefault().getValidator();
-
-
 
     private static final String Glioblastoma_v5_EXPECTED_JSON_URL = "https://github.com/HumanCellAtlas/metadata-schema/blob/develop/examples/JSON/v5/SmartSeq2/Glioblastoma.json?raw=true";
     private static final String Glioblastoma_v5_single_EXPECTED_JSON_URL = "https://github.com/HumanCellAtlas/metadata-schema/blob/develop/examples/JSON/v5/SmartSeq2/Glioblastoma_single.json?raw=true";
@@ -89,7 +92,7 @@ public class SampleSpreadsheetsImportTest {
             JsonNode outputSchema = JsonLoader.fromResource("/output-schema.json");
             ProcessingReport processingReport = VALIDATOR.validate(outputSchema, jsonNode);
             for (ProcessingMessage processingMessage : processingReport) {
-                System.out.println(processingMessage.toString());
+                LOGGER.info(processingMessage.toString());
             }
             assertTrue(processingReport.isSuccess());
         } catch (Exception e) {
