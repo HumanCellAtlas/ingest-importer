@@ -4,6 +4,9 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.primitives.Ints;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import uk.ac.ebi.hca.importer.util.MappingUtil;
 
 import java.util.Arrays;
 import java.util.List;
@@ -12,6 +15,8 @@ import java.util.stream.Collectors;
 import static uk.ac.ebi.hca.importer.excel.NodeNavigator.navigate;
 
 class CellMapping {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(CellMapping.class);
 
     static final String ARRAY_SEPARATOR = "\\|\\|";
 
@@ -132,11 +137,15 @@ class CellMapping {
     }
 
     private void reportFailure(SchemaDataType schemaDataType, CellType cellTypeEnum) {
-        throw new CellMappingException("Unable to process " + cellTypeEnum + " spreadsheet field as schema data type " + schemaDataType);
+        String message = "Unable to process " + cellTypeEnum + " spreadsheet field as schema data type " + schemaDataType;
+        LOGGER.warn(message);
+        throw new CellMappingException(message);
     }
 
     private void reportFailure(SchemaDataType schemaDataType, String value) {
-        throw new CellMappingException("Unable to determine schema data type " + schemaDataType + " from " + value);
+        String message ="Unable to determine schema data type " + schemaDataType + " from " + value;
+        LOGGER.warn(message);
+        throw new CellMappingException(message);
     }
 
     @Override

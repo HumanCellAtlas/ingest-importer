@@ -69,10 +69,9 @@ public class TestProcessingOfSampleSpreadsheets {
              //InputStream expectedFile = new URL(expectedFileUrl).openStream()
         ) {
             Workbook workbook = new XSSFWorkbook(input);
-            List<ObjectNode> records = workbookImporter.importFrom(workbook);
+            List<ObjectNode> records = workbookImporter.importFrom(workbook, inputUrl);
             ObjectWriter writer = objectMapper.writer(new DefaultPrettyPrinter());
             String jsonString = writer.writeValueAsString(records);
-            System.out.println(jsonString);
             writer.writeValue(new File(outputFile), records);
             final JsonNode jsonNode = new ObjectMapper().readTree(jsonString);
             JsonNode outputSchema = JsonLoader.fromResource("/output-schema.json");

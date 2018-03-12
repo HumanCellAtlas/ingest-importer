@@ -37,6 +37,7 @@ public class WorksheetImporter {
     }
 
     public ObjectNode importFrom(Sheet worksheet) {
+        LOGGER.info("\tImporting worksheet " + worksheet.getSheetName());
         String schemaType = predefinedValues.get("schema_type").textValue();
         ArrayNode nodes = JsonNodeFactory.instance.arrayNode();
         ArrayNode links = JsonNodeFactory.instance.arrayNode();
@@ -49,7 +50,7 @@ public class WorksheetImporter {
                 for (Cell dataCell : row) {
                     Cell headerCell = headerRow.getCell(dataCell.getColumnIndex());
                     if (headerCell == null) {
-                        LOGGER.warn("Header cell is null in worksheet: " + worksheet.getSheetName() + " col: " + dataCell.getColumnIndex());
+                        LOGGER.warn("\t* Header cell is null in worksheet: " + worksheet.getSheetName() + " col: " + dataCell.getColumnIndex());
                     } else {
                         String header = headerCell.getStringCellValue();
                         CellMapping cellMapping = worksheetMapping.getMappingFor(header);
@@ -60,8 +61,9 @@ public class WorksheetImporter {
                             if (dataCell.getColumnIndex() == 0) {
                                 if (cellMapping.schemaDataType == SchemaDataType.STRING) {
                                     id = dataCell.getStringCellValue();
+                                    LOGGER.info("\t- Importing row: " + id);
                                 } else {
-                                    LOGGER.warn("Don't know how to deal with non string id: " + cellMapping.schemaDataType);
+                                    LOGGER.warn("\t* Don't know how to deal with non string id: " + cellMapping.schemaDataType);
                                 }
                             }
                             cellMapping.importTo(rowJson, dataCell);
@@ -96,7 +98,7 @@ public class WorksheetImporter {
             objectNode.put("destination_id", value);
             return objectNode;
         } else {
-            throw new RuntimeException("Don't know how to deal with non string link: " + cellMapping.schemaDataType);
+            throw new WorksheetImporterException("Don't know how to deal with non string link: " + cellMapping.schemaDataType);
         }
     }
 
@@ -111,6 +113,12 @@ public class WorksheetImporter {
 
     public void defineValuesFor(String module, JsonNode predefinedValues) {
         modulePredefinedValues.put(module, predefinedValues);
+    }
+
+    public class WorksheetImporterException extends RuntimeException {
+        public WorksheetImporterException(String message) {
+            super(message);
+        }
     }
 
 }
