@@ -3,10 +3,7 @@ package uk.ac.ebi.hca.importer.excel;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.jayway.jsonassert.JsonAssert;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.junit.Test;
 import uk.ac.ebi.hca.importer.excel.exception.NotAnObjectNode;
@@ -138,6 +135,26 @@ public class CellMappingTest {
         //then:
         JsonAssert.with(objectMapper.writeValueAsString(node))
                 .assertThat("$.allowed_ages", contains(23));
+    }
+
+    @Test
+    public void testImportIntegerArrayFromBlankCell() throws Exception {
+        //given:
+        ObjectNode node = objectMapper.createObjectNode();
+
+        //and:
+        Cell blankCell = createSampleRow().createCell(0);
+        assertThat(blankCell.getCellTypeEnum()).isEqualTo(CellType.BLANK);
+
+        //and:
+        CellMapping pricesCellMapping = new CellMapping("prices", INTEGER_ARRAY);
+
+        //when:
+        pricesCellMapping.importTo(node, blankCell);
+
+        //then:
+        JsonAssert.with(objectMapper.writeValueAsString(node))
+                .assertNotDefined("$.prices");
     }
 
     @Test
