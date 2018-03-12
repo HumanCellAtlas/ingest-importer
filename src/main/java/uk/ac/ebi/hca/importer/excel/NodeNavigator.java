@@ -124,9 +124,11 @@ class NodeNavigator {
 
     //TODO add unit tests?
     void addValuesFrom(JsonNode json) {
-        json.fieldNames().forEachRemaining(fieldName -> {
-            ((ObjectNode) currentNode).set(fieldName, json.get(fieldName));
-        });
+        if (currentNode != null) {
+            json.fieldNames().forEachRemaining(fieldName -> {
+                ((ObjectNode) currentNode).set(fieldName, json.get(fieldName));
+            });
+        }
     }
 
 }
