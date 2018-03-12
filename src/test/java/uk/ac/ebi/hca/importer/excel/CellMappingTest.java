@@ -245,6 +245,27 @@ public class CellMappingTest {
         assertThat(notAnObjectNode.getMessage()).contains("[friends] field");
     }
 
+    @Test
+    public void testImportNumberType() throws Exception {
+        //given:
+        ObjectNode node = objectMapper.createObjectNode();
+
+        //and:
+        Cell cell = createSampleRow().createCell(0);
+        double cellValue = 385.402D;
+        cell.setCellValue(cellValue);
+
+        //and:
+        CellMapping numberCellMapping = new CellMapping("amount", NUMBER);
+
+        //when:
+        numberCellMapping.importTo(node, cell);
+
+        //then:
+        JsonAssert.with(objectMapper.writeValueAsString(node))
+                .assertEquals("$.amount", cellValue);
+    }
+
     private Row createSampleRow() {
         Workbook workbook = new XSSFWorkbook();
         Sheet worksheet = workbook.createSheet("sample");
