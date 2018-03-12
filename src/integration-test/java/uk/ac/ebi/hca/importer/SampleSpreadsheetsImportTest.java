@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.fge.jackson.JsonLoader;
-import com.github.fge.jsonschema.core.exceptions.ProcessingException;
 import com.github.fge.jsonschema.core.report.ProcessingMessage;
 import com.github.fge.jsonschema.core.report.ProcessingReport;
 import com.github.fge.jsonschema.main.JsonSchemaFactory;
@@ -22,7 +21,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 import uk.ac.ebi.hca.importer.excel.WorkbookImporter;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.List;
@@ -31,7 +29,7 @@ import static junit.framework.TestCase.assertTrue;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
-public class TestProcessingOfSampleSpreadsheets {
+public class SampleSpreadsheetsImportTest {
 
     private static final JsonValidator VALIDATOR = JsonSchemaFactory.byDefault().getValidator();
 
@@ -53,30 +51,35 @@ public class TestProcessingOfSampleSpreadsheets {
 
     @Test
     @Ignore
-    public void test_pbmc8k_v5_spreadsheet_matched_expected_output_and_is_valid_against_schema() throws IOException, ProcessingException {
-        checkSpreadsheetValidates(pbmc8k_SPREADSHEET_URL, Glioblastoma_v5_EXPECTED_JSON_URL, "src/test/resources/output/pbmc8k_v5.json");
+    public void testPbmc8kSample() {
+        assertCorrectOutput(pbmc8k_SPREADSHEET_URL, Glioblastoma_v5_EXPECTED_JSON_URL,
+                "src/test/resources/output/pbmc8k_v5.json");
     }
 
     @Test
     @Ignore
-    public void test_Glioblastoma_v5_spreadsheet_matched_expected_output_and_is_valid_against_schema() throws IOException, ProcessingException {
-        checkSpreadsheetValidates(Glioblastoma_v5_SPREADSHEET_URL, Glioblastoma_v5_EXPECTED_JSON_URL, "src/test/resources/output/Glioblastoma_v5.json");
+    public void testGlioblastomaSample() {
+        assertCorrectOutput(Glioblastoma_v5_SPREADSHEET_URL,
+                Glioblastoma_v5_EXPECTED_JSON_URL,
+                "src/test/resources/output/Glioblastoma_v5.json");
     }
 
     @Test
-    public void test_Glioblastoma_v5_single_spreadsheet_matched_expected_output_and_is_valid_against_schema() throws IOException, ProcessingException {
-        checkSpreadsheetValidates(Glioblastoma_v5_single_SPREADSHEET_URL, Glioblastoma_v5_single_EXPECTED_JSON_URL, "src/test/resources/output/Glioblastoma_v5_single.json");
+    public void testGlioblastomaSingleSample() {
+        assertCorrectOutput(Glioblastoma_v5_single_SPREADSHEET_URL,
+                Glioblastoma_v5_single_EXPECTED_JSON_URL,
+                "src/test/resources/output/Glioblastoma_v5_single.json");
     }
 
     @Test
-    public void test_Q4DemoSS2Metadata_v5_spreadsheet_matched_expected_output_and_is_valid_against_schema() throws IOException, ProcessingException {
-        checkSpreadsheetValidates(Q4DemoSS2Metadata_v5_SPREADSHEET_URL, Q4DemoSS2Metadata_v5_EXPECTED_JSON_URL, "src/test/resources/output/Q4DemoSS2Metadata_v5.json");
+    public void testQ4DemoSample() {
+        assertCorrectOutput(Q4DemoSS2Metadata_v5_SPREADSHEET_URL,
+                Q4DemoSS2Metadata_v5_EXPECTED_JSON_URL,
+                "src/test/resources/output/Q4DemoSS2Metadata_v5.json");
     }
 
-    private void checkSpreadsheetValidates(String inputUrl, String expectedFileUrl, String outputFile) throws ProcessingException, IOException {
-        try (InputStream input = new URL(inputUrl).openStream();
-             //InputStream expectedFile = new URL(expectedFileUrl).openStream()
-        ) {
+    private void assertCorrectOutput(String inputUrl, String expectedFileUrl, String outputFile) {
+        try (InputStream input = new URL(inputUrl).openStream()) {
             Workbook workbook = new XSSFWorkbook(input);
             List<ObjectNode> records = workbookImporter.importFrom(workbook, inputUrl);
             ObjectWriter writer = objectMapper.writer(new DefaultPrettyPrinter());
@@ -89,8 +92,8 @@ public class TestProcessingOfSampleSpreadsheets {
                 System.out.println(processingMessage.toString());
             }
             assertTrue(processingReport.isSuccess());
-        } catch (IOException e) {
-            throw e;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 
