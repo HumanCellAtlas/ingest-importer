@@ -28,7 +28,7 @@ sourceSets {
 
     integrationTest {
         java.srcDir 'src/integration-test/java'
-        resources.srcDir 'src/integration-test/reources'
+        resources.srcDir 'src/integration-test/resources'
     }
 
 }
