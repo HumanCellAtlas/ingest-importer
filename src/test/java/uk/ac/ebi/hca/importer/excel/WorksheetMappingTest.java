@@ -34,7 +34,7 @@ public class WorksheetMappingTest {
 
         //and:
         assertThat(extraField).extracting(cellMappingFields)
-                .containsExactly("extra_field", STRING);
+                .containsExactly("extra_field", STRING_ARRAY);
     }
 
 }
