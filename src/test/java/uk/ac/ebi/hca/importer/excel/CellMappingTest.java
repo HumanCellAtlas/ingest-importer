@@ -4,9 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.jayway.jsonassert.JsonAssert;
 import org.apache.poi.ss.usermodel.*;
-import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.junit.Ignore;
 import org.junit.Test;
 import uk.ac.ebi.hca.importer.excel.exception.NotAnObjectNode;
 
@@ -145,42 +143,39 @@ public class CellMappingTest {
     }
 
     @Test
-    @Ignore
     public void testImportModularField() throws Exception {
         //given:
         ObjectNode node = objectMapper.createObjectNode();
+        Row row = createSampleRow();
 
         //and:
         String warrantyLength = "warranty.warranty_length";
         CellMapping numericCellMapping = new CellMapping(warrantyLength, INTEGER);
 
         //and:
-        Cell numericCell = mock(Cell.class);
-        doReturn(CellType.NUMERIC).when(numericCell).getCellTypeEnum();
-        double lengthValue = 1;
-        doReturn(lengthValue).when(numericCell).getNumericCellValue();
+        Cell integerCell = row.createCell(0);
+        int lengthValue = 1;
+        integerCell.setCellValue(lengthValue);
 
         //and:
         String warrantyLengthUnit = "warranty.warranty_length_unit";
         CellMapping stringCellMapping = new CellMapping(warrantyLengthUnit, STRING);
 
         //and:
-        Cell stringCell = mock(Cell.class);
-        doReturn(CellType.STRING).when(stringCell).getCellTypeEnum();
+        Cell stringCell = row.createCell(1);
         String unitValue = "year";
-        doReturn(unitValue).when(stringCell).getStringCellValue();
+        stringCell.setCellValue(unitValue);
 
         //and:
         String warrantyExclusions = "warranty.exclusions";
         CellMapping arrayCellMapping = new CellMapping(warrantyExclusions, STRING_ARRAY);
 
         //and:
-        Cell arrayCell = mock(Cell.class);
-        doReturn(CellType.STRING).when(arrayCell).getCellTypeEnum();
-        doReturn("cosmetic damages||dead pixels").when(arrayCell).getStringCellValue();
+        Cell arrayCell = row.createCell(2);
+        arrayCell.setCellValue("cosmetic damages||dead pixels");
 
         //when:
-        numericCellMapping.importTo(node, numericCell);
+        numericCellMapping.importTo(node, integerCell);
         stringCellMapping.importTo(node, stringCell);
         arrayCellMapping.importTo(node, arrayCell);
 
