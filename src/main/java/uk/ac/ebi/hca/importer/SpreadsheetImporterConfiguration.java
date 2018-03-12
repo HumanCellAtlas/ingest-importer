@@ -160,11 +160,12 @@ public class SpreadsheetImporterConfiguration {
         String schemaUrl = String.format("%s/%s", BASE_URL, schemaPath);
         String coreSchemaUrl = String.format("%s/%s", BASE_URL, corePath);
 
-        WorksheetMapping worksheetMapping = new WorksheetMapping();
-        mappingUtil.populateMappingsFromSchema(worksheetMapping, schemaUrl, "");
 
         ObjectNode predefinedSchemaValues = objectMapper.createObjectNode();
         mappingUtil.populatePredefinedValuesForSchema(predefinedSchemaValues, schemaUrl);
+
+        WorksheetMapping worksheetMapping = new WorksheetMapping();
+        mappingUtil.populateMappingsFromSchema(worksheetMapping, schemaUrl, "");
 
         WorksheetImporter importer = new WorksheetImporter(worksheetMapping,
                 predefinedSchemaValues);

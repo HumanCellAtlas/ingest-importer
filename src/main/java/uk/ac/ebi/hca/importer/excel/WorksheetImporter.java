@@ -55,7 +55,7 @@ public class WorksheetImporter {
                         String header = headerCell.getStringCellValue();
                         CellMapping cellMapping = worksheetMapping.getMappingFor(header);
                         if (cellMapping.isLink) {
-                            links.add(createLink(worksheet, id, dataCell, cellMapping));
+                            links.add(createLink(worksheet, id, dataCell, cellMapping, schemaType));
 
                         } else {
                             if (dataCell.getColumnIndex() == 0) {
@@ -86,19 +86,26 @@ public class WorksheetImporter {
         return resultNode;
     }
 
-    private JsonNode createLink(Sheet worksheet, String id, Cell dataCell, CellMapping cellMapping) {
-        if (cellMapping.schemaDataType == SchemaDataType.STRING) {
-            dataCell.setCellType(CellType.STRING);
-            String value = dataCell.getStringCellValue();
+    private JsonNode createLink(Sheet worksheet, String id, Cell spreadsheetDataCell, CellMapping cellMapping, String schemaType) {
+        if (cellMapping.schemaDataType == SchemaDataType.STRING_ARRAY) {
+            spreadsheetDataCell.setCellType(CellType.STRING);
+            String[] values = spreadsheetDataCell.getStringCellValue().split("\\|\\|");
             String worksheetName = worksheet.getSheetName();
             ObjectNode objectNode = JsonNodeFactory.instance.objectNode();
-            objectNode.put("source_type", worksheetName);
+            objectNode.put("source_type", schemaType);
             objectNode.put("source_id", id);
-            objectNode.put("destination_type", cellMapping.jsonProperty);
-            objectNode.put("destination_id", value);
+            String linkName = cellMapping.jsonProperty;
+            String[] parts = linkName.split("_");
+            objectNode.put("destination_type", parts[0]);
+            ArrayNode destinationNode = JsonNodeFactory.instance.arrayNode();
+            for (String value: values)
+            {
+                destinationNode.add(value);
+            }
+            objectNode.put("destination_ids", destinationNode);
             return objectNode;
         } else {
-            throw new WorksheetImporterException("Don't know how to deal with non string link: " + cellMapping.schemaDataType);
+            throw new WorksheetImporterException("Don't know how to deal with non string array link: " + cellMapping.schemaDataType);
         }
     }
 

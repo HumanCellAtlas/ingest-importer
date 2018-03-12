@@ -7,12 +7,17 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import uk.ac.ebi.hca.importer.client.IngestApiClient;
 import uk.ac.ebi.hca.importer.util.EntityType;
+import uk.ac.ebi.hca.importer.util.MappingUtil;
 
 import java.util.Iterator;
 
 public class Submitter {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(Submitter.class);
 
     private IngestApiClient ingestApiClient;
 
@@ -22,7 +27,7 @@ public class Submitter {
 
     public String submit(String token, JsonNode jsonNode) {
         String submissionUrl = ingestApiClient.createSubmission(token);
-        System.out.println("Created submission: " + submissionUrl);
+        LOGGER.info("Created submission: " + submissionUrl);
         if (jsonNode.getNodeType() == JsonNodeType.ARRAY) {
             ArrayNode arrayNode = (ArrayNode) jsonNode;
             for (Iterator<JsonNode> collectionIterator = arrayNode.iterator(); collectionIterator.hasNext(); ) {
@@ -38,9 +43,9 @@ public class Submitter {
                             try {
                                 String jsonString = writer.writeValueAsString(itemNode);
                                 String entityUrl = ingestApiClient.createEntity(token,submissionUrl, entityType, jsonString);
-                                System.out.println("- Created " + entityType.getSchemaType() + " entity: " + entityUrl);
+                                LOGGER.info("- Created " + entityType.getSchemaType() + " entity: " + entityUrl);
                             } catch (JsonProcessingException e) {
-                                e.printStackTrace();
+                                LOGGER.error("Error processing JSON", e);
                             }
                         }
                     }

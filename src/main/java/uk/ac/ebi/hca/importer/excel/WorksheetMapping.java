@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static uk.ac.ebi.hca.importer.excel.SchemaDataType.STRING;
+import static uk.ac.ebi.hca.importer.excel.SchemaDataType.STRING_ARRAY;
 
 public class WorksheetMapping {
 
@@ -31,7 +32,7 @@ public class WorksheetMapping {
         if (cellMapping == null) {
             //If not found assume a link
             String jsonProperty = header.toLowerCase().replaceAll(" ", "_");
-            cellMapping = new CellMapping(jsonProperty, STRING, "", true);
+            cellMapping = new CellMapping(jsonProperty, STRING_ARRAY, "", true);
         }
         return cellMapping;
     }
