@@ -77,7 +77,7 @@ public class CellMappingTest {
     }
 
     @Test
-    public void testNumericTypeImportTo() {
+    public void testImportIntegerType() {
         //given:
         ObjectNode node = objectMapper.createObjectNode();
 
