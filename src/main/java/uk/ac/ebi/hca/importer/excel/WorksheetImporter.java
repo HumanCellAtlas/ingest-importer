@@ -60,7 +60,17 @@ public class WorksheetImporter {
                         } else {
                             if (dataCell.getColumnIndex() == 0) {
                                 if (cellMapping.schemaDataType == SchemaDataType.STRING) {
-                                    id = dataCell.getStringCellValue();
+                                    if (dataCell.getCellTypeEnum() == CellType.NUMERIC) {
+                                        id = String.valueOf(dataCell.getNumericCellValue());
+                                    }
+                                    else if (dataCell.getCellTypeEnum() == CellType.STRING) {
+                                        id = dataCell.getStringCellValue();
+                                    }
+                                    else
+                                    {
+                                        LOGGER.warn("\t* Don't know how to deal with non string cell: " + header + " in " + worksheet.getSheetName());
+                                    }
+
                                     LOGGER.info("\t- Importing row: " + id);
                                 } else {
                                     LOGGER.warn("\t* Don't know how to deal with non string id: " + cellMapping.schemaDataType);
@@ -80,7 +90,7 @@ public class WorksheetImporter {
         ObjectNode resultNode = JsonNodeFactory.instance.objectNode();
         resultNode.put("schema_type", schemaType);
         resultNode.set("content", nodes);
-        if (links.size()>0) {
+        if (links.size() > 0) {
             resultNode.set("links", links);
         }
         return resultNode;
@@ -98,8 +108,7 @@ public class WorksheetImporter {
             String[] parts = linkName.split("_");
             objectNode.put("destination_type", parts[0]);
             ArrayNode destinationNode = JsonNodeFactory.instance.arrayNode();
-            for (String value: values)
-            {
+            for (String value : values) {
                 destinationNode.add(value);
             }
             objectNode.put("destination_ids", destinationNode);
