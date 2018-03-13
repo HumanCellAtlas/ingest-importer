@@ -3,27 +3,25 @@ package uk.ac.ebi.hca.importer.excel;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.jayway.jsonassert.JsonAssert;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.junit.Test;
 import uk.ac.ebi.hca.importer.excel.exception.NotAnObjectNode;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.hasSize;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static uk.ac.ebi.hca.importer.excel.CellDataType.*;
+import static uk.ac.ebi.hca.importer.excel.SchemaDataType.*;
 
 public class CellMappingTest {
 
     private ObjectMapper objectMapper = new ObjectMapper();
 
     @Test
-    public void testStringTypeImportTo() {
+    public void testImportStringType() {
         //given:
         ObjectNode node = objectMapper.createObjectNode();
+        Row row = createSampleRow();
 
         //and:
         String firstName = "first_name";
@@ -32,17 +30,15 @@ public class CellMappingTest {
         CellMapping lastNameMapping = new CellMapping(lastName, STRING);
 
         //when:
-        Cell juanCell = mock(Cell.class);
-        doReturn(CellType.STRING).when(juanCell).getCellTypeEnum();
+        Cell juanCell = row.createCell(0);
         String juan = "Juan";
-        doReturn(juan).when(juanCell).getStringCellValue();
+        juanCell.setCellValue(juan);
         firstNameMapping.importTo(node, juanCell);
 
         //and:
-        Cell delaCruzCell = mock(Cell.class);
-        doReturn(CellType.STRING).when(delaCruzCell).getCellTypeEnum();
+        Cell delaCruzCell = row.createCell(1);
         String delaCruz = "dela Cruz";
-        doReturn(delaCruz).when(delaCruzCell).getStringCellValue();
+        delaCruzCell.setCellValue(delaCruz);
         lastNameMapping.importTo(node, delaCruzCell);
 
         //then:
@@ -55,15 +51,15 @@ public class CellMappingTest {
     }
 
     @Test
-    public void testStringArrayTypeImportTo() throws Exception {
+    public void testImportStringArrayType() throws Exception {
         //given:
         ObjectNode node = objectMapper.createObjectNode();
+        Row row = createSampleRow();
 
         //and:
-        Cell shoppingListCell = mock(Cell.class);
-        doReturn(CellType.STRING).when(shoppingListCell).getCellTypeEnum();
+        Cell shoppingListCell = row.createCell(0);
         String items = "milk||egg||cereals";
-        doReturn(items).when(shoppingListCell).getStringCellValue();
+        shoppingListCell.setCellValue(items);
         String shoppingList = "shopping_list";
         CellMapping shoppingListMapping = new CellMapping(shoppingList, STRING_ARRAY);
 
@@ -77,19 +73,19 @@ public class CellMappingTest {
     }
 
     @Test
-    public void testNumericTypeImportTo() {
+    public void testImportIntegerType() {
         //given:
         ObjectNode node = objectMapper.createObjectNode();
+        Row row = createSampleRow();
 
         //and:
         String quantity = "quantity";
-        CellMapping quantityMapping = new CellMapping(quantity, NUMERIC);
+        CellMapping quantityMapping = new CellMapping(quantity, INTEGER);
 
         //and:
-        Cell cell = mock(Cell.class);
-        doReturn(CellType.NUMERIC).when(cell).getCellTypeEnum();
+        Cell cell = row.createCell(0);
         double cellValue = 12D;
-        doReturn(cellValue).when(cell).getNumericCellValue();
+        cell.setCellValue(cellValue);
 
         //when:
         quantityMapping.importTo(node, cell);
@@ -100,15 +96,15 @@ public class CellMappingTest {
     }
 
     @Test
-    public void testNumericArrayTypeImportTo() throws Exception {
+    public void testImportIntegerArrayType() throws Exception {
         //given:
         String fibonacci = "fibonacci";
-        CellMapping fibonacciMapping = new CellMapping(fibonacci, NUMERIC_ARRAY);
+        CellMapping fibonacciMapping = new CellMapping(fibonacci, INTEGER_ARRAY);
+        Row row = createSampleRow();
 
         //and:
-        Cell cell = mock(Cell.class);
-        doReturn(CellType.STRING).when(cell).getCellTypeEnum();
-        doReturn("1||1||2||3||5||8").when(cell).getStringCellValue();
+        Cell cell = row.createCell(0);
+        cell.setCellValue("1||1||2||3||5||8");
 
         //and:
         ObjectNode node = objectMapper.createObjectNode();
@@ -122,15 +118,80 @@ public class CellMappingTest {
     }
 
     @Test
-    public void testEmptyNumericArrayTypeImportTo() throws Exception {
+    public void testImportIntegerArrayTypeFromNumericCell() throws Exception {
         //given:
-        String intList = "int_list";
-        CellMapping integerListMapping = new CellMapping(intList, NUMERIC_ARRAY);
+        ObjectNode node = objectMapper.createObjectNode();
 
         //and:
-        Cell cell = mock(Cell.class);
-        doReturn(CellType.STRING).when(cell).getCellTypeEnum();
-        doReturn("").when(cell).getStringCellValue();
+        Cell cell = createSampleRow().createCell(0);
+        cell.setCellValue(23.0D);
+
+        //and:
+        CellMapping agesMapping = new CellMapping("allowed_ages", INTEGER_ARRAY);
+
+        //when:
+        agesMapping.importTo(node, cell);
+
+        //then:
+        JsonAssert.with(objectMapper.writeValueAsString(node))
+                .assertThat("$.allowed_ages", contains(23));
+    }
+
+    @Test
+    public void testImportIntegerArrayFromBlankCell() throws Exception {
+        //given:
+        ObjectNode node = objectMapper.createObjectNode();
+
+        //and:
+        Cell blankCell = createSampleRow().createCell(0);
+        assertThat(blankCell.getCellTypeEnum()).isEqualTo(CellType.BLANK);
+
+        //and:
+        CellMapping pricesCellMapping = new CellMapping("prices", INTEGER_ARRAY);
+
+        //when:
+        pricesCellMapping.importTo(node, blankCell);
+
+        //then:
+        JsonAssert.with(objectMapper.writeValueAsString(node))
+                .assertNotDefined("$.prices");
+    }
+
+    @Test
+    public void testImportBooleanType() throws Exception {
+        //given:
+        ObjectNode node = objectMapper.createObjectNode();
+        Row row = createSampleRow();
+
+        //and:
+        Cell studentCell = row.createCell(0);
+        studentCell.setCellValue("yes");
+        Cell graduatingCell = row.createCell(1);
+        graduatingCell.setCellValue("no");
+
+        //and:
+        CellMapping studentMapping = new CellMapping("student.is_student", BOOLEAN);
+        CellMapping graduatingMapping = new CellMapping("student.is_graduating", BOOLEAN);
+
+        //when:
+        studentMapping.importTo(node, studentCell);
+        graduatingMapping.importTo(node, graduatingCell);
+
+        //then:
+        JsonAssert.with(objectMapper.writeValueAsString(node))
+                .assertEquals("$.student.is_student", true)
+                .assertEquals("$.student.is_graduating", false);
+    }
+
+    @Test
+    public void testImportEmptyIntegerArrayType() throws Exception {
+        //given:
+        String intList = "int_list";
+        CellMapping integerListMapping = new CellMapping(intList, INTEGER_ARRAY);
+
+        //and:
+        Cell cell = createSampleRow().createCell(0);
+        cell.setCellValue("");
 
         //and:
         ObjectNode node = objectMapper.createObjectNode();
@@ -144,41 +205,39 @@ public class CellMappingTest {
     }
 
     @Test
-    public void testModularFieldImportTo() throws Exception {
+    public void testImportModularField() throws Exception {
         //given:
         ObjectNode node = objectMapper.createObjectNode();
+        Row row = createSampleRow();
 
         //and:
         String warrantyLength = "warranty.warranty_length";
-        CellMapping numericCellMapping = new CellMapping(warrantyLength, NUMERIC);
+        CellMapping integerCellMapping = new CellMapping(warrantyLength, INTEGER);
 
         //and:
-        Cell numericCell = mock(Cell.class);
-        doReturn(CellType.NUMERIC).when(numericCell).getCellTypeEnum();
-        double lengthValue = 1D;
-        doReturn(lengthValue).when(numericCell).getNumericCellValue();
+        Cell integerCell = row.createCell(0);
+        int lengthValue = 1;
+        integerCell.setCellValue(lengthValue);
 
         //and:
         String warrantyLengthUnit = "warranty.warranty_length_unit";
         CellMapping stringCellMapping = new CellMapping(warrantyLengthUnit, STRING);
 
         //and:
-        Cell stringCell = mock(Cell.class);
-        doReturn(CellType.STRING).when(stringCell).getCellTypeEnum();
+        Cell stringCell = row.createCell(1);
         String unitValue = "year";
-        doReturn(unitValue).when(stringCell).getStringCellValue();
+        stringCell.setCellValue(unitValue);
 
         //and:
         String warrantyExclusions = "warranty.exclusions";
         CellMapping arrayCellMapping = new CellMapping(warrantyExclusions, STRING_ARRAY);
 
         //and:
-        Cell arrayCell = mock(Cell.class);
-        doReturn(CellType.STRING).when(arrayCell).getCellTypeEnum();
-        doReturn("cosmetic damages||dead pixels").when(arrayCell).getStringCellValue();
+        Cell arrayCell = row.createCell(2);
+        arrayCell.setCellValue("cosmetic damages||dead pixels");
 
         //when:
-        numericCellMapping.importTo(node, numericCell);
+        integerCellMapping.importTo(node, integerCell);
         stringCellMapping.importTo(node, stringCell);
         arrayCellMapping.importTo(node, arrayCell);
 
@@ -190,25 +249,25 @@ public class CellMappingTest {
     }
 
     @Test
-    public void testImportToDeeplyNestedField() throws Exception {
+    public void testImportDeeplyNestedField() throws Exception {
         //given:
         ObjectNode node = objectMapper.createObjectNode();
+        Row row = createSampleRow();
 
         //and:
-        CellMapping ageMapping = new CellMapping("personal.info.age", NUMERIC);
-        CellMapping sexMapping = new CellMapping("personal.info.sex", STRING);
+        Cell ageCell = row.createCell(0);
+        int ageValue = 39;
+        ageCell.setCellValue(ageValue);
+
 
         //and:
-        Cell ageCell = mock(Cell.class);
-        doReturn(CellType.NUMERIC).when(ageCell).getCellTypeEnum();
-        double ageValue = 39D;
-        doReturn(ageValue).when(ageCell).getNumericCellValue();
-
-        //and:
-        Cell sexCell = mock(Cell.class);
-        doReturn(CellType.STRING).when(sexCell).getCellTypeEnum();
+        Cell sexCell = row.createCell(1);
         String male = "male";
-        doReturn(male).when(sexCell).getStringCellValue();
+        sexCell.setCellValue(male);
+
+        //and:
+        CellMapping ageMapping = new CellMapping("personal.info.age", INTEGER);
+        CellMapping sexMapping = new CellMapping("personal.info.sex", STRING);
 
         //when:
         ageMapping.importTo(node, ageCell);
@@ -229,12 +288,11 @@ public class CellMappingTest {
                 .add("Pedro");
 
         //and: a cell mapping that attempts to putNext a field under friends property
-        CellMapping cellMapping = new CellMapping("friends.count", NUMERIC);
+        CellMapping cellMapping = new CellMapping("friends.count", INTEGER);
 
         //and:
-        Cell cell = mock(Cell.class);
-        doReturn(CellType.NUMERIC).when(cell).getCellTypeEnum();
-        doReturn(14D).when(cell).getNumericCellValue();
+        Cell cell = createSampleRow().createCell(0);
+        cell.setCellValue(14D);
 
         //when:
         NotAnObjectNode notAnObjectNode = null;
@@ -248,6 +306,33 @@ public class CellMappingTest {
 
         //then:
         assertThat(notAnObjectNode.getMessage()).contains("[friends] field");
+    }
+
+    @Test
+    public void testImportNumberType() throws Exception {
+        //given:
+        ObjectNode node = objectMapper.createObjectNode();
+
+        //and:
+        Cell cell = createSampleRow().createCell(0);
+        double cellValue = 385.402D;
+        cell.setCellValue(cellValue);
+
+        //and:
+        CellMapping numberCellMapping = new CellMapping("amount", NUMBER);
+
+        //when:
+        numberCellMapping.importTo(node, cell);
+
+        //then:
+        JsonAssert.with(objectMapper.writeValueAsString(node))
+                .assertEquals("$.amount", cellValue);
+    }
+
+    private Row createSampleRow() {
+        Workbook workbook = new XSSFWorkbook();
+        Sheet worksheet = workbook.createSheet("sample");
+        return worksheet.createRow(0);
     }
 
 }
