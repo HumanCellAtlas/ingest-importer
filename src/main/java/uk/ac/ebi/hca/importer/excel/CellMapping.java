@@ -87,7 +87,7 @@ class CellMapping {
                 switch (spreadsheetDataCell.getCellTypeEnum()) {
                     case STRING:
                         String stringValue = spreadsheetDataCell.getStringCellValue();
-                        switch (stringValue) {
+                        switch (stringValue.toLowerCase()) {
                             case "yes":
                                 nodeNavigator.putNext(true);
                                 break;

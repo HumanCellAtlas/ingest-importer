@@ -47,6 +47,9 @@ public class SampleSpreadsheetsImportTest {
     private static final String Glioblastoma_v5_single_SPREADSHEET_URL = "https://github.com/HumanCellAtlas/metadata-schema/blob/develop/examples/spreadsheets/v5/filled/SmartSeq2/Glioblastoma_single.xlsx?raw=true";
     private static final String pbmc8k_SPREADSHEET_URL = "https://github.com/HumanCellAtlas/metadata-schema/blob/develop/examples/spreadsheets/v5/filled/10x_v2/pbmc8k.xlsx?raw=true";
     private static final String pbmc8k_EXPECTED_JSON_URL = "";
+    private static final String glioblastoma_added_module_SPREADSHEET_URL = "https://github.com/HumanCellAtlas/metadata-schema/blob/develop_will/examples/spreadsheets/v5/filled/SmartSeq2/glioblastoma_added_module.xlsx?raw=true";
+    private static final String v5_spleen_SPREADSHEET_URL = "https://github.com/HumanCellAtlas/metadata-schema/blob/develop/examples/spreadsheets/v5/filled/10x_v2/v5_spleen_userFriendlyHeaders.xlsx?raw=true";
+    private static final String v5_spleen_EXPECTED_JSON_URL = "";
 
     @Autowired
     private WorkbookImporter workbookImporter;
@@ -54,9 +57,21 @@ public class SampleSpreadsheetsImportTest {
     private ObjectMapper objectMapper;
 
     @Test
+    public void testGlioblastoma_added_moduleSample() {
+        assertCorrectOutput(glioblastoma_added_module_SPREADSHEET_URL, "",
+                "glioblastoma_added_module.json");
+    }
+
+    @Test
+    public void testV5_spleen() {
+        assertCorrectOutput(v5_spleen_SPREADSHEET_URL, v5_spleen_EXPECTED_JSON_URL,
+                "v5_spleen.json");
+    }
+
+    @Test
     @Ignore
     public void testPbmc8kSample() {
-        assertCorrectOutput(pbmc8k_SPREADSHEET_URL, Glioblastoma_v5_EXPECTED_JSON_URL,
+        assertCorrectOutput(pbmc8k_SPREADSHEET_URL, pbmc8k_EXPECTED_JSON_URL,
                 "pbmc8k_v5.json");
     }
 
