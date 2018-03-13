@@ -120,6 +120,8 @@ class CellMapping {
                         String stringValue = spreadsheetDataCell.getStringCellValue();
                         nodeNavigator.putNext(stringValue, ref);
                         break;
+                    case BLANK:
+                        break;
                     default:
                         reportFailure(schemaDataType, spreadsheetDataCell.getCellTypeEnum());
                 }
