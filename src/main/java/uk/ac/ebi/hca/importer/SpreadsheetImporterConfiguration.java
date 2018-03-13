@@ -93,7 +93,14 @@ public class SpreadsheetImporterConfiguration {
 
     enum ModuleType {
 
-        smartseq2("5.0.0", CoreType.process, "sequencing");
+
+        death("5.0.0", CoreType.biomaterial),
+        familial_relationship("5.0.0", CoreType.biomaterial),
+        homo_sapiens_specific("5.0.0", CoreType.biomaterial),
+        medical_history("5.0.0", CoreType.biomaterial),
+        preservation_storage("5.0.0", CoreType.biomaterial),
+        mus_musculus_specific("5.0.0", CoreType.biomaterial),
+        state_of_specimen("5.0.0", CoreType.biomaterial);
 
         private final String version;
         private final CoreType coreType;
