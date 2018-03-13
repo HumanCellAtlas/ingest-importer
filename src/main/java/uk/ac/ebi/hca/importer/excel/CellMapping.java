@@ -103,6 +103,7 @@ class CellMapping {
                 }
                 break;
             case ENUM:
+                //TODO not very different from STRING type so this should probably be merged
                 switch (spreadsheetDataCell.getCellTypeEnum()) {
                     case STRING:
                         String stringValue = spreadsheetDataCell.getStringCellValue();
@@ -113,6 +114,7 @@ class CellMapping {
                 }
                 break;
             case OBJECT:
+                //TODO add test for this
                 switch (spreadsheetDataCell.getCellTypeEnum()) {
                     case STRING:
                         String stringValue = spreadsheetDataCell.getStringCellValue();
@@ -123,6 +125,7 @@ class CellMapping {
                 }
                 break;
             case OBJECT_ARRAY:
+                //TODO add test for this
                 switch (spreadsheetDataCell.getCellTypeEnum()) {
                     case STRING:
                         nodeNavigator.putNext(spreadsheetDataCell.getStringCellValue().split(ARRAY_SEPARATOR), ref);
