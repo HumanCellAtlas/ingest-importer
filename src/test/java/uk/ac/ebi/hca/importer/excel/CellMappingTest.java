@@ -158,6 +158,32 @@ public class CellMappingTest {
     }
 
     @Test
+    public void testImportBooleanType() throws Exception {
+        //given:
+        ObjectNode node = objectMapper.createObjectNode();
+        Row row = createSampleRow();
+
+        //and:
+        Cell studentCell = row.createCell(0);
+        studentCell.setCellValue("yes");
+        Cell graduatingCell = row.createCell(1);
+        graduatingCell.setCellValue("no");
+
+        //and:
+        CellMapping studentMapping = new CellMapping("student.is_student", BOOLEAN);
+        CellMapping graduatingMapping = new CellMapping("student.is_graduating", BOOLEAN);
+
+        //when:
+        studentMapping.importTo(node, studentCell);
+        graduatingMapping.importTo(node, graduatingCell);
+
+        //then:
+        JsonAssert.with(objectMapper.writeValueAsString(node))
+                .assertEquals("$.student.is_student", true)
+                .assertEquals("$.student.is_graduating", false);
+    }
+
+    @Test
     public void testImportEmptyIntegerArrayType() throws Exception {
         //given:
         String intList = "int_list";
