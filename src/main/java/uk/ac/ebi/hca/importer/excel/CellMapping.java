@@ -1,67 +1,173 @@
 package uk.ac.ebi.hca.importer.excel;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.google.common.primitives.Doubles;
 import com.google.common.primitives.Ints;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static uk.ac.ebi.hca.importer.excel.CellDataType.NUMERIC;
-import static uk.ac.ebi.hca.importer.excel.CellDataType.NUMERIC_ARRAY;
-import static uk.ac.ebi.hca.importer.excel.CellDataType.STRING_ARRAY;
 import static uk.ac.ebi.hca.importer.excel.NodeNavigator.navigate;
 
 class CellMapping {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(CellMapping.class);
+
     static final String ARRAY_SEPARATOR = "\\|\\|";
 
     final String jsonProperty;
-    final CellDataType dataType;
+    final SchemaDataType schemaDataType;
+    final String ref;
+    final boolean isLink;
 
-    CellMapping(String jsonProperty, CellDataType dataType) {
+    CellMapping(String jsonProperty, SchemaDataType schemaDataType, String ref, boolean isLink) {
         this.jsonProperty = jsonProperty;
-        this.dataType = dataType;
+        this.schemaDataType = schemaDataType;
+        this.ref = ref;
+        this.isLink = isLink;
     }
 
-    static CellMapping map(String jsonProperty, CellDataType dataType) {
-        return new CellMapping(jsonProperty, dataType);
+    CellMapping(String jsonProperty, SchemaDataType schemaDataType) {
+        this.jsonProperty = jsonProperty;
+        this.schemaDataType = schemaDataType;
+        this.ref = "";
+        this.isLink = false;
     }
 
-    void importTo(final ObjectNode node, final Cell dataCell) {
+    void importTo(final ObjectNode node, final Cell spreadsheetDataCell) {
         NodeNavigator nodeNavigator = navigate(node).prepareObjectNode(jsonProperty);
-        if (NUMERIC.equals(dataType)) {
-            dataCell.setCellType(CellType.NUMERIC);
-            nodeNavigator.putNext(dataCell.getNumericCellValue());
-        } else {
-            dataCell.setCellType(CellType.STRING);
-            String data = dataCell.getStringCellValue();
-            if (STRING_ARRAY.equals(dataType)) {
-                nodeNavigator.putNext(data.split(ARRAY_SEPARATOR));
-            } else if (NUMERIC_ARRAY.equals(dataType)) {
-                if (!data.isEmpty()) {
-                    List<Integer> numericValues = Arrays
-                            //FIXME fix the NumberFormatException
-                            //when the data cell has float type string e.g. "9606.0"
-                            .stream(data.split(ARRAY_SEPARATOR))
-                            .map(Integer::parseInt)
-                            .collect(Collectors.toList());
-                    nodeNavigator.putNext(Ints.toArray(numericValues));
+        switch (schemaDataType) {
+            case INTEGER:
+                spreadsheetDataCell.setCellType(CellType.NUMERIC);
+                Double numericCellValue = spreadsheetDataCell.getNumericCellValue();
+                int intValue = numericCellValue.intValue();
+                nodeNavigator.putNext(intValue);
+                break;
+            case NUMBER:
+                spreadsheetDataCell.setCellType(CellType.NUMERIC);
+                nodeNavigator.putNext(spreadsheetDataCell.getNumericCellValue());
+                break;
+            case STRING:
+                spreadsheetDataCell.setCellType(CellType.STRING);
+                nodeNavigator.putNext(spreadsheetDataCell.getStringCellValue());
+                break;
+            case STRING_ARRAY:
+                spreadsheetDataCell.setCellType(CellType.STRING);
+                nodeNavigator.putNext(spreadsheetDataCell.getStringCellValue().split(ARRAY_SEPARATOR));
+                break;
+            case INTEGER_ARRAY:
+                switch (spreadsheetDataCell.getCellTypeEnum()) {
+                    case NUMERIC:
+                        Double doubleValue = spreadsheetDataCell.getNumericCellValue();
+                        int[] intArray = new int[]{doubleValue.intValue()};
+                        nodeNavigator.putNext(intArray);
+                        break;
+                    case STRING:
+                        String data = spreadsheetDataCell.getStringCellValue();
+                        if (!data.isEmpty()) {
+                            List<Integer> numericValues = Arrays
+                                    //FIXME fix the NumberFormatException
+                                    //when the data cell has float type string e.g. "9606.0"
+                                    .stream(data.split(ARRAY_SEPARATOR))
+                                    .map(Integer::parseInt)
+                                    .collect(Collectors.toList());
+                            nodeNavigator.putNext(Ints.toArray(numericValues));
+                        }
+                        break;
+                    case BLANK:
+                        break;
+                    default:
+                        reportFailure(schemaDataType, spreadsheetDataCell.getCellTypeEnum());
                 }
-            } else {
-                nodeNavigator.putNext(data);
-            }
+                break;
+            case BOOLEAN:
+                switch (spreadsheetDataCell.getCellTypeEnum()) {
+                    case STRING:
+                        String stringValue = spreadsheetDataCell.getStringCellValue();
+                        switch (stringValue) {
+                            case "yes":
+                                nodeNavigator.putNext(true);
+                                break;
+                            case "no":
+                                nodeNavigator.putNext(false);
+                                break;
+                            default:
+                                reportFailure(schemaDataType, stringValue);
+                        }
+                        break;
+                    default:
+                        reportFailure(schemaDataType, spreadsheetDataCell.getCellTypeEnum());
+                }
+                break;
+            case ENUM:
+                //TODO not very different from STRING type so this should probably be merged
+                switch (spreadsheetDataCell.getCellTypeEnum()) {
+                    case STRING:
+                        String stringValue = spreadsheetDataCell.getStringCellValue();
+                        nodeNavigator.putNext(stringValue);
+                        break;
+                    default:
+                        reportFailure(schemaDataType, spreadsheetDataCell.getCellTypeEnum());
+                }
+                break;
+            case OBJECT:
+                //TODO add test for this
+                switch (spreadsheetDataCell.getCellTypeEnum()) {
+                    case STRING:
+                        String stringValue = spreadsheetDataCell.getStringCellValue();
+                        nodeNavigator.putNext(stringValue, ref);
+                        break;
+                    case BLANK:
+                        break;
+                    default:
+                        reportFailure(schemaDataType, spreadsheetDataCell.getCellTypeEnum());
+                }
+                break;
+            case OBJECT_ARRAY:
+                //TODO add test for this
+                switch (spreadsheetDataCell.getCellTypeEnum()) {
+                    case STRING:
+                        nodeNavigator.putNext(spreadsheetDataCell.getStringCellValue().split(ARRAY_SEPARATOR), ref);
+                        break;
+                    default:
+                        reportFailure(schemaDataType, spreadsheetDataCell.getCellTypeEnum());
+                }
+                break;
+            default:
+                reportFailure(schemaDataType, spreadsheetDataCell.getCellTypeEnum());
         }
+    }
+
+    private void reportFailure(SchemaDataType schemaDataType, CellType cellTypeEnum) {
+        String message = "Unable to process " + cellTypeEnum + " spreadsheet field as schema data type " + schemaDataType;
+        LOGGER.warn(message);
+        throw new CellMappingException(message);
+    }
+
+    private void reportFailure(SchemaDataType schemaDataType, String value) {
+        String message ="Unable to determine schema data type " + schemaDataType + " from " + value;
+        LOGGER.warn(message);
+        throw new CellMappingException(message);
     }
 
     @Override
     public String toString() {
         return "CellMapping{" +
                 "jsonProperty='" + jsonProperty + '\'' +
-                ", dataType=" + dataType +
+                ", schemaDataType=" + schemaDataType +
+                ", ref='" + ref + '\'' +
+                ", isLink=" + isLink +
                 '}';
+    }
+
+
+    public class CellMappingException extends RuntimeException {
+        public CellMappingException(String message) {
+            super(message);
+        }
     }
 }

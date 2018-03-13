@@ -3,36 +3,17 @@ package uk.ac.ebi.hca.importer.client;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.util.JSONPObject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
+import uk.ac.ebi.hca.importer.util.EntityType;
 
 import java.io.IOException;
 
 @Component
 public class IngestApiClient {
-
-    public enum EntityType {
-
-        BIOMATERIAL("biomaterials"),
-        PROJECT("projects"),
-        PROCESS("processes"),
-        PROTOCOL("protocols"),
-        FILE("files");
-
-        private final String path;
-
-        public String getPath() {
-            return path;
-        }
-
-        EntityType(String path) {
-            this.path = path;
-        }
-    }
 
     @Value("${ingest.api.url}")
     private String ingestApiUrl = "http://localhost:8080";
@@ -45,26 +26,58 @@ public class IngestApiClient {
         template = new RestTemplate();
     }
 
+    public String requestAuthenticationToken() {
+        HttpHeaders requestHeaders = new HttpHeaders();
+        requestHeaders.add("Content-type", "application/json");
+        HttpEntity<?> httpEntity = new HttpEntity<Object>("{\"client_id\":\"Zdsog4nDAnhQ99yiKwMQWAPc2qUDlR99\",\"client_secret\":\"t-OAE-GQk_nZZtWn-QQezJxDsLXmU7VSzlAh9cKW5vb87i90qlXGTvVNAjfT9weF\",\"audience\":\"http://localhost:8080\",\"grant_type\":\"client_credentials\"}", requestHeaders);
+        String response = template.postForObject("https://danielvaughan.eu.auth0.com/oauth/token", httpEntity, String.class);
+        try {
+            JsonNode root = new ObjectMapper().readTree(response);
+            if (root.has("access_token"))
+            {
+                return root.get("access_token").textValue();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return "";
+    }
+
+
     public String createSubmission(String token) {
         HttpEntity<?> httpEntity = new HttpEntity<Object>("{}", getRequestHeaders(token));
         String response = template.postForObject(ingestApiUrl + "/submissionEnvelopes", httpEntity, String.class);
         try {
-            JsonNode root = new ObjectMapper().readTree(response);
-            return getObjectId(root);
+            return getSelfLink(new ObjectMapper().readTree(response));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
     public String createEntity(String token, String submissionUrl, EntityType entityType, String json) {
-        String postUrl = submissionUrl + "/" + entityType.getPath();
+        String postUrl = submissionUrl + "/" + entityType.getSubmissionPath();
         HttpEntity<?> httpEntity = new HttpEntity<Object>(json, getRequestHeaders(token));
         String response = template.postForObject(postUrl, httpEntity, String.class);
         try {
-            JsonNode root = new ObjectMapper().readTree(response);
-            return root.asText();
+            return getSelfLink(new ObjectMapper().readTree(response));
         } catch (IOException e) {
             e.printStackTrace();
+        }
+        return "";
+    }
+
+    private String getSelfLink(JsonNode rootNode)
+    {
+        if (rootNode.has("_links"))
+        {
+            JsonNode linksNode = rootNode.get("_links");
+            if (linksNode.has("self"))
+            {
+                JsonNode selfNode = linksNode.get("self");
+                if (selfNode.has("href")) {
+                    return selfNode.get("href").textValue();
+                }
+            }
         }
         return "";
     }

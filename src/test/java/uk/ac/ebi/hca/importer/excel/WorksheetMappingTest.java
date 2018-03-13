@@ -3,7 +3,7 @@ package uk.ac.ebi.hca.importer.excel;
 import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static uk.ac.ebi.hca.importer.excel.CellDataType.*;
+import static uk.ac.ebi.hca.importer.excel.SchemaDataType.*;
 
 public class WorksheetMappingTest {
 
@@ -13,7 +13,7 @@ public class WorksheetMappingTest {
         WorksheetMapping worksheetMapping = new WorksheetMapping()
                 .map("First Name", "first_name", STRING)
                 .map("Friends", "friends", STRING_ARRAY)
-                .map("Age", "age", NUMERIC);
+                .map("Age", "age", INTEGER);
 
         //when:
         CellMapping firstName = worksheetMapping.getMappingFor("First Name");
@@ -24,17 +24,17 @@ public class WorksheetMappingTest {
         CellMapping extraField = worksheetMapping.getMappingFor("Extra Field");
 
         //then:
-        String[] cellMappingFields = {"jsonProperty", "dataType"};
+        String[] cellMappingFields = {"jsonProperty", "schemaDataType"};
         assertThat(firstName).extracting(cellMappingFields)
                 .containsExactly("first_name", STRING);
         assertThat(friends).extracting(cellMappingFields)
                 .containsExactly("friends", STRING_ARRAY);
         assertThat(age).extracting(cellMappingFields)
-                .containsExactly("age", NUMERIC);
+                .containsExactly("age", INTEGER);
 
         //and:
         assertThat(extraField).extracting(cellMappingFields)
-                .containsExactly("extra_field", STRING);
+                .containsExactly("extra_field", STRING_ARRAY);
     }
 
 }

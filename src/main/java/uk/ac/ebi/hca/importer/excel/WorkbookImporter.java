@@ -1,9 +1,11 @@
 package uk.ac.ebi.hca.importer.excel;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -13,7 +15,9 @@ import java.util.stream.StreamSupport;
 
 public class WorkbookImporter {
 
-    //TODO remove unused reference!
+    private static final Logger LOGGER = LoggerFactory.getLogger(WorkbookImporter.class);
+
+    //TODO remove this unused property
     private final ObjectMapper objectMapper;
 
     private final Map<String, WorksheetImporter> registry = new HashMap<>();
@@ -22,15 +26,17 @@ public class WorkbookImporter {
         this.objectMapper = objectMapper;
     }
 
-    public List<JsonNode> importFrom(Workbook workbook) {
-        List<JsonNode> workbookRecords = new ArrayList<>();
+    public List<ObjectNode> importFrom(Workbook workbook) {
+        List<ObjectNode> workbookRecords = new ArrayList<>();
         StreamSupport.stream(workbook.spliterator(), false)
                 .filter(this::hasImporter)
                 .forEach(worksheet -> {
                     String sheetName = worksheet.getSheetName();
-                    List<JsonNode> worksheetRecords = registry.get(sheetName).importFrom(worksheet);
-                    workbookRecords.addAll(worksheetRecords);
+                    ObjectNode worksheetRecords = registry.get(sheetName).importFrom(worksheet);
+                    LOGGER.info("- Processing worksheet: " + sheetName);
+                    workbookRecords.add(worksheetRecords);
                 });
+        LOGGER.info("Completed processing spreadsheet");
         return workbookRecords;
     }
 
