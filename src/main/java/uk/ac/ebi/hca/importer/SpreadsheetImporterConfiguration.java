@@ -36,7 +36,7 @@ public class SpreadsheetImporterConfiguration {
 
     enum CoreType {
 
-        //use lower case so that enum name() = schema type -> easier to configure
+        //use lower caseso that enum name() = schema type -> easier to configure
         biomaterial("5.0.0"),
         file("5.0.0"),
         process("5.0.0"),

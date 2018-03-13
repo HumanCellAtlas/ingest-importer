@@ -20,7 +20,6 @@ public class SubmitterTest {
     private Submitter submitter = new Submitter(ingestApiClient);
 
     @Test
-    @Ignore
     public void given_Q4DemoSS2Metadata_v5_json_ingest_successfully() {
         JsonNode jsonNode = FileUtil.buildJsonNodeFromUrl(Q4DemoSS2Metadata_v5_EXPECTED_JSON_URL);
         submitter.submit(ingestApiClient.requestAuthenticationToken(), jsonNode);

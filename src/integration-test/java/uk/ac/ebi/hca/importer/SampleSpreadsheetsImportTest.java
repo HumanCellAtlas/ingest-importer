@@ -48,7 +48,7 @@ public class SampleSpreadsheetsImportTest {
     private static final String pbmc8k_SPREADSHEET_URL = "https://github.com/HumanCellAtlas/metadata-schema/blob/develop/examples/spreadsheets/v5/filled/10x_v2/pbmc8k.xlsx?raw=true";
     private static final String pbmc8k_EXPECTED_JSON_URL = "";
     private static final String glioblastoma_added_module_SPREADSHEET_URL = "https://github.com/HumanCellAtlas/metadata-schema/blob/develop_will/examples/spreadsheets/v5/filled/SmartSeq2/glioblastoma_added_module.xlsx?raw=true";
-    private static final String v5_spleen_SPREADSHEET_URL = "https://github.com/HumanCellAtlas/metadata-schema/blob/develop/examples/spreadsheets/v5/filled/10x_v2/v5_spleen_userFriendlyHeaders.xlsx?raw=true";
+    private static final String v5_spleen_SPREADSHEET_URL = "https://github.com/HumanCellAtlas/metadata-schema/blob/develop/examples/spreadsheets/v5/filled/10x_v2/metadata_spleen_v5_20180313_userFriendlyHeaders.xlsx?raw=true";
     private static final String v5_spleen_EXPECTED_JSON_URL = "";
 
     @Autowired
