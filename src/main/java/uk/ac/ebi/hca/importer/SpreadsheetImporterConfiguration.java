@@ -61,7 +61,7 @@ public class SpreadsheetImporterConfiguration {
         cell_suspension("5.0.0", CoreType.biomaterial),
         donor_organism("5.0.0", CoreType.biomaterial),
         organoid("5.0.0", CoreType.biomaterial),
-        specimen_from_organism("5.0.0", CoreType.biomaterial),
+        specimen_from_organism("5.1.0", CoreType.biomaterial),
         analysis_file("5.0.0", CoreType.file),
         sequence_file("5.0.0", CoreType.file),
         analysis_process("5.0.0", CoreType.process, "analysis"),
@@ -100,7 +100,9 @@ public class SpreadsheetImporterConfiguration {
         medical_history("5.0.0", CoreType.biomaterial),
         preservation_storage("5.0.0", CoreType.biomaterial),
         mus_musculus_specific("5.0.0", CoreType.biomaterial),
-        state_of_specimen("5.0.0", CoreType.biomaterial);
+        state_of_specimen("5.0.0", CoreType.biomaterial),
+        smartseq2("5.0.0", CoreType.process, "sequencing"),
+        barcode("5.0.0", CoreType.process, "sequencing");
 
         private final String version;
         private final CoreType coreType;

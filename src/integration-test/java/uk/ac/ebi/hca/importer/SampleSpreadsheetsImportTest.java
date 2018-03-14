@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.fge.jackson.JsonLoader;
+import com.github.fge.jsonschema.core.report.LogLevel;
 import com.github.fge.jsonschema.core.report.ProcessingReport;
 import com.github.fge.jsonschema.main.JsonSchemaFactory;
 import com.github.fge.jsonschema.main.JsonValidator;
@@ -109,7 +110,12 @@ public class SampleSpreadsheetsImportTest {
             JsonNode outputSchema = JsonLoader.fromResource("/output-schema.json");
             ProcessingReport processingReport = VALIDATOR.validate(outputSchema, jsonNode);
             processingReport.iterator()
-                    .forEachRemaining(message -> LOGGER.info(message.toString()));
+                    .forEachRemaining(message -> {
+                        if (message.getLogLevel()== LogLevel.ERROR)
+                        {
+                            LOGGER.info(message.toString());
+                        }
+                    });
             assertThat(processingReport.isSuccess())
                     .as("Resulting JSON should validate against the schema.")
                     .isTrue();
