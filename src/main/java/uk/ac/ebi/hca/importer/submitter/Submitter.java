@@ -33,7 +33,25 @@ public class Submitter {
         String submissionUrl = ingestApiClient.createSubmission(token);
         LOGGER.info("Created submission: " + submissionUrl);
         createEntities(token, jsonNode, submissionUrl);
+        linkEntities(jsonNode);
         return submissionUrl;
+    }
+
+    private void linkEntities(JsonNode jsonNode) {
+        if (jsonNode.getNodeType() == JsonNodeType.ARRAY) {
+            ArrayNode arrayNode = (ArrayNode) jsonNode;
+            for (Iterator<JsonNode> collectionIterator = arrayNode.iterator(); collectionIterator.hasNext(); ) {
+                JsonNode collectionNode = collectionIterator.next();
+                if (collectionNode.has("links")) {
+                    ArrayNode linksNode = (ArrayNode) collectionNode.get("links");
+                    EntityType entitytype = EntityType.get(linksNode.get("source_type").textValue());
+                    switch (entitytype) {
+                        case FILE:
+
+                    }
+                }
+            }
+        }
     }
 
     private void createEntities(String token, JsonNode jsonNode, String submissionUrl) {
@@ -67,7 +85,7 @@ public class Submitter {
 
     private void storeMapping(EntityType entityType, String jsonString, String entityUrl) {
         Map<String, String> entityMap = entityTypeMap.get(entityType);
-        if (entityMap==null) {
+        if (entityMap == null) {
             entityMap = new HashMap<>();
         }
         String id = getId(entityType, jsonString);
@@ -81,13 +99,13 @@ public class Submitter {
             String type = entityType.getSchemaType();
             switch (entityType) {
                 case PROJECT:
-                    return root.get(type + "_core").get(type +  "_shortname").textValue();
+                    return root.get(type + "_core").get(type + "_shortname").textValue();
                 case BIOMATERIAL:
                 case PROCESS:
                 case PROTOCOL:
-                    return root.get(type + "_core").get(type +  "_id").textValue();
+                    return root.get(type + "_core").get(type + "_id").textValue();
                 case FILE:
-                    return root.get(type + "_core").get(type +  "_name").textValue();
+                    return root.get(type + "_core").get(type + "_name").textValue();
                 default:
                     throw new RuntimeException("Unknown Entity Type: " + entityType);
             }
@@ -99,21 +117,9 @@ public class Submitter {
 }
 
 /*
-               processIngest = self.ingest_api.createProcess(submissionUrl, json.dumps(process))
-                self.ingest_api.linkEntity(processIngest, projectIngest, "projects") # correct
-
-                if process["process_core"]["process_id"] in proc_input_biomaterials:
-                    for biomaterial in proc_input_biomaterials[process["process_core"]["process_id"]]:
-                        self.ingest_api.linkEntity(processIngest, biomaterialMap[biomaterial], "inputBiomaterials")
-
-                if process["process_core"]["process_id"] in proc_output_biomaterials:
-                    for biomaterial in proc_output_biomaterials[process["process_core"]["process_id"]]:
-                        self.ingest_api.linkEntity(processIngest, biomaterialMap[biomaterial], "derivedBiomaterials")
-
-                # seems to not be used for biomaterials
-                for biomaterial in output_biomaterials:
-                    self.ingest_api.linkEntity(processIngest, biomaterialMap[biomaterial], "inputBiomaterials") # correct
-
-                for file in output_files:
-                    self.ingest_api.linkEntity(processIngest, filesMap[file], "derivedFiles") # correct
+self.ingest_api.linkEntity(processIngest, projectIngest, "projects") # correct
+self.ingest_api.linkEntity(processIngest, biomaterialMap[biomaterial], "inputBiomaterials")
+self.ingest_api.linkEntity(processIngest, biomaterialMap[biomaterial], "derivedBiomaterials")
+self.ingest_api.linkEntity(processIngest, biomaterialMap[biomaterial], "inputBiomaterials") # correct
+self.ingest_api.linkEntity(processIngest, filesMap[file], "derivedFiles") # correct
  */
