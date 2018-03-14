@@ -78,14 +78,16 @@ public class Submitter {
     private String getId(EntityType entityType, String jsonString) {
         try {
             JsonNode root = new ObjectMapper().readTree(jsonString);
+            String type = entityType.getSchemaType();
             switch (entityType) {
                 case PROJECT:
-                    return "";
+                    return root.get(type + "_core").get(type +  "_shortname").textValue();
                 case BIOMATERIAL:
                 case PROCESS:
                 case PROTOCOL:
+                    return root.get(type + "_core").get(type +  "_id").textValue();
                 case FILE:
-                    return root.get(entityType.name() + "_core").get(entityType.name() +  "_id").textValue();
+                    return root.get(type + "_core").get(type +  "_name").textValue();
                 default:
                     throw new RuntimeException("Unknown Entity Type: " + entityType);
             }
